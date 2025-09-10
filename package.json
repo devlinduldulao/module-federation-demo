@@ -1,0 +1,24 @@
+{
+  "name": "module-federation-demo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && (cd packages/shell && npm install) && (cd packages/products && npm install) && (cd packages/cart && npm install) && (cd packages/dashboard && npm install)",
+    "dev": "concurrently \"npm:dev:*\"",
+    "dev:shell": "cd packages/shell && npm run dev",
+    "dev:products": "cd packages/products && npm run dev",
+    "dev:cart": "cd packages/cart && npm run dev",
+    "dev:dashboard": "cd packages/dashboard && npm run dev",
+    "build": "concurrently \"npm:build:*\"",
+    "build:shell": "cd packages/shell && npm run build",
+    "build:products": "cd packages/products && npm run build",
+    "build:cart": "cd packages/cart && npm run build",
+    "build:dashboard": "cd packages/dashboard && npm run build",
+    "postinstall": "npm run install:packages",
+    "install:packages": "cd packages/shell && npm install && cd ../products && npm install && cd ../cart && npm install && cd ../dashboard && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.9.2"
+  }
+}
