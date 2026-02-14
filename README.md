@@ -1,183 +1,194 @@
-# 🚀 Module Federation Demo - React 18 Streaming with Best Practices
+# Module Federation Demo
 
-A comprehensive implementation of Module Federation using **React 18 Suspense Streaming**, **TypeScript**, **Rspack**, and modern web development best practices. Features real-time streaming components with enhanced UX and visual indicators for conference demonstrations.
+A micro-frontend architecture demo built with **Rspack Module Federation**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. Four independent applications compose into a single shell — each deployable, scalable, and maintainable on its own.
 
-> **📢 Latest Update**: Enhanced with React 18 Suspense streaming components and improved flat design with better color contrast for optimal user experience!
+Built for conference talks and technical demonstrations.
 
-## 🏗️ Architecture Overview
+## Architecture
 
-This project demonstrates a micro-frontend architecture with **React 18 Suspense streaming** for enhanced user experience:
+```
+Shell (host)           localhost:3000
+├── Products (remote)  localhost:3001   → StreamingProductsCatalog
+├── Cart (remote)      localhost:3002   → StreamingShoppingCart
+└── Dashboard (remote) localhost:3003   → StreamingUserDashboard
+```
 
-- **Shell Application** (`localhost:3000`) - Main orchestrator with streaming indicators
-- **Products Module** (`localhost:3001`) - Product catalog with streaming delays (Blue theme)
-- **Cart Module** (`localhost:3002`) - Shopping cart with real-time updates (Green theme)
-- **Dashboard Module** (`localhost:3003`) - User analytics with streaming data (Violet theme)
+Each remote exposes a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell lazy-loads the streaming variants and wraps them in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation.
 
-### 🎨 Visual Design Features
-
-- **Flat Design**: Clean, modern interface with improved color contrast
-- **Streaming Indicators**: Clear visual feedback showing which service is streaming
-- **Theme Consistency**: Color-coded modules for easy identification during demos
-- **Enhanced UX**: Better accessibility and reduced cognitive load
-- **Conference Ready**: Optimized for live demonstrations and presentations
-
-## ✨ Best Practices Implemented
-
-### 🔧 React Best Practices
-
-- **React 18 Suspense**: Advanced streaming with skeleton loading states
-- **Hooks Optimization**: `useCallback`, `useMemo`, `memo` for performance
-- **Component Architecture**: Memoized, reusable components with proper separation
-- **Error Boundaries**: Comprehensive error handling for module federation
-- **Accessibility**: ARIA labels, semantic HTML, proper focus management
-- **Event Handling**: Custom events for inter-module communication
-- **State Management**: Efficient local state with proper TypeScript typing
-- **Streaming Components**: Real-time data loading with visual feedback
-
-### 📘 TypeScript Excellence
-
-- **Strict Configuration**: Enhanced `tsconfig.json` with strict rules
-- **Type Safety**: Comprehensive interfaces and readonly properties
-- **Path Mapping**: Clean import paths with alias configuration
-- **Union Types**: Proper enum-like types for better type safety
-- **Generic Components**: Flexible, reusable component typing
-- **Event Types**: Custom event interfaces for type-safe communication
-
-### ⚡ Rspack Optimization
-
-- **Development Experience**: Hot reloading, source maps, error overlays
-- **Production Optimization**: Code splitting, tree shaking, minification
-- **Caching Strategy**: Filesystem caching for faster rebuilds
-- **Bundle Analysis**: Performance hints and size optimization
-- **Module Federation**: Optimized sharing and loading strategies
-
-### 🎨 UI/UX Enhancements
-
-- **Flat Design**: Modern clean interface with improved color contrast
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
-- **Streaming States**: Real-time skeleton screens and loading indicators
-- **Visual Feedback**: Clear service identification and streaming status
-- **Micro-interactions**: Hover effects, transitions, and animations
-- **Error States**: User-friendly error messages and fallbacks
-- **Progressive Enhancement**: Graceful degradation for failed modules
-- **Conference Demo Ready**: Enhanced visibility for live presentations
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 20+ (required for Tailwind CSS v4)
-- npm or yarn
-- Modern browser (Safari 16.4+, Chrome 111+, Firefox 128+)
-
-### Installation & Development
+## Quick Start
 
 ```bash
-# Install dependencies
+# Install everything (root + all 4 packages)
 npm install
 
-# Start all applications concurrently
+# Start all four dev servers concurrently
 npm run dev
-
-# Access the applications
-# Shell: http://localhost:3000
-# Products: http://localhost:3001
-# Cart: http://localhost:3002
-# Dashboard: http://localhost:3003
 ```
 
-### Individual Package Development
+Open [http://localhost:3000](http://localhost:3000). The shell will pull remote entry points from ports 3001–3003.
+
+### Run a single package
 
 ```bash
-# Products module
-cd packages/products && npm run dev
-
-# Cart module
-cd packages/cart && npm run dev
-
-# Dashboard module
-cd packages/dashboard && npm run dev
-
-# Shell application
-cd packages/shell && npm run dev
+cd packages/products && npm run dev   # :3001
+cd packages/cart && npm run dev       # :3002
+cd packages/dashboard && npm run dev  # :3003
+cd packages/shell && npm run dev      # :3000
 ```
 
-## 📁 Project Structure
+Each remote runs standalone at its own port with its own `index.html`.
+
+## Project Structure
 
 ```
 module-federation-demo/
-├── packages/
-│   ├── shell/                 # Main orchestrator app
-│   │   ├── src/
-│   │   │   ├── components/    # Reusable UI components
-│   │   │   │   ├── ErrorBoundary.tsx
-│   │   │   │   ├── LoadingSpinner.tsx
-│   │   │   │   └── ModuleFallback.tsx
-│   │   │   ├── lib/           # Utility functions
-│   │   │   ├── App.tsx        # Main app component
-│   │   │   └── bootstrap.tsx  # Module federation bootstrap
-│   │   ├── rspack.config.js   # Enhanced Rspack configuration
-│   │   └── tsconfig.json      # Strict TypeScript config
-│   ├── products/              # Product catalog module (Blue theme)
-│   │   ├── src/
-│   │   │   ├── ProductsCatalog.tsx     # Main product component
-│   │   │   ├── StreamingProductsCatalog.tsx  # Streaming version with delays
-│   │   │   ├── types.ts                # TypeScript definitions
-│   │   │   └── lib/                    # Shared utilities
-│   │   └── rspack.config.js            # Module federation config
-│   ├── cart/                  # Shopping cart module (Green theme)
-│   │   ├── src/
-│   │   │   ├── ShoppingCart.tsx        # Cart management
-│   │   │   ├── StreamingShoppingCart.tsx # Streaming version with updates
-│   │   │   └── types.ts                # Cart-specific types
-│   │   └── rspack.config.js
-│   └── dashboard/             # User dashboard module (Violet theme)
-│       ├── src/
-│       │   ├── UserDashboard.tsx       # Analytics dashboard
-│       │   ├── StreamingUserDashboard.tsx # Streaming version with data
-│       │   └── types.ts                # Dashboard types
-│       └── rspack.config.js
-├── package.json               # Root package with scripts
-└── README.md                  # This file
+├── package.json                       # Workspace scripts (concurrently)
+└── packages/
+    ├── shell/                         # Host application
+    │   ├── rspack.config.js           # MF remotes config
+    │   ├── src/
+    │   │   ├── App.tsx                # Navigation, Suspense orchestration
+    │   │   ├── bootstrap.tsx          # createRoot entry
+    │   │   ├── index.css              # Design system tokens + animations
+    │   │   ├── types.d.ts             # Remote module declarations
+    │   │   └── components/
+    │   │       ├── ErrorBoundary.tsx   # Per-module error isolation
+    │   │       ├── ModuleFallback.tsx  # Offline module placeholder
+    │   │       ├── LoadingSpinner.tsx  # Generic loading dots
+    │   │       ├── ProductsSkeleton.tsx
+    │   │       ├── CartSkeleton.tsx
+    │   │       └── DashboardSkeleton.tsx
+    │   └── lib/utils.ts               # cn() — clsx + tailwind-merge
+    ├── products/                      # Remote — product catalog
+    │   ├── rspack.config.js           # MF exposes config
+    │   └── src/
+    │       ├── ProductsCatalog.tsx     # Standalone version
+    │       ├── StreamingProductsCatalog.tsx  # Suspense-wrapped
+    │       └── types.ts
+    ├── cart/                          # Remote — shopping cart
+    │   ├── rspack.config.js
+    │   └── src/
+    │       ├── ShoppingCart.tsx
+    │       ├── StreamingShoppingCart.tsx
+    │       └── types.ts
+    └── dashboard/                     # Remote — analytics dashboard
+        ├── rspack.config.js
+        └── src/
+            ├── UserDashboard.tsx
+            ├── StreamingUserDashboard.tsx
+            └── types.ts
 ```
 
-## 🔄 Module Communication
+## Tech Stack
 
-### Event-Driven Architecture
+| Tool | Version | Role |
+|------|---------|------|
+| React | ^19.2.4 | UI library |
+| TypeScript | ^5.9.3 | Type safety |
+| Rspack | ^1.7.6 | Bundler + Module Federation |
+| Tailwind CSS | v4 | Utility-first CSS via `@theme` |
+| PostCSS | ^8.5.6 | CSS pipeline (`@tailwindcss/postcss`) |
+| concurrently | ^9.2.1 | Dev server orchestration |
+
+## Design System — "Noir Editorial"
+
+A dark, typographic design language that avoids generic pastel AI aesthetics. Defined via Tailwind v4 `@theme` tokens in each package's `index.css`.
+
+### Typography
+
+| Role | Font | Usage |
+|------|------|-------|
+| Display | Instrument Serif | Headlines, large numbers (italic) |
+| Body | DM Sans | Paragraphs, UI text |
+| Technical | IBM Plex Mono | Labels, prices, metadata, navigation |
+
+### Color Tokens
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `noir` | `#0C0C0C` | Canvas / page background |
+| `surface` | `#141414` | Hover / elevated cards |
+| `elevated` | `#1C1C1C` | Skeleton placeholders |
+| `edge` | `#2E2E2E` | Borders, 1px grid dividers |
+| `cream` | `#FAFAF9` | Primary text |
+| `stone` | `#A8A29E` | Secondary text |
+| `dim` | `#6B6560` | Tertiary / disabled text |
+| `citrine` | `#D4FF00` | Primary accent — CTAs, active nav |
+| `mint` | `#34D399` | Success states |
+| `ice` | `#60A5FA` | Info / cool data |
+| `burnt` | `#FF6B35` | Warnings / warm accent |
+| `rose` | `#F87171` | Errors / destructive |
+
+### Key Visual Patterns
+
+- **1px grid gaps** — `gap-[1px] bg-edge` creates sharp editorial grid lines
+- **Mono uppercase labels** — `font-mono text-[11px] tracking-[0.3em] uppercase`
+- **Serif italic headings** — `font-display italic` for display type
+- **Citrine underline navigation** — active tab gets a 2px citrine bottom bar
+- **Noise grain overlay** — subtle SVG noise on `body::after`
+- **Staggered entry animations** — `fadeInUp` with incremental `animationDelay`
+
+## Module Federation Setup
+
+### Shell (Host)
+
+```js
+// rspack.config.js — shell
+new rspack.container.ModuleFederationPlugin({
+  name: "shell",
+  remotes: {
+    products: "products@http://localhost:3001/remoteEntry.js",
+    cart:     "cart@http://localhost:3002/remoteEntry.js",
+    dashboard:"dashboard@http://localhost:3003/remoteEntry.js",
+  },
+  shared: {
+    react:       { singleton: true, strictVersion: false },
+    "react-dom": { singleton: true, strictVersion: false },
+  },
+});
+```
+
+### Remote (example: products)
+
+```js
+// rspack.config.js — products
+new rspack.container.ModuleFederationPlugin({
+  name: "products",
+  filename: "remoteEntry.js",
+  exposes: {
+    "./ProductsCatalog":          "./src/ProductsCatalog.tsx",
+    "./StreamingProductsCatalog": "./src/StreamingProductsCatalog.tsx",
+  },
+  shared: { react: { singleton: true }, "react-dom": { singleton: true } },
+});
+```
+
+## Inter-Module Communication
+
+Modules communicate through typed `CustomEvent` dispatch on `window`:
 
 ```typescript
-// Adding items to cart (Products → Cart)
+// Products → Cart: add item
 window.dispatchEvent(
   new CustomEvent("addToCart", {
-    detail: cartItem,
+    detail: { id: 1, name: "Laptop", price: 999.99, quantity: 1 },
     bubbles: true,
   })
 );
 
-// User notifications (Global)
+// Any module → Shell: trigger notification toast
 window.dispatchEvent(
   new CustomEvent("showNotification", {
-    detail: {
-      type: "success",
-      message: "Item added to cart!",
-    },
+    detail: { type: "success", message: "Item added to cart" },
   })
 );
 ```
 
-### Type-Safe Communication
+Events are typed in each package's `types.ts` via `WindowEventMap` augmentation:
 
 ```typescript
-// Custom event interfaces
 export interface AddToCartEvent extends CustomEvent {
   detail: CartItem;
-}
-
-export interface NotificationEvent extends CustomEvent {
-  detail: {
-    type: "success" | "error" | "info" | "warning";
-    message: string;
-  };
 }
 
 declare global {
@@ -188,141 +199,67 @@ declare global {
 }
 ```
 
-## 🛠️ Technology Stack
+## React Suspense Streaming Pattern
 
-| Technology            | Version  | Purpose                             |
-| --------------------- | -------- | ----------------------------------- |
-| **React**             | ^18.3.1  | UI library with modern hooks        |
-| **TypeScript**        | ^5.6.2   | Type-safe development               |
-| **Rspack**            | ^0.7.5   | Fast bundler with Module Federation |
-| **Tailwind CSS**      | ^4.0.0   | Modern utility-first styling        |
-| **PostCSS**           | ^8.4.0   | CSS processing                      |
-| **Module Federation** | Enhanced | Micro-frontend architecture         |
+Each remote uses a Resource-based Suspense pattern to simulate network streaming:
 
-## 🎯 Key Features
-
-### Performance Optimizations
-
-- ⚡ **Code Splitting**: Automatic chunk splitting for optimal loading
-- 🔄 **Lazy Loading**: Components loaded on demand
-- 💾 **Caching**: Filesystem caching for faster rebuilds
-- 📦 **Tree Shaking**: Dead code elimination
-- 🎛️ **Bundle Analysis**: Size optimization and performance hints
-
-### Developer Experience
-
-- 🔥 **Hot Module Replacement**: Instant updates during development
-- 🐛 **Source Maps**: Enhanced debugging capabilities
-- 📝 **TypeScript Integration**: Full type checking and IntelliSense
-- 🎨 **Tailwind Integration**: v4 with CSS-based configuration and modern features
-- 📊 **Error Overlays**: Clear error messages in development
-
-### Production Ready
-
-- 🔒 **Error Boundaries**: Graceful error handling
-- 📱 **Responsive Design**: Mobile-first approach
-- ♿ **Accessibility**: WCAG compliance with ARIA support
-- 🌐 **Cross-Origin**: Proper CORS configuration
-- 📈 **Performance Monitoring**: Bundle size tracking
-
-## 🧪 Testing Strategy
-
-```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Generate coverage report
-npm run test:coverage
+```typescript
+function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
+  let status = "pending";
+  let result: T;
+  let suspender = asyncFn().then(
+    (data) => { status = "success"; result = data; },
+    (error) => { status = "error"; result = error; }
+  );
+  return {
+    read() {
+      if (status === "pending") throw suspender;     // Suspense catches this
+      if (status === "error") throw result;           // ErrorBoundary catches this
+      return result;
+    },
+  };
+}
 ```
 
-## 📈 Performance Metrics
+The shell wraps each lazy-loaded remote in `<Suspense fallback={<Skeleton />}>` and `<ErrorBoundary>`, giving each module independent loading and error states.
 
-- **Initial Load**: < 100kb gzipped
-- **Module Load**: < 50kb per module
-- **Hot Reload**: < 200ms
-- **Build Time**: < 30s for full rebuild
+## Conference Demo Value
 
-## 🚀 Deployment
+This project demonstrates these micro-frontend concepts during a live talk:
 
-### Development
+1. **Independent deployment** — each remote starts on its own port with its own build
+2. **Fault isolation** — kill a remote server and only that module shows a fallback
+3. **Shared dependencies** — React is loaded once via singleton sharing
+4. **Suspense streaming** — skeleton screens appear during module load, then content streams in
+5. **Loose coupling** — modules communicate through events, not imports
+6. **Independent tech choices** — each package has its own `rspack.config.js`, `postcss.config.js`, and `tsconfig.json`
+7. **Design system consistency** — shared `@theme` tokens across all packages keep the UI cohesive without a shared CSS build step
 
-```bash
-npm run dev
-```
+### What to show in a talk
 
-### Production Build
+- Start `npm run dev`, open `:3000` — all three modules load with streaming skeletons
+- Kill the products server (`Ctrl+C` on `:3001`) — products module shows `ModuleFallback`, cart and dashboard continue working
+- Restart it — products comes back without refreshing the shell
+- Add a product to cart — the `addToCart` event crosses module boundaries
+- Inspect the network tab — each module loads its own `remoteEntry.js` chunk
 
-```bash
-npm run build
-```
+## Scripts
 
-### Production Preview
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start all four dev servers concurrently |
+| `npm run build` | Build all four packages for production |
+| `npm run dev:shell` | Start only the shell (`:3000`) |
+| `npm run dev:products` | Start only products (`:3001`) |
+| `npm run dev:cart` | Start only cart (`:3002`) |
+| `npm run dev:dashboard` | Start only dashboard (`:3003`) |
 
-```bash
-npm run preview
-```
+## Prerequisites
 
-## 🤝 Contributing
+- Node.js 20+ (required for Tailwind CSS v4)
+- npm 9+
+- Modern browser (Chrome 111+, Firefox 128+, Safari 16.4+)
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+## License
 
-## 📝 Best Practices Checklist
-
-### ✅ React
-
-- [x] Functional components with hooks
-- [x] Memoization with `React.memo`, `useMemo`, `useCallback`
-- [x] Proper dependency arrays in hooks
-- [x] Error boundaries for graceful failures
-- [x] Accessibility with ARIA labels
-- [x] Semantic HTML structure
-
-### ✅ TypeScript
-
-- [x] Strict mode enabled
-- [x] Readonly properties where applicable
-- [x] Union types for better type safety
-- [x] Generic components and functions
-- [x] Proper event typing
-- [x] Path mapping for clean imports
-
-### ✅ Rspack
-
-- [x] Code splitting and lazy loading
-- [x] Tree shaking enabled
-- [x] Development optimizations
-- [x] Production optimizations
-- [x] Proper caching strategy
-- [x] Bundle size optimization
-
-### ✅ Performance
-
-- [x] Component memoization
-- [x] Bundle size monitoring
-- [x] Lazy loading of modules
-- [x] Efficient re-rendering
-- [x] Optimized asset loading
-- [x] Proper caching headers
-
-## 📚 Learning Resources
-
-- [Module Federation Documentation](https://module-federation.github.io/)
-- [React 18 Documentation](https://react.dev/)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Rspack Documentation](https://rspack.dev/)
-- [Tailwind CSS Guide](https://tailwindcss.com/docs)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-**Built with ❤️ using modern web technologies and best practices**
+MIT
