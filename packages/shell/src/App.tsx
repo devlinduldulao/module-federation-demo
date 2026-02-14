@@ -299,7 +299,7 @@ function App(): JSX.Element {
                 <span>:{activeConfig.port}</span>
               </div>
               <div className="font-mono text-[11px] text-dim hidden sm:flex items-center gap-4">
-                <span>React 18</span>
+                <span>React 19</span>
                 <span className="text-edge">|</span>
                 <span>Suspense</span>
                 <span className="text-edge">|</span>
