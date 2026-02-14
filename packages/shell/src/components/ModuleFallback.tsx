@@ -8,7 +8,7 @@ interface ModuleFallbackProps {
 }
 
 const ModuleFallback = memo<ModuleFallbackProps>(
-  ({ icon, title, message, onRetry }) => (
+  ({ title, message, onRetry }) => (
     <div className="py-20 text-center max-w-lg mx-auto">
       <div className="w-12 h-12 border border-edge mx-auto mb-8 flex items-center justify-center">
         <span className="font-mono text-[10px] text-dim">OFF</span>

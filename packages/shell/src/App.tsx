@@ -66,6 +66,13 @@ interface ModuleConfig {
   readonly component: React.LazyExoticComponent<React.ComponentType>;
 }
 
+// Prefetch helpers — bare import() triggers the MF remote fetch without rendering
+const PREFETCH_MAP: Record<ModuleType, () => Promise<unknown>> = {
+  products:  () => import("products/StreamingProductsCatalog").catch(() => {}),
+  cart:      () => import("cart/StreamingShoppingCart").catch(() => {}),
+  dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => {}),
+};
+
 // Configuration
 const MODULES: readonly ModuleConfig[] = [
   { id: "products", label: "Products", port: "3001", component: StreamingProductsCatalog },
@@ -80,21 +87,7 @@ const NavigationButton = memo<{
   onClick: (moduleId: ModuleType) => void;
 }>(({ module, isActive, onClick }) => {
   const handleMouseEnter = useCallback(() => {
-    if (!isActive) {
-      try {
-        import(
-          `${module.id}/Streaming${
-            module.id.charAt(0).toUpperCase() + module.id.slice(1)
-          }${
-            module.id === "products"
-              ? "Catalog"
-              : module.id === "cart"
-              ? "ShoppingCart"
-              : "UserDashboard"
-          }`
-        ).catch(() => {});
-      } catch {}
-    }
+    if (!isActive) PREFETCH_MAP[module.id]();
   }, [module.id, isActive]);
 
   return (
@@ -132,7 +125,7 @@ interface Notification {
 }
 
 // Main App component
-function App(): JSX.Element {
+function App(): React.JSX.Element {
   const [activeModule, setActiveModule] = useState<ModuleType>("products");
   const [notifications, setNotifications] = useState<Notification[]>([]);
 

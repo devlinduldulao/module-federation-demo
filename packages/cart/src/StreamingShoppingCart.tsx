@@ -74,7 +74,7 @@ const StreamingShoppingCart = () => {
 };
 
 // Main component
-function ShoppingCart(): JSX.Element {
+function ShoppingCart() {
   const [cartItems, setCartItems] = useState<CartItem[]>(INITIAL_CART_ITEMS);
 
   // Event listener for adding items to cart

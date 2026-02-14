@@ -149,7 +149,7 @@ const OrderSummary = memo<{
 OrderSummary.displayName = "OrderSummary";
 
 // Main component
-function ShoppingCart(): JSX.Element {
+function ShoppingCart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([
     { id: 1, name: "MacBook Pro M3", price: 2499.99, quantity: 1 },
     { id: 7, name: "AirPods Pro", price: 249.99, quantity: 2 },

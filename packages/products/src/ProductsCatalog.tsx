@@ -112,7 +112,7 @@ const ProductCard = memo<{
 
 ProductCard.displayName = "ProductCard";
 
-function ProductsCatalog(): JSX.Element {
+function ProductsCatalog() {
   const [selectedCategory, setSelectedCategory] =
     useState<FilterCategory>("all");
 

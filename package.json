@@ -14,11 +14,24 @@
     "build:products": "cd packages/products && npm run build",
     "build:cart": "cd packages/cart && npm run build",
     "build:dashboard": "cd packages/dashboard && npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "postinstall": "npm run install:packages",
     "install:packages": "cd packages/shell && npm install && cd ../products && npm install && cd ../cart && npm install && cd ../dashboard && npm install"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.0.18",
     "concurrently": "^9.2.1",
-    "typescript": "^5.9.3"
+    "jsdom": "^28.0.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

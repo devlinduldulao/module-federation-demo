@@ -145,7 +145,7 @@ const ActivityRow = memo<{ activity: ActivityItem; index: number }>(
 ActivityRow.displayName = "ActivityRow";
 
 // Main component
-function UserDashboard(): JSX.Element {
+function UserDashboard() {
   const lastUpdated = useMemo(() => new Date().toLocaleString(), []);
 
   return (

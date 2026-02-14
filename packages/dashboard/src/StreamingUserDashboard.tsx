@@ -191,7 +191,7 @@ const StreamingUserDashboard = () => {
 };
 
 // Main component
-function UserDashboard(): JSX.Element {
+function UserDashboard() {
   const lastUpdated = useMemo(() => new Date().toLocaleString(), []);
 
   return (
