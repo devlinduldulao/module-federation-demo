@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import { cn } from "./lib/utils";
 import { Product, CartItem, FilterCategory } from "./types";
 
@@ -24,7 +24,7 @@ const MOCK_PRODUCTS: readonly Product[] = [
     name: "Book",
     price: 12.99,
     category: "books",
-    image: "📚",
+    image: "BOOK",
     description: "New York Times bestselling novel",
   },
   {
@@ -32,7 +32,7 @@ const MOCK_PRODUCTS: readonly Product[] = [
     name: "Phone",
     price: 699.99,
     category: "electronics",
-    image: "��",
+    image: "PHONE",
     description: "Latest smartphone with advanced camera",
   },
   {
@@ -40,7 +40,7 @@ const MOCK_PRODUCTS: readonly Product[] = [
     name: "Jeans",
     price: 49.99,
     category: "clothing",
-    image: "👖",
+    image: "DENIM",
     description: "Premium quality denim jeans",
   },
   {
@@ -48,7 +48,7 @@ const MOCK_PRODUCTS: readonly Product[] = [
     name: "Cookbook",
     price: 24.99,
     category: "books",
-    image: "📖",
+    image: "COOK",
     description: "Professional cooking techniques and recipes",
   },
 ] as const;
@@ -59,6 +59,58 @@ const CATEGORIES: readonly FilterCategory[] = [
   "clothing",
   "books",
 ] as const;
+
+// Product card component
+const ProductCard = memo<{
+  product: Product;
+  index: number;
+  onAddToCart: (product: Product) => void;
+}>(({ product, index, onAddToCart }) => (
+  <article
+    className="group bg-noir flex flex-col animate-fade-in-up"
+    style={{ animationDelay: `${index * 80}ms` }}
+    role="article"
+    aria-label={`Product: ${product.name}`}
+  >
+    {/* Image placeholder */}
+    <div className="aspect-square bg-elevated relative overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="font-mono text-sm text-dim tracking-wider">
+          {product.image}
+        </span>
+      </div>
+      {/* Citrine reveal line */}
+      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-citrine scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+    </div>
+
+    <div className="p-5 flex flex-col flex-1">
+      <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase mb-2">
+        {product.category}
+      </span>
+      <h3 className="font-display text-lg italic text-cream mb-1 group-hover:text-citrine transition-colors duration-300">
+        {product.name}
+      </h3>
+      <p className="text-stone text-sm leading-relaxed line-clamp-2 mb-4 flex-1">
+        {product.description}
+      </p>
+
+      <div className="flex items-end justify-between pt-4 border-t border-edge">
+        <span className="font-mono text-xl text-cream tracking-tight">
+          ${product.price.toLocaleString()}
+        </span>
+        <button
+          onClick={() => onAddToCart(product)}
+          className="font-mono text-xs tracking-wider text-citrine border border-edge px-4 py-2 hover:bg-citrine hover:text-noir transition-all duration-300"
+          aria-label={`Add ${product.name} to cart`}
+        >
+          Add &rarr;
+        </button>
+      </div>
+    </div>
+  </article>
+));
+
+ProductCard.displayName = "ProductCard";
 
 function ProductsCatalog(): JSX.Element {
   const [selectedCategory, setSelectedCategory] =
@@ -90,12 +142,11 @@ function ProductsCatalog(): JSX.Element {
           bubbles: true,
         })
       );
-
       window.dispatchEvent(
         new CustomEvent("showNotification", {
           detail: {
             type: "success",
-            message: `${product.name} added to cart!`,
+            message: `${product.name} added to cart`,
           },
         })
       );
@@ -105,133 +156,73 @@ function ProductsCatalog(): JSX.Element {
   }, []);
 
   return (
-    <div className="w-full max-w-6xl mx-auto" role="main">
-      <header className="mb-12 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl mb-6">
-          <span
-            className="text-3xl animate-pulse text-white font-bold"
-            role="img"
-            aria-label="shopping"
-          >
-            SHOP
-          </span>
-        </div>
-        <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-          Premium Collection
+    <div className="w-full max-w-7xl mx-auto" role="main">
+      {/* Header */}
+      <header className="mb-12 animate-fade-in-up">
+        <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
+          Browse Collection
+        </span>
+        <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
+          Products
         </h2>
-        <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-8">
+        <p className="text-stone text-sm max-w-xl">
           Curated products for developers, designers, and tech enthusiasts.
-          Every item tells a story of innovation and quality.
         </p>
-
-        <nav
-          className="flex flex-wrap justify-center gap-3"
-          role="navigation"
-          aria-label="Product category filters"
-        >
-          {CATEGORIES.map((category) => (
-            <button
-              key={category}
-              onClick={() => handleCategoryChange(category)}
-              className={cn(
-                "px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform hover:scale-105",
-                selectedCategory === category
-                  ? "bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-gray-200 shadow-lg shadow-purple-500/25"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md"
-              )}
-              aria-pressed={selectedCategory === category}
-              aria-label={`Filter by ${category} category`}
-            >
-              <span className="flex items-center gap-2">
-                {category === "all" && "🌟"}
-                {category === "electronics" && "⚡"}
-                {category === "clothing" && "👔"}
-                {category === "books" && "📚"}
-                <span>
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </span>
-              </span>
-            </button>
-          ))}
-        </nav>
       </header>
 
+      {/* Filters */}
+      <nav
+        className="flex items-center gap-6 mb-10 border-b border-edge pb-4 animate-fade-in-up"
+        style={{ animationDelay: "100ms" }}
+        role="navigation"
+        aria-label="Product category filters"
+      >
+        {CATEGORIES.map((category) => (
+          <button
+            key={category}
+            onClick={() => handleCategoryChange(category)}
+            className={cn(
+              "font-mono text-xs tracking-wider uppercase pb-2 transition-all duration-300 relative",
+              selectedCategory === category
+                ? "text-cream"
+                : "text-dim hover:text-stone"
+            )}
+            aria-pressed={selectedCategory === category}
+          >
+            {category}
+            {selectedCategory === category && (
+              <span className="absolute bottom-0 left-0 w-full h-[2px] bg-citrine" />
+            )}
+          </button>
+        ))}
+        <span className="ml-auto font-mono text-[11px] text-dim">
+          {filteredProducts.length} item{filteredProducts.length !== 1 ? "s" : ""}
+        </span>
+      </nav>
+
+      {/* Product grid */}
       <section aria-label="Products grid">
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredProducts.map((product) => (
-              <article
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[1px] bg-edge">
+            {filteredProducts.map((product, index) => (
+              <ProductCard
                 key={product.id}
-                className="group bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-purple-200 relative overflow-hidden"
-                role="article"
-                aria-label={`Product: ${product.name}`}
-              >
-                {/* Product badge */}
-                <div className="absolute top-4 right-4 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-gray-200 text-xs font-medium rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {product.category}
-                </div>
-
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-
-                <div className="relative z-10">
-                  <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl mb-4 group-hover:from-purple-100 group-hover:to-pink-100 transition-all duration-300">
-                      <div
-                        className="text-3xl transition-transform duration-300 group-hover:scale-110"
-                        role="img"
-                        aria-label={`${product.name} icon`}
-                      >
-                        {product.image}
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors duration-300">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-2">
-                      {product.description}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="text-left">
-                      <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                        ${product.price.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Best price guarantee
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      className="group/btn px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-gray-200 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all duration-300 text-sm font-semibold focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform hover:scale-105 shadow-lg hover:shadow-xl relative overflow-hidden"
-                      aria-label={`Add ${product.name} to cart`}
-                    >
-                      <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-500" />
-                      <span className="relative flex items-center gap-2">
-                        <span>Add to Cart</span>
-                        <span className="transition-transform duration-300 group-hover/btn:translate-x-1">
-                          →
-                        </span>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </article>
+                product={product}
+                index={index}
+                onAddToCart={handleAddToCart}
+              />
             ))}
           </div>
         ) : (
-          <div className="text-center py-20">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl mb-6">
-              <div className="text-4xl" role="img" aria-hidden="true">
-                📭
-              </div>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-700 mb-3">
-              No products found
+          <div className="text-center py-24 border border-edge">
+            <span className="font-mono text-sm text-dim block mb-3">
+              No results
+            </span>
+            <h3 className="font-display text-2xl italic text-cream mb-2">
+              Nothing found
             </h3>
-            <p className="text-gray-500 text-lg">
-              Try selecting a different category to explore our collection
+            <p className="text-stone text-sm">
+              Try selecting a different category
             </p>
           </div>
         )}

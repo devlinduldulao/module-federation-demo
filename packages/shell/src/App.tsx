@@ -62,28 +62,26 @@ type ModuleType = "products" | "cart" | "dashboard";
 interface ModuleConfig {
   readonly id: ModuleType;
   readonly label: string;
+  readonly port: string;
   readonly component: React.LazyExoticComponent<React.ComponentType>;
 }
 
 // Configuration
 const MODULES: readonly ModuleConfig[] = [
-  { id: "products", label: "Products", component: StreamingProductsCatalog },
-  { id: "cart", label: "Cart", component: StreamingShoppingCart },
-  { id: "dashboard", label: "Dashboard", component: StreamingUserDashboard },
+  { id: "products", label: "Products", port: "3001", component: StreamingProductsCatalog },
+  { id: "cart", label: "Cart", port: "3002", component: StreamingShoppingCart },
+  { id: "dashboard", label: "Dashboard", port: "3003", component: StreamingUserDashboard },
 ] as const;
 
-// Memoized components
+// Memoized navigation button — clean editorial style
 const NavigationButton = memo<{
   module: ModuleConfig;
   isActive: boolean;
   onClick: (moduleId: ModuleType) => void;
 }>(({ module, isActive, onClick }) => {
-  // Prefetch module on hover for better UX
   const handleMouseEnter = useCallback(() => {
     if (!isActive) {
-      // Prefetch the module when user hovers for better perceived performance
       try {
-        // This triggers the lazy loading but doesn't wait for it
         import(
           `${module.id}/Streaming${
             module.id.charAt(0).toUpperCase() + module.id.slice(1)
@@ -94,38 +92,32 @@ const NavigationButton = memo<{
               ? "ShoppingCart"
               : "UserDashboard"
           }`
-        ).catch(() => {
-          // Silently fail - will show proper error when actually clicked
-        });
-      } catch {
-        // Module might not be available for prefetch
-      }
+        ).catch(() => {});
+      } catch {}
     }
   }, [module.id, isActive]);
 
   return (
     <button
-      key={module.id}
       onClick={() => onClick(module.id)}
       onMouseEnter={handleMouseEnter}
       className={cn(
-        "group relative px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
+        "relative px-5 py-2.5 font-mono text-sm tracking-wide transition-all duration-500 focus:outline-hidden",
         isActive
-          ? "bg-blue-600 text-gray-200 shadow-lg scale-105"
-          : "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200"
+          ? "text-citrine"
+          : "text-stone hover:text-cream"
       )}
       aria-pressed={isActive}
       aria-label={`Switch to ${module.label}`}
     >
-      <span className="flex items-center gap-2">
-        <span>{module.label}</span>
-        {!isActive && (
-          <span className="text-xs opacity-60 hidden sm:inline">preload</span>
+      <span className="relative z-10">{module.label.toUpperCase()}</span>
+      {/* Citrine underline indicator */}
+      <span
+        className={cn(
+          "absolute bottom-0 left-0 h-[2px] bg-citrine transition-all duration-500",
+          isActive ? "w-full" : "w-0"
         )}
-      </span>
-      {isActive && (
-        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-blue-600 rounded-full animate-pulse" />
-      )}
+      />
     </button>
   );
 });
@@ -144,12 +136,12 @@ function App(): JSX.Element {
   const [activeModule, setActiveModule] = useState<ModuleType>("products");
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  const activeConfig = MODULES.find((m) => m.id === activeModule)!;
+
   const handleModuleChange = useCallback((moduleId: ModuleType) => {
     setActiveModule(moduleId);
 
-    // Clear any module-specific caches to ensure fresh loading on next visit
     try {
-      // Dispatch a custom event to signal module change to remote modules
       window.dispatchEvent(
         new CustomEvent("moduleChange", {
           detail: { newModule: moduleId },
@@ -159,14 +151,11 @@ function App(): JSX.Element {
       console.warn("Failed to dispatch module change event:", error);
     }
 
-    // Add visual feedback for module switching
     setNotifications((prev) => [
       {
         id: Date.now().toString(),
         type: "info",
-        message: `Switched to ${
-          moduleId.charAt(0).toUpperCase() + moduleId.slice(1)
-        } module`,
+        message: `${moduleId.charAt(0).toUpperCase() + moduleId.slice(1)} module loaded`,
       },
       ...prev.slice(0, 2),
     ]);
@@ -178,11 +167,7 @@ function App(): JSX.Element {
       const customEvent = event as CustomEvent;
       const { type, message } = customEvent.detail;
       setNotifications((prev) => [
-        {
-          id: Date.now().toString(),
-          type,
-          message,
-        },
+        { id: Date.now().toString(), type, message },
         ...prev.slice(0, 2),
       ]);
     };
@@ -194,6 +179,7 @@ function App(): JSX.Element {
 
   // Auto-remove notifications
   useEffect(() => {
+    if (notifications.length === 0) return;
     const timer = setTimeout(() => {
       setNotifications((prev) => prev.slice(0, -1));
     }, 3000);
@@ -208,14 +194,13 @@ function App(): JSX.Element {
     if (!activeModuleConfig) {
       return (
         <div className="p-8 text-center">
-          <p className="text-gray-600">Module not found</p>
+          <p className="text-stone">Module not found</p>
         </div>
       );
     }
 
     const { component: Component } = activeModuleConfig;
 
-    // Choose appropriate skeleton based on module type
     const getSkeleton = () => {
       switch (activeModule) {
         case "products":
@@ -225,7 +210,7 @@ function App(): JSX.Element {
         case "dashboard":
           return <DashboardSkeleton />;
         default:
-          return <ProductsSkeleton />; // Default to products skeleton
+          return <ProductsSkeleton />;
       }
     };
 
@@ -239,31 +224,33 @@ function App(): JSX.Element {
   }, [activeModule]);
 
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-slate-100" />
+    <div className="min-h-screen bg-noir relative">
+      {/* Subtle dot grid background */}
       <div
-        className="absolute inset-0 bg-grid-slate-100 opacity-25"
+        className="fixed inset-0 pointer-events-none opacity-[0.03]"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.15) 1px, transparent 0)",
-          backgroundSize: "24px 24px",
+            "radial-gradient(circle at 1px 1px, rgba(250,250,249,0.5) 1px, transparent 0)",
+          backgroundSize: "32px 32px",
         }}
       />
 
-      {/* Notifications */}
-      <div className="fixed top-4 right-4 z-50 space-y-2">
+      {/* Top accent line */}
+      <div className="fixed top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-citrine/40 to-transparent z-50" />
+
+      {/* Notifications — minimal toast */}
+      <div className="fixed top-6 right-6 z-50 space-y-2">
         {notifications.map((notification) => (
           <div
             key={notification.id}
             className={cn(
-              "px-4 py-3 rounded-lg border shadow-lg transform transition-all duration-300 animate-in slide-in-from-right",
+              "px-4 py-2.5 border font-mono text-xs tracking-wide transition-all duration-300 animate-in slide-in-from-right",
               notification.type === "success" &&
-                "bg-green-50 border-green-200 text-green-800",
+                "bg-noir border-mint/30 text-mint",
               notification.type === "error" &&
-                "bg-red-50 border-red-200 text-red-800",
+                "bg-noir border-rose/30 text-rose",
               notification.type === "info" &&
-                "bg-blue-50 border-blue-200 text-blue-800"
+                "bg-noir border-edge text-stone"
             )}
           >
             {notification.message}
@@ -271,31 +258,19 @@ function App(): JSX.Element {
         ))}
       </div>
 
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-start pt-8 px-4">
-        <div className="w-full max-w-7xl mx-auto">
-          {/* Header */}
-          <header className="bg-white rounded-2xl border border-slate-200 shadow-lg p-8 mb-8">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div className="text-center sm:text-left">
-                <h1 className="text-4xl font-bold text-slate-900 flex items-center justify-center sm:justify-start gap-3">
-                  <span>Module Federation Demo</span>
-                </h1>
-                <p className="text-slate-600 mt-2 text-lg font-medium">
-                  React 18 Suspense & Streaming Components
-                </p>
-                <div className="flex items-center justify-center sm:justify-start gap-2 mt-3 text-sm text-slate-500">
-                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span>
-                    Live Demo • Streaming • Skeleton Loading • Independent
-                    Deployment
-                  </span>
-                </div>
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Header — editorial nav */}
+        <header className="border-b border-edge">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+            <div className="flex items-center justify-between h-16">
+              {/* Logo */}
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-2xl italic text-cream tracking-tight">MF</span>
+                <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">Demo</span>
               </div>
-              <nav
-                className="flex gap-3"
-                role="navigation"
-                aria-label="Module navigation"
-              >
+
+              {/* Navigation */}
+              <nav className="flex items-center gap-1" role="navigation" aria-label="Module navigation">
                 {MODULES.map((module) => (
                   <NavigationButton
                     key={module.id}
@@ -306,59 +281,56 @@ function App(): JSX.Element {
                 ))}
               </nav>
             </div>
-          </header>
+          </div>
+        </header>
 
-          {/* Module indicator with streaming status */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-blue-50 border border-blue-200 rounded-full text-blue-800">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                <span className="text-sm font-semibold">
-                  Streaming:{" "}
-                  {activeModule.charAt(0).toUpperCase() + activeModule.slice(1)}{" "}
-                  Module
-                </span>
+        {/* Module status strip */}
+        <div className="border-b border-edge bg-surface/50">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+            <div className="flex items-center justify-between h-9">
+              <div className="flex items-center gap-4 font-mono text-[11px] text-dim">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-citrine animate-subtle-pulse" />
+                  <span>STREAMING</span>
+                </div>
+                <span className="text-edge">|</span>
+                <span>{activeConfig.label.toLowerCase()}</span>
+                <span className="text-edge">|</span>
+                <span>:{activeConfig.port}</span>
               </div>
-              <div className="h-4 w-px bg-blue-300" />
-              <span className="text-xs text-blue-600 font-medium">
-                Port:{" "}
-                {activeModule === "products"
-                  ? "3001"
-                  : activeModule === "cart"
-                  ? "3002"
-                  : "3003"}
-              </span>
+              <div className="font-mono text-[11px] text-dim hidden sm:flex items-center gap-4">
+                <span>React 18</span>
+                <span className="text-edge">|</span>
+                <span>Suspense</span>
+                <span className="text-edge">|</span>
+                <span>Module Federation</span>
+              </div>
             </div>
           </div>
-
-          {/* Main content */}
-          <main className="bg-white rounded-2xl border border-slate-200 shadow-lg p-8 min-h-[700px] relative overflow-hidden">
-            {/* Module boundary indicator */}
-            <div className="absolute top-4 right-4 px-3 py-1 bg-blue-600 text-gray-200 text-xs font-medium rounded-full">
-              Micro-Frontend
-            </div>
-
-            <div className="flex-1 flex flex-col items-center justify-center relative z-10">
-              {renderModuleContent()}
-            </div>
-
-            {/* Clean top border */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-blue-600" />
-          </main>
-
-          {/* Footer info */}
-          <footer className="mt-8 text-center">
-            <div className="inline-flex items-center gap-4 px-6 py-3 bg-white border border-slate-200 rounded-full text-slate-600 text-sm shadow-sm">
-              <span>Independent Deployment</span>
-              <span>•</span>
-              <span>Hot Reloading</span>
-              <span>•</span>
-              <span>Zero Coupling</span>
-              <span>•</span>
-              <span>React 18 Streaming</span>
-            </div>
-          </footer>
         </div>
+
+        {/* Main content */}
+        <main className="flex-1">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-10">
+            {renderModuleContent()}
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-edge mt-auto">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+            <div className="flex items-center justify-between h-12 font-mono text-[10px] tracking-wider text-dim uppercase">
+              <span>Independent Deployment</span>
+              <div className="flex items-center gap-4">
+                <span>Hot Reload</span>
+                <span className="text-edge-bright">/</span>
+                <span>Zero Coupling</span>
+                <span className="text-edge-bright">/</span>
+                <span>Fault Isolation</span>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

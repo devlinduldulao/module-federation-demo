@@ -1,18 +1,18 @@
-import { useMemo, memo, useState, useEffect } from "react";
+import { useMemo, memo } from "react";
 import { cn } from "./lib/utils";
 import type { DashboardStat, ActivityItem } from "./types";
 
 // Simulate network delay for demonstration
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Enhanced mock data for conference demo
+// Enhanced mock data
 const MOCK_STATS: readonly DashboardStat[] = [
   {
     id: "orders",
     label: "Total Orders",
     value: "156",
     emoji: "",
-    color: "from-blue-500 to-cyan-600",
+    color: "text-ice",
     trend: { direction: "up", percentage: 23 },
   },
   {
@@ -20,7 +20,7 @@ const MOCK_STATS: readonly DashboardStat[] = [
     label: "Total Spent",
     value: "$12,847",
     emoji: "",
-    color: "from-green-500 to-emerald-600",
+    color: "text-mint",
     trend: { direction: "up", percentage: 18 },
   },
   {
@@ -28,7 +28,7 @@ const MOCK_STATS: readonly DashboardStat[] = [
     label: "Money Saved",
     value: "$2,156",
     emoji: "",
-    color: "from-purple-500 to-violet-600",
+    color: "text-citrine",
     trend: { direction: "up", percentage: 45 },
   },
   {
@@ -36,7 +36,7 @@ const MOCK_STATS: readonly DashboardStat[] = [
     label: "Wishlist Items",
     value: "24",
     emoji: "",
-    color: "from-pink-500 to-rose-600",
+    color: "text-burnt",
     trend: { direction: "up", percentage: 12 },
   },
 ] as const;
@@ -44,168 +44,112 @@ const MOCK_STATS: readonly DashboardStat[] = [
 const MOCK_ACTIVITY: readonly ActivityItem[] = [
   {
     id: "1",
-    message:
-      "MacBook Pro M3 delivered successfully - Premium experience guaranteed!",
+    message: "MacBook Pro M3 delivered successfully",
     timestamp: "2 hours ago",
     type: "success",
     icon: "",
   },
   {
     id: "2",
-    message:
-      "Added AirPods Pro and 2 other items to wishlist for Black Friday deals",
+    message: "Added AirPods Pro to wishlist for price tracking",
     timestamp: "5 hours ago",
     type: "info",
     icon: "",
   },
   {
     id: "3",
-    message:
-      "iPhone 15 Pro order #MF-2024-156 is being processed - Estimated delivery: Tomorrow",
+    message: "iPhone 15 Pro order #MF-2024-156 is being processed",
     timestamp: "1 day ago",
     type: "warning",
     icon: "",
   },
   {
     id: "4",
-    message: "Payment of $2,749.98 processed successfully via Apple Pay",
+    message: "Payment of $2,749.98 processed via Apple Pay",
     timestamp: "2 days ago",
     type: "success",
     icon: "",
   },
   {
     id: "5",
-    message: "Welcome bonus: $50 credit added to your account! Start shopping",
+    message: "Welcome bonus: $50 credit added to your account",
     timestamp: "1 week ago",
     type: "info",
     icon: "",
   },
 ] as const;
 
-// Memoized components
-const StatCard = memo<{
-  stat: DashboardStat;
-  index: number;
-}>(({ stat, index }) => {
-  const trendIcon = useMemo(() => {
-    if (!stat.trend) return null;
-    return null; // No icons
-  }, [stat.trend]);
+// Stat card — large editorial numbers
+const StatCard = memo<{ stat: DashboardStat; index: number }>(
+  ({ stat, index }) => {
+    const trendColor = stat.trend?.direction === "up" ? "text-mint" : stat.trend?.direction === "down" ? "text-rose" : "text-stone";
 
-  return (
-    <article
-      className="group bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-purple-200 relative overflow-hidden animate-count-up"
-      style={{ animationDelay: `${index * 150}ms` }}
-      role="article"
-      aria-label={`Statistic: ${stat.label}`}
-    >
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-
-      <div className="relative z-10">
-        <div className="flex justify-center mb-6">
-          <div
-            className={cn(
-              "w-16 h-16 bg-gradient-to-br rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300 relative overflow-hidden",
-              stat.color
-            )}
-            role="img"
-            aria-label={`${stat.label} icon`}
-          >
-            <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <span className="relative text-white font-bold text-sm">
-              {stat.emoji || stat.label.slice(0, 3).toUpperCase()}
-            </span>
-          </div>
+    return (
+      <article
+        className="group bg-noir p-6 transition-all duration-300 hover:bg-surface animate-count-up"
+        style={{ animationDelay: `${index * 120}ms` }}
+        role="article"
+        aria-label={`${stat.label}: ${stat.value}`}
+      >
+        <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase block mb-4">
+          {stat.label}
+        </span>
+        <div className={cn("font-display text-4xl lg:text-5xl italic tracking-tight mb-3", stat.color)}>
+          {stat.value}
         </div>
-        <div className="text-center">
-          <div className="text-4xl font-bold text-gray-800 mb-3 group-hover:text-purple-600 transition-colors duration-300">
-            {stat.value}
-          </div>
-          <div className="text-gray-600 mb-4 font-medium">{stat.label}</div>
-          {stat.trend && (
-            <div
-              className={cn(
-                "inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full text-sm font-semibold",
-                stat.trend.direction === "up" && "bg-green-100 text-green-700",
-                stat.trend.direction === "down" && "bg-red-100 text-red-700",
-                stat.trend.direction === "neutral" &&
-                  "bg-gray-100 text-gray-700"
-              )}
-            >
-              <span>{stat.trend.percentage}% vs last month</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </article>
-  );
-});
+        {stat.trend && (
+          <span className={cn("font-mono text-xs", trendColor)}>
+            {stat.trend.direction === "up" ? "+" : stat.trend.direction === "down" ? "-" : ""}
+            {stat.trend.percentage}% vs last month
+          </span>
+        )}
+      </article>
+    );
+  }
+);
 
 StatCard.displayName = "StatCard";
 
-const ActivityItem = memo<{
-  activity: ActivityItem;
-  index: number;
-}>(({ activity, index }) => {
-  const statusColors = {
-    success: "bg-green-500",
-    info: "bg-blue-500",
-    warning: "bg-yellow-500",
-    error: "bg-red-500",
-  } as const;
+// Activity row
+const ActivityRow = memo<{ activity: ActivityItem; index: number }>(
+  ({ activity, index }) => {
+    const dotColors = {
+      success: "bg-mint",
+      info: "bg-ice",
+      warning: "bg-burnt",
+      error: "bg-rose",
+    } as const;
 
-  const backgroundColors = {
-    success: "hover:bg-green-50",
-    info: "hover:bg-blue-50",
-    warning: "hover:bg-yellow-50",
-    error: "hover:bg-red-50",
-  } as const;
-
-  return (
-    <article
-      className={cn(
-        "group flex items-start gap-4 p-4 bg-gray-50 rounded-xl transition-all duration-300 cursor-pointer activity-item",
-        backgroundColors[activity.type]
-      )}
-      style={{ animationDelay: `${index * 100}ms` }}
-      role="article"
-      aria-label={`Activity: ${activity.message}`}
-    >
-      <div className="flex items-center gap-3 flex-shrink-0 mt-1">
+    return (
+      <article
+        className="group activity-item flex items-start gap-4 py-4 hover:bg-surface/50 transition-colors duration-200 pl-4 animate-fade-in-up"
+        style={{ animationDelay: `${(index + 4) * 80}ms` }}
+        role="article"
+        aria-label={`Activity: ${activity.message}`}
+      >
         <div
           className={cn(
-            "w-3 h-3 rounded-full transition-all duration-300 group-hover:scale-125",
-            statusColors[activity.type]
+            "w-2 h-2 rounded-full flex-shrink-0 mt-1.5 transition-transform duration-200 group-hover:scale-150",
+            dotColors[activity.type]
           )}
           aria-hidden="true"
         />
-        {activity.icon && (
-          <div className="text-lg group-hover:scale-110 transition-transform duration-300">
-            <span role="img" aria-hidden="true">
-              {activity.icon}
-            </span>
-          </div>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <span className="text-gray-800 font-medium leading-relaxed block">
-          {activity.message}
-        </span>
-        <time
-          className="text-sm text-gray-500 mt-1 block"
-          dateTime={activity.timestamp}
-        >
-          {activity.timestamp}
-        </time>
-      </div>
-    </article>
-  );
-});
+        <div className="flex-1 min-w-0">
+          <span className="text-stone text-sm leading-relaxed block group-hover:text-cream transition-colors duration-200">
+            {activity.message}
+          </span>
+          <time className="font-mono text-[11px] text-dim mt-1 block" dateTime={activity.timestamp}>
+            {activity.timestamp}
+          </time>
+        </div>
+      </article>
+    );
+  }
+);
 
-ActivityItem.displayName = "ActivityItem";
+ActivityRow.displayName = "ActivityRow";
 
-// Resource-based Suspense pattern for React 18+
+// Resource-based Suspense pattern
 interface Resource<T> {
   read(): T;
 }
@@ -214,154 +158,103 @@ function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
   let status = "pending";
   let result: T;
   let suspender = asyncFn().then(
-    (data) => {
-      status = "success";
-      result = data;
-    },
-    (error) => {
-      status = "error";
-      result = error;
-    }
+    (data) => { status = "success"; result = data; },
+    (error) => { status = "error"; result = error; }
   );
 
   return {
     read() {
-      if (status === "pending") {
-        throw suspender;
-      } else if (status === "error") {
-        throw result;
-      } else if (status === "success") {
-        return result;
-      }
+      if (status === "pending") throw suspender;
+      if (status === "error") throw result;
+      if (status === "success") return result;
       throw new Error("Invalid resource state");
     },
   };
 }
 
-// Global resource cache with proper invalidation
 const resourceCache = new Map<string, Resource<void>>();
 
 function getResource(key: string, delayMs: number): Resource<void> {
   if (!resourceCache.has(key)) {
-    const resource = createResource(() => delay(delayMs));
-    resourceCache.set(key, resource);
+    resourceCache.set(key, createResource(() => delay(delayMs)));
   }
   return resourceCache.get(key)!;
 }
 
-function clearResourceCache() {
-  resourceCache.clear();
-}
-
-// Module-specific resource keys
 let currentResourceKey = "dashboard-initial";
 
-/**
- * CACHE INVALIDATION LOGIC - COMMENTED OUT FOR BETTER UX
- *
- * This code was originally designed for Module Federation demo purposes to showcase:
- * - React 18 Suspense streaming capabilities
- * - Independent loading states for each micro-frontend
- * - Realistic network simulation with loading skeletons
- *
- * However, it causes skeletons to re-appear every time you navigate back to a
- * previously visited page, which creates a poor user experience.
- *
- * Commenting this out means:
- * ✅ Resources stay cached after first load
- * ✅ No skeleton re-showing on revisit
- * ✅ Better perceived performance
- * ✅ More realistic production behavior
- */
-/*
-// Listen for module changes globally
-if (typeof window !== "undefined") {
-  window.addEventListener("moduleChange", (event: any) => {
-    if (event.detail.newModule === "dashboard") {
-      currentResourceKey = `dashboard-${Date.now()}`;
-      // Clear only dashboard resources to force fresh load
-      Array.from(resourceCache.keys())
-        .filter((key) => key.startsWith("dashboard-"))
-        .forEach((key) => resourceCache.delete(key));
-    }
-  });
-}
-*/
-
-// Modern Suspense component following React 18+ best practices
+// Suspense wrapper
 const StreamingUserDashboard = () => {
-  // Read from resource - this will throw promise if not ready
   const resource = getResource(currentResourceKey, 5000);
-  resource.read(); // Throws promise for Suspense if not ready
-
+  resource.read();
   return <UserDashboard />;
 };
 
 // Main component
 function UserDashboard(): JSX.Element {
-  const lastUpdated = useMemo(() => {
-    return new Date().toLocaleString();
-  }, []);
+  const lastUpdated = useMemo(() => new Date().toLocaleString(), []);
 
   return (
-    <div className="w-full max-w-7xl mx-auto animate-fade-in-up" role="main">
-      <header className="mb-12 text-center">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl mb-6 animate-bounce">
-          <span className="text-white font-bold text-lg">DASH</span>
-        </div>
-        <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-          Dashboard Overview
+    <div className="w-full max-w-7xl mx-auto" role="main">
+      {/* Header */}
+      <header className="mb-12 animate-fade-in-up">
+        <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
+          Analytics Overview
+        </span>
+        <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
+          Dashboard
         </h2>
-        <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-          Welcome back, Developer! Here's your comprehensive account overview
-          with real-time insights and activity tracking.
+        <p className="text-stone text-sm max-w-xl">
+          Welcome back. Here's your account overview with real-time insights and activity tracking across all modules.
         </p>
       </header>
 
-      {/* User Welcome Card */}
-      <section className="mb-12 animate-slide-in-right">
-        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden">
-          <div
-            className="absolute inset-0 bg-white/10 translate-x-[-100%] animate-pulse"
-            style={{ animationDuration: "4s" }}
-          />
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      {/* Welcome banner */}
+      <section className="mb-12 border border-edge animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+        <div className="p-8 relative overflow-hidden">
+          {/* Subtle gradient accent */}
+          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-ice via-citrine to-mint" />
+
+          <div className="flex flex-col md:flex-row items-start justify-between gap-6">
             <div>
-              <h3 className="text-2xl font-bold mb-2">
-                Welcome back, Conference Attendee!
+              <h3 className="font-display text-2xl italic text-cream mb-2">
+                Welcome back, Developer
               </h3>
-              <p className="text-white/90 text-lg">
-                You've saved $2,156 with smart shopping choices this month.
+              <p className="text-stone text-sm leading-relaxed mb-4">
+                You've saved $2,156 with smart shopping choices this month. Your account is performing above average.
               </p>
-              <div className="flex items-center gap-4 mt-4 text-sm">
+              <div className="flex items-center gap-4 font-mono text-[11px] text-dim">
                 <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-mint" />
                   Module Federation Demo
                 </span>
-                <span>•</span>
+                <span className="text-edge">|</span>
                 <span>React 18 Streaming</span>
-                <span>•</span>
+                <span className="text-edge">|</span>
                 <span>Modern Architecture</span>
               </div>
             </div>
-            <div className="text-center">
-              <div className="text-white font-bold text-2xl mb-2">LIVE</div>
-              <div className="text-sm opacity-90">Demo Status</div>
-              <div className="text-2xl font-bold">Active</div>
+            <div className="text-right hidden md:block">
+              <div className="border border-edge p-4">
+                <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase block mb-1">Status</span>
+                <span className="font-display text-2xl italic text-citrine">Active</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Statistics Grid */}
+      {/* Statistics Grid — editorial big numbers */}
       <section className="mb-12" aria-label="Account statistics">
-        <h3 className="text-2xl font-bold text-gray-800 mb-8 flex items-center gap-2 animate-slide-in-right">
-          <span>Performance Metrics</span>
-          <span className="text-sm font-normal text-gray-500 ml-auto">
+        <div className="flex items-center justify-between mb-6 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+          <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase">
+            Performance Metrics
+          </span>
+          <span className="font-mono text-[11px] text-dim hidden sm:block">
             Streaming from Analytics API
           </span>
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-edge">
           {MOCK_STATS.map((stat, index) => (
             <StatCard key={stat.id} stat={stat} index={index} />
           ))}
@@ -369,85 +262,51 @@ function UserDashboard(): JSX.Element {
       </section>
 
       {/* Recent Activity */}
-      <section
-        className="mb-8 animate-fade-in-up"
-        style={{ animationDelay: "600ms" }}
-      >
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 hover:shadow-md transition-shadow duration-300">
-          <header className="mb-8">
-            <h3 className="text-2xl font-bold text-gray-800 flex items-center gap-3 mb-2">
-              <span>Live Activity Stream</span>
-              <span className="text-sm font-normal text-gray-500 ml-auto">
-                Real-time updates
-              </span>
-            </h3>
-            <p className="text-gray-600">
-              Stay up to date with your latest transactions and account
-              activities
+      <section className="mb-10 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+        <div className="border border-edge">
+          <div className="p-8 pb-0">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-display text-xl italic text-cream">
+                Activity Stream
+              </h3>
+              <span className="font-mono text-[11px] text-dim">Real-time</span>
+            </div>
+            <p className="text-stone text-sm mb-6">
+              Latest transactions and account events
             </p>
-          </header>
-          <div className="space-y-4" role="list" aria-label="Recent activities">
+          </div>
+          <div className="divide-y divide-edge" role="list" aria-label="Recent activities">
             {MOCK_ACTIVITY.map((activity, index) => (
-              <ActivityItem
-                key={activity.id}
-                activity={activity}
-                index={index}
-              />
+              <ActivityRow key={activity.id} activity={activity} index={index} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Module Info */}
-      <footer
-        className="bg-gradient-to-r from-purple-100 via-pink-100 to-indigo-100 rounded-2xl p-8 text-center border border-purple-200 animate-fade-in-up"
-        style={{ animationDelay: "800ms" }}
-      >
-        <div className="mb-4">
-          <span className="text-purple-800 font-bold text-xl">MF DEMO</span>
-        </div>
-        <h4 className="text-xl font-bold text-purple-800 mb-3">
-          Dashboard Micro-Frontend Architecture
+      {/* Architecture info */}
+      <footer className="border border-edge p-8 text-center animate-fade-in-up" style={{ animationDelay: "600ms" }}>
+        <h4 className="font-display text-xl italic text-cream mb-3">
+          Micro-Frontend Architecture
         </h4>
-        <p className="text-purple-700 mb-4 max-w-2xl mx-auto">
-          This dashboard module showcases independent deployment capabilities
-          with React 18 Suspense streaming. It can be updated, scaled, and
-          maintained separately from other modules without affecting the entire
-          application.
+        <p className="text-stone text-sm mb-6 max-w-2xl mx-auto leading-relaxed">
+          This dashboard module operates independently — it can be deployed, scaled, and maintained without affecting other modules in the federation.
         </p>
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-purple-600 mb-4">
-          <span className="flex items-center gap-1">
-            <span>Independent deployments</span>
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <span>Hot reloading</span>
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <span>Zero coupling</span>
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <span>Fault isolation</span>
-          </span>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <span>React 18 Streaming</span>
-          </span>
+        <div className="flex flex-wrap justify-center gap-6 font-mono text-[11px] tracking-wider text-dim uppercase mb-6">
+          <span>Independent Deploy</span>
+          <span className="text-edge-bright">/</span>
+          <span>Hot Reload</span>
+          <span className="text-edge-bright">/</span>
+          <span>Zero Coupling</span>
+          <span className="text-edge-bright">/</span>
+          <span>Fault Isolation</span>
         </div>
 
-        {/* Module boundary indicator */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 border border-purple-200 rounded-full text-purple-600 text-sm font-medium">
-          <span className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
-          <span>
-            Dashboard Micro-Frontend • Port 3003 • Analytics & Reporting
+        <div className="flex items-center justify-center gap-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-citrine animate-subtle-pulse" />
+          <span className="font-mono text-[11px] tracking-wider text-dim">
+            DASHBOARD MICRO-FRONTEND &middot; PORT 3003 &middot; LAST UPDATED {lastUpdated.toUpperCase()}
           </span>
         </div>
-
-        <p className="text-xs text-purple-600 mt-4">
-          Last updated: {lastUpdated}
-        </p>
       </footer>
     </div>
   );
@@ -455,5 +314,4 @@ function UserDashboard(): JSX.Element {
 
 UserDashboard.displayName = "UserDashboard";
 
-// Export the streaming wrapper as default for Suspense
 export default StreamingUserDashboard;

@@ -18,7 +18,7 @@
     "install:packages": "cd packages/shell && npm install && cd ../products && npm install && cd ../cart && npm install && cd ../dashboard && npm install"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "typescript": "^5.9.2"
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
   }
 }

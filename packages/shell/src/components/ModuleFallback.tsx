@@ -9,21 +9,19 @@ interface ModuleFallbackProps {
 
 const ModuleFallback = memo<ModuleFallbackProps>(
   ({ icon, title, message, onRetry }) => (
-    <div className="p-8 text-center max-w-md mx-auto">
-      {icon && (
-        <div className="text-6xl mb-4" role="img" aria-hidden="true">
-          {icon}
-        </div>
-      )}
-      <h3 className="text-xl font-semibold mb-2 text-gray-800">{title}</h3>
-      <p className="text-gray-600 mb-4">{message}</p>
+    <div className="py-20 text-center max-w-lg mx-auto">
+      <div className="w-12 h-12 border border-edge mx-auto mb-8 flex items-center justify-center">
+        <span className="font-mono text-[10px] text-dim">OFF</span>
+      </div>
+      <h3 className="font-display text-2xl italic text-cream mb-3">{title}</h3>
+      <p className="text-stone text-sm leading-relaxed mb-8">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
-          className="px-4 py-2 bg-purple-600 text-gray-200 rounded-lg hover:bg-purple-700 transition-colors focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+          className="px-6 py-2.5 bg-transparent border border-citrine text-citrine font-mono text-xs tracking-wider uppercase hover:bg-citrine hover:text-noir transition-all duration-300 focus:outline-hidden"
           aria-label="Retry loading module"
         >
-          Try Again
+          Retry Connection
         </button>
       )}
     </div>

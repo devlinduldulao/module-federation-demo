@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { cn } from "./lib/utils";
 import { Product, CartItem, FilterCategory } from "./types";
 
@@ -138,44 +138,10 @@ function clearResourceCache() {
 // Module-specific resource keys
 let currentResourceKey = "products-initial";
 
-/**
- * CACHE INVALIDATION LOGIC - COMMENTED OUT FOR BETTER UX
- *
- * This code was originally designed for Module Federation demo purposes to showcase:
- * - React 18 Suspense streaming capabilities
- * - Independent loading states for each micro-frontend
- * - Realistic network simulation with loading skeletons
- *
- * However, it causes skeletons to re-appear every time you navigate back to a
- * previously visited page, which creates a poor user experience.
- *
- * Commenting this out means:
- * ✅ Resources stay cached after first load
- * ✅ No skeleton re-showing on revisit
- * ✅ Better perceived performance
- * ✅ More realistic production behavior
- */
-/*
-// Listen for module changes globally
-if (typeof window !== "undefined") {
-  window.addEventListener("moduleChange", (event: any) => {
-    if (event.detail.newModule === "products") {
-      currentResourceKey = `products-${Date.now()}`;
-      // Clear only products resources to force fresh load
-      Array.from(resourceCache.keys())
-        .filter((key) => key.startsWith("products-"))
-        .forEach((key) => resourceCache.delete(key));
-    }
-  });
-}
-*/
-
 // Modern Suspense component following React 18+ best practices
 const StreamingProductsCatalog = () => {
-  // Read from resource - this will throw promise if not ready
   const resource = getResource(currentResourceKey, 2500);
-  resource.read(); // Throws promise for Suspense if not ready
-
+  resource.read();
   return <ProductsCatalog />;
 };
 
@@ -214,7 +180,7 @@ function ProductsCatalog(): JSX.Element {
         new CustomEvent("showNotification", {
           detail: {
             type: "success",
-            message: `${product.name} added to cart!`,
+            message: `${product.name} added to cart`,
           },
         })
       );
@@ -224,21 +190,26 @@ function ProductsCatalog(): JSX.Element {
   }, []);
 
   return (
-    <div className="w-full max-w-6xl mx-auto animate-fade-in-up" role="main">
-      <header className="mb-12 text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl mb-6 animate-bounce">
-          <span className="text-gray-200 font-bold text-lg">SHOP</span>
+    <div className="w-full max-w-6xl mx-auto" role="main">
+      {/* Header — editorial style */}
+      <header className="mb-14 animate-fade-in-up">
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
+              Curated Selection
+            </span>
+            <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none">
+              Premium Collection
+            </h2>
+          </div>
+          <span className="font-mono text-sm text-dim hidden lg:block">
+            {filteredProducts.length} items
+          </span>
         </div>
-        <h2 className="text-4xl font-bold text-black mb-4">
-          Premium Collection
-        </h2>
-        <p className="text-black text-lg max-w-2xl mx-auto mb-8 font-bold">
-          Curated products for developers, designers, and tech enthusiasts.
-          Every item tells a story of innovation and quality.
-        </p>
 
+        {/* Filter divider bar */}
         <nav
-          className="flex flex-wrap justify-center gap-3"
+          className="flex items-center gap-6 border-t border-b border-edge py-4"
           role="navigation"
           aria-label="Product category filters"
         >
@@ -247,125 +218,103 @@ function ProductsCatalog(): JSX.Element {
               key={category}
               onClick={() => handleCategoryChange(category)}
               className={cn(
-                "px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform hover:scale-105",
+                "font-mono text-xs tracking-wider uppercase transition-all duration-300 focus:outline-hidden relative pb-0.5",
                 selectedCategory === category
-                  ? "bg-black text-gray-200 shadow-xl border-4 border-purple-500"
-                  : "bg-white text-black hover:bg-gray-100 hover:shadow-md border-4 border-black shadow-sm"
+                  ? "text-citrine"
+                  : "text-dim hover:text-stone"
               )}
               aria-pressed={selectedCategory === category}
-              aria-label={`Filter by ${category} category`}
+              aria-label={`Filter by ${category}`}
             >
-              <span className="flex items-center gap-2">
-                {category === "all" && (
-                  <span className="text-lg font-bold">ALL</span>
-                )}
-                {category === "electronics" && (
-                  <span className="text-lg font-bold">ELEC</span>
-                )}
-                {category === "clothing" && (
-                  <span className="text-lg font-bold">CLOTH</span>
-                )}
-                {category === "books" && (
-                  <span className="text-lg font-bold">BOOK</span>
-                )}
-                <span
-                  className={cn(
-                    "font-black",
-                    selectedCategory === category
-                      ? "text-gray-400"
-                      : "text-black"
-                  )}
-                >
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </span>
-              </span>
+              {category}
+              {selectedCategory === category && (
+                <span className="absolute -bottom-[17px] left-0 w-full h-[1px] bg-citrine" />
+              )}
             </button>
           ))}
         </nav>
       </header>
 
+      {/* Product grid — 1px gap grid creates sharp editorial lines */}
       <section aria-label="Products grid">
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[1px] bg-edge">
             {filteredProducts.map((product, index) => (
               <article
                 key={product.id}
-                className="group bg-slate-50 border-2 border-slate-200 rounded-2xl p-6 shadow-md hover:shadow-2xl transition-all duration-500 hover:scale-105 hover:border-purple-300 hover:bg-white relative overflow-hidden animate-slide-in-right"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="group bg-noir p-6 transition-all duration-500 hover:bg-surface relative animate-fade-in-up"
+                style={{ animationDelay: `${index * 80}ms` }}
                 role="article"
                 aria-label={`Product: ${product.name}`}
               >
-                {/* Product badge */}
-                <div className="absolute top-4 right-4 px-3 py-2 bg-black text-gray-200 text-xs font-bold rounded-full opacity-90 group-hover:opacity-100 group-hover:bg-purple-700 transition-all duration-300 shadow-xl border-2 border-gray-200">
-                  {product.category.toUpperCase()}
+                {/* Image placeholder — geometric */}
+                <div className="aspect-square bg-surface mb-5 relative overflow-hidden group-hover:bg-elevated transition-colors duration-500">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="font-mono text-[10px] tracking-wider text-dim group-hover:text-stone transition-colors">
+                      {product.category.toUpperCase().slice(0, 4)}
+                    </span>
+                  </div>
+                  {/* Hover reveal line */}
+                  <div className="absolute bottom-0 left-0 w-full h-[1px] bg-citrine transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
                 </div>
 
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                {/* Category label */}
+                <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase block mb-2">
+                  {product.category}
+                </span>
 
-                <div className="relative z-10">
-                  <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-200 border-2 border-slate-300 rounded-2xl mb-4 group-hover:bg-purple-100 group-hover:border-purple-300 transition-all duration-300">
-                      <span className="text-black text-xs font-bold tracking-wide">
-                        IMG
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-black mb-3 group-hover:text-black transition-colors duration-300">
-                      {product.name}
-                    </h3>
-                    <p className="text-black text-sm leading-relaxed line-clamp-2 font-bold">
-                      {product.description}
-                    </p>
-                  </div>
+                {/* Product name — serif */}
+                <h3 className="font-display text-xl italic text-cream mb-2 group-hover:text-citrine transition-colors duration-300">
+                  {product.name}
+                </h3>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="text-left">
-                      <div className="text-2xl font-bold text-black">
-                        ${product.price.toLocaleString()}
-                      </div>
-                      <div className="inline-block px-3 py-2 bg-white text-black text-xs font-black rounded-lg border-4 border-black shadow-md">
-                        ✓ Best price guarantee
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleAddToCart(product)}
-                      className="group/btn px-6 py-4 bg-white text-black hover:bg-gray-100 transition-all duration-300 text-sm font-black focus:outline-hidden focus:ring-4 focus:ring-black focus:ring-offset-2 transform hover:scale-105 shadow-xl hover:shadow-2xl rounded-xl border-4 border-black relative overflow-hidden"
-                      aria-label={`Add ${product.name} to cart`}
-                    >
-                      <div className="absolute inset-0 bg-black/10 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-500" />
-                      <span className="relative flex items-center gap-3 font-black text-base text-black">
-                        <span>Add to Cart</span>
-                        <span className="transition-transform duration-300 group-hover/btn:translate-x-1 text-lg text-black">
-                          →
-                        </span>
+                {/* Description */}
+                <p className="text-stone text-sm leading-relaxed line-clamp-2 mb-5">
+                  {product.description}
+                </p>
+
+                {/* Price + CTA */}
+                <div className="flex items-center justify-between pt-4 border-t border-edge">
+                  <span className="font-mono text-lg text-cream tracking-tight">
+                    ${product.price.toLocaleString()}
+                  </span>
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    className="group/btn px-4 py-2 bg-transparent border border-edge text-stone font-mono text-[11px] tracking-wider uppercase hover:border-citrine hover:text-citrine hover:bg-citrine/5 transition-all duration-300 focus:outline-hidden relative overflow-hidden"
+                    aria-label={`Add ${product.name} to cart`}
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      <span>Add</span>
+                      <span className="transition-transform duration-300 group-hover/btn:translate-x-1">
+                        &rarr;
                       </span>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
                 </div>
               </article>
             ))}
           </div>
         ) : (
-          <div className="text-center py-20">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-slate-200 border-2 border-slate-300 rounded-3xl mb-6">
-              <span className="text-black font-bold text-sm">NO ITEMS</span>
+          <div className="text-center py-24 animate-fade-in-up">
+            <div className="w-16 h-16 border border-edge mx-auto mb-6 flex items-center justify-center">
+              <span className="font-mono text-[10px] text-dim">EMPTY</span>
             </div>
-            <h3 className="text-2xl font-bold text-black mb-3">
+            <h3 className="font-display text-2xl italic text-cream mb-3">
               No products found
             </h3>
-            <p className="text-black text-lg font-bold">
-              Try selecting a different category to explore our collection
+            <p className="text-stone text-sm">
+              Try selecting a different category
             </p>
           </div>
         )}
       </section>
 
-      {/* Module boundary indicator for conference demo */}
-      <div className="mt-12 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-black rounded-full text-black text-sm font-bold shadow-md">
-          <span className="w-2 h-2 bg-black rounded-full animate-pulse" />
-          <span>
-            Products Micro-Frontend • Port 3001 • Independently Deployed
+      {/* Module boundary indicator */}
+      <div className="mt-12 pt-6 border-t border-edge animate-fade-in-up" style={{ animationDelay: "600ms" }}>
+        <div className="flex items-center gap-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-citrine animate-subtle-pulse" />
+          <span className="font-mono text-[11px] tracking-wider text-dim">
+            PRODUCTS MICRO-FRONTEND &middot; PORT 3001 &middot; INDEPENDENTLY DEPLOYED
           </span>
         </div>
       </div>
@@ -375,5 +324,4 @@ function ProductsCatalog(): JSX.Element {
 
 ProductsCatalog.displayName = "ProductsCatalog";
 
-// Export the streaming wrapper as default for Suspense
 export default StreamingProductsCatalog;

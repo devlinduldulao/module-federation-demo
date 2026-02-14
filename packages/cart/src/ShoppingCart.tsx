@@ -1,213 +1,164 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from "react";
+import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { cn } from "./lib/utils";
 import type { CartItem, AddToCartEvent } from "./types";
 
-// Memoized components
-const CartItemCard = memo<{
+// Cart item row
+const CartItemRow = memo<{
   item: CartItem;
+  index: number;
   onUpdateQuantity: (id: number, delta: number) => void;
   onRemove: (id: number) => void;
-}>(({ item, onUpdateQuantity, onRemove }) => (
+}>(({ item, index, onUpdateQuantity, onRemove }) => (
   <article
-    className="group bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-purple-200 relative overflow-hidden"
+    className="group flex flex-col sm:flex-row items-start sm:items-center gap-4 py-5 animate-fade-in-up"
+    style={{ animationDelay: `${index * 80}ms` }}
     aria-label={`Cart item: ${item.name}`}
   >
-    {/* Gradient overlay */}
-    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-pink-500/5 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-
-    <div className="relative z-10">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-4 flex-1">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-400 via-pink-400 to-indigo-400 rounded-2xl flex items-center justify-center text-3xl relative overflow-hidden group-hover:scale-110 transition-transform duration-300">
-            <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <span className="relative">�</span>
-          </div>
-          <div className="text-center sm:text-left">
-            <h3 className="font-bold text-xl text-gray-900 group-hover:text-purple-600 transition-colors duration-300">
-              {item.name}
-            </h3>
-            <p className="text-gray-600 mt-1">
-              <span className="text-lg font-semibold">
-                ${item.price.toFixed(2)}
-              </span>
-              <span className="text-sm ml-2">each</span>
-            </p>
-            <div className="text-sm text-gray-500 mt-1">
-              Premium quality • Fast delivery
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => onUpdateQuantity(item.id, -1)}
-              className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-red-100 hover:text-red-600 flex items-center justify-center transition-all duration-300 focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform hover:scale-110"
-              aria-label={`Decrease quantity of ${item.name}`}
-              disabled={item.quantity <= 1}
-            >
-              <span className="text-lg font-bold">−</span>
-            </button>
-            <div className="flex flex-col items-center">
-              <span
-                className="w-16 text-center font-bold text-xl text-purple-600"
-                aria-label={`Quantity: ${item.quantity}`}
-              >
-                {item.quantity}
-              </span>
-              <span className="text-xs text-gray-500">qty</span>
-            </div>
-            <button
-              onClick={() => onUpdateQuantity(item.id, 1)}
-              className="w-10 h-10 rounded-xl bg-gray-100 hover:bg-green-100 hover:text-green-600 flex items-center justify-center transition-all duration-300 focus:outline-hidden focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform hover:scale-110"
-              aria-label={`Increase quantity of ${item.name}`}
-            >
-              <span className="text-lg font-bold">+</span>
-            </button>
-          </div>
-
-          <div className="text-center">
-            <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              ${(item.price * item.quantity).toFixed(2)}
-            </div>
-            <div className="text-xs text-gray-500">total</div>
-          </div>
-
-          <button
-            onClick={() => onRemove(item.id)}
-            className="w-10 h-10 rounded-xl bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-600 flex items-center justify-center transition-all duration-300 focus:outline-hidden focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform hover:scale-110"
-            aria-label={`Remove ${item.name} from cart`}
-          >
-            <span className="text-lg font-bold">×</span>
-          </button>
-        </div>
-      </div>
+    {/* Image placeholder */}
+    <div className="w-16 h-16 bg-elevated flex-shrink-0 flex items-center justify-center">
+      <span className="font-mono text-[10px] text-dim">IMG</span>
     </div>
+
+    {/* Product info */}
+    <div className="flex-1 min-w-0">
+      <h3 className="font-display text-lg italic text-cream group-hover:text-citrine transition-colors duration-200">
+        {item.name}
+      </h3>
+      <span className="font-mono text-sm text-stone">
+        ${item.price.toFixed(2)} each
+      </span>
+    </div>
+
+    {/* Quantity controls */}
+    <div className="flex items-center border border-edge">
+      <button
+        onClick={() => onUpdateQuantity(item.id, -1)}
+        disabled={item.quantity <= 1}
+        className="w-9 h-9 flex items-center justify-center font-mono text-sm text-stone hover:text-cream hover:bg-surface transition-colors duration-200 disabled:opacity-30"
+        aria-label={`Decrease quantity of ${item.name}`}
+      >
+        −
+      </button>
+      <span className="w-10 h-9 flex items-center justify-center font-mono text-sm text-cream border-x border-edge">
+        {item.quantity}
+      </span>
+      <button
+        onClick={() => onUpdateQuantity(item.id, 1)}
+        className="w-9 h-9 flex items-center justify-center font-mono text-sm text-stone hover:text-cream hover:bg-surface transition-colors duration-200"
+        aria-label={`Increase quantity of ${item.name}`}
+      >
+        +
+      </button>
+    </div>
+
+    {/* Line total */}
+    <div className="w-28 text-right">
+      <span className="font-mono text-lg text-cream">
+        ${(item.price * item.quantity).toFixed(2)}
+      </span>
+    </div>
+
+    {/* Remove */}
+    <button
+      onClick={() => onRemove(item.id)}
+      className="font-mono text-xs text-dim hover:text-rose transition-colors duration-200"
+      aria-label={`Remove ${item.name} from cart`}
+    >
+      &times;
+    </button>
   </article>
 ));
 
-CartItemCard.displayName = "CartItemCard";
+CartItemRow.displayName = "CartItemRow";
 
+// Empty cart state
 const EmptyCart = memo(() => (
-  <div className="text-center py-20" role="region" aria-label="Empty cart">
-    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl mb-8">
-      <div
-        className="text-6xl animate-bounce text-gray-700 font-bold"
-        role="img"
-        aria-hidden="true"
-      >
-        CART
-      </div>
-    </div>
-    <h3 className="text-3xl font-bold text-gray-700 mb-4">
-      Your cart is empty
+  <div className="text-center py-24 border border-edge" role="region" aria-label="Empty cart">
+    <span className="font-mono text-sm text-dim block mb-4">
+      No items in cart
+    </span>
+    <h3 className="font-display text-3xl italic text-cream mb-3">
+      Cart is empty
     </h3>
-    <p className="text-gray-500 text-lg mb-8 max-w-md mx-auto">
-      Looks like you haven't added any amazing products yet. Start exploring our
-      collection!
+    <p className="text-stone text-sm mb-8 max-w-md mx-auto">
+      Browse the collection to add items to your cart.
     </p>
-    <div className="flex justify-center">
-      <div className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-gray-200 rounded-xl font-semibold">
-        Continue Shopping
-      </div>
-    </div>
+    <span className="font-mono text-xs tracking-wider text-citrine border border-edge px-6 py-3 inline-block hover:bg-citrine hover:text-noir transition-all duration-300 cursor-pointer">
+      Browse Products &rarr;
+    </span>
   </div>
 ));
 
 EmptyCart.displayName = "EmptyCart";
 
-const CartSummary = memo<{
+// Order summary
+const OrderSummary = memo<{
   total: number;
   itemCount: number;
   onCheckout: () => void;
-}>(({ total, itemCount, onCheckout }) => (
-  <div className="w-full max-w-md bg-gradient-to-br from-purple-600 via-pink-600 to-indigo-600 text-gray-200 rounded-2xl p-8 shadow-2xl shadow-purple-500/25 relative overflow-hidden">
-    {/* Animated background */}
-    <div
-      className="absolute inset-0 bg-white/10 translate-x-[-100%] animate-pulse"
-      style={{ animationDuration: "3s" }}
-    />
+}>(({ total, itemCount, onCheckout }) => {
+  const subtotal = total * 0.9;
+  const tax = total * 0.1;
 
-    <div className="relative z-10">
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-4">
-          <span className="text-2xl text-white font-bold">PAY</span>
-        </div>
-        <div className="text-sm opacity-90 mb-2">
-          {itemCount} item{itemCount !== 1 ? "s" : ""} in your cart
-        </div>
-        <div className="text-4xl font-bold mb-2">${total.toFixed(2)}</div>
-        <div className="text-sm opacity-75">Including taxes and fees</div>
-      </div>
+  return (
+    <div className="border border-edge p-8">
+      <h3 className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase mb-8">
+        Order Summary
+      </h3>
 
-      <div className="space-y-3 mb-6">
-        <div className="flex justify-between text-sm">
-          <span className="opacity-90">Subtotal:</span>
-          <span>${(total * 0.9).toFixed(2)}</span>
+      <div className="space-y-4 mb-8">
+        <div className="flex justify-between font-mono text-sm">
+          <span className="text-stone">Subtotal ({itemCount} items)</span>
+          <span className="text-cream">${subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="opacity-90">Shipping:</span>
-          <span className="text-green-300">FREE</span>
+        <div className="flex justify-between font-mono text-sm">
+          <span className="text-stone">Shipping</span>
+          <span className="text-mint">Free</span>
         </div>
-        <div className="flex justify-between text-sm">
-          <span className="opacity-90">Tax:</span>
-          <span>${(total * 0.1).toFixed(2)}</span>
+        <div className="flex justify-between font-mono text-sm">
+          <span className="text-stone">Tax</span>
+          <span className="text-cream">${tax.toFixed(2)}</span>
         </div>
-        <hr className="border-white/20" />
-        <div className="flex justify-between font-bold">
-          <span>Total:</span>
-          <span>${total.toFixed(2)}</span>
+        <div className="border-t border-edge pt-4 flex justify-between">
+          <span className="font-mono text-sm text-stone uppercase tracking-wider">
+            Total
+          </span>
+          <span className="font-display text-3xl italic text-cream">
+            ${total.toFixed(2)}
+          </span>
         </div>
       </div>
 
       <button
         onClick={onCheckout}
-        className="group w-full bg-white text-purple-600 py-4 rounded-xl font-bold hover:bg-gray-100 transition-all duration-300 focus:outline-hidden focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-600 transform hover:scale-105 relative overflow-hidden"
-        aria-label={`Proceed to checkout with ${itemCount} items totaling $${total.toFixed(
-          2
-        )}`}
+        className="w-full bg-citrine text-noir font-mono text-sm tracking-wider py-4 hover:bg-citrine-dim transition-colors duration-300"
+        aria-label={`Checkout ${itemCount} items for $${total.toFixed(2)}`}
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
-        <span className="relative flex items-center justify-center gap-2">
-          <span>Proceed to Checkout</span>
-        </span>
+        Checkout &rarr;
       </button>
 
-      <div className="text-center mt-4">
-        <div className="text-xs opacity-75 flex items-center justify-center gap-2">
-          <span>Secure checkout</span>
-          <span>•</span>
-          <span>30-day returns</span>
-        </div>
+      <div className="mt-4 flex items-center justify-center gap-3 font-mono text-[10px] text-dim">
+        <span>Secure</span>
+        <span className="text-edge-bright">&middot;</span>
+        <span>30-day returns</span>
       </div>
     </div>
-  </div>
-));
+  );
+});
 
-CartSummary.displayName = "CartSummary";
+OrderSummary.displayName = "OrderSummary";
 
 // Main component
 function ShoppingCart(): JSX.Element {
   const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      name: "MacBook Pro M3",
-      price: 2499.99,
-      quantity: 1,
-    },
-    {
-      id: 7,
-      name: "AirPods Pro",
-      price: 249.99,
-      quantity: 2,
-    },
+    { id: 1, name: "MacBook Pro M3", price: 2499.99, quantity: 1 },
+    { id: 7, name: "AirPods Pro", price: 249.99, quantity: 2 },
   ]);
 
-  // Event listener for adding items to cart
+  // Listen for addToCart events
   useEffect(() => {
     const handleAddToCart = (event: AddToCartEvent) => {
       const cartItem: CartItem = event.detail;
-
       setCartItems((prev) => {
         const existing = prev.find((item) => item.id === cartItem.id);
         if (existing) {
@@ -220,21 +171,17 @@ function ShoppingCart(): JSX.Element {
         return [...prev, cartItem];
       });
     };
-
     window.addEventListener("addToCart", handleAddToCart);
     return () => window.removeEventListener("addToCart", handleAddToCart);
   }, []);
 
-  // Callbacks
   const updateQuantity = useCallback((id: number, delta: number) => {
     setCartItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const newQuantity = Math.max(1, item.quantity + delta);
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      })
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      )
     );
   }, []);
 
@@ -243,18 +190,13 @@ function ShoppingCart(): JSX.Element {
   }, []);
 
   const handleCheckout = useCallback(() => {
-    // Simulate checkout process
     window.dispatchEvent(
       new CustomEvent("showNotification", {
-        detail: {
-          type: "success",
-          message: "Checkout feature coming soon!",
-        },
+        detail: { type: "success", message: "Checkout feature coming soon!" },
       })
     );
   }, []);
 
-  // Memoized calculations
   const { total, itemCount } = useMemo(() => {
     const calculatedTotal = cartItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -264,31 +206,22 @@ function ShoppingCart(): JSX.Element {
       (sum, item) => sum + item.quantity,
       0
     );
-    return {
-      total: calculatedTotal,
-      itemCount: calculatedItemCount,
-    };
+    return { total: calculatedTotal, itemCount: calculatedItemCount };
   }, [cartItems]);
 
   return (
-    <div className="w-full max-w-5xl mx-auto" role="main">
-      <header className="mb-12 text-center">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl mb-6">
-          <span
-            className="text-4xl animate-pulse text-white font-bold"
-            role="img"
-            aria-label="shopping cart"
-          >
-            CART
-          </span>
-        </div>
-        <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
-          Shopping Cart
+    <div className="w-full max-w-6xl mx-auto" role="main">
+      {/* Header */}
+      <header className="mb-12 animate-fade-in-up">
+        <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
+          Your Order
+        </span>
+        <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
+          Cart
         </h2>
         {cartItems.length > 0 && (
-          <p className="text-gray-600 text-lg">
-            {itemCount} premium item{itemCount !== 1 ? "s" : ""} ready for
-            checkout
+          <p className="text-stone text-sm">
+            {itemCount} item{itemCount !== 1 ? "s" : ""} ready for checkout
           </p>
         )}
       </header>
@@ -296,25 +229,38 @@ function ShoppingCart(): JSX.Element {
       {cartItems.length === 0 ? (
         <EmptyCart />
       ) : (
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
-          <section className="flex-1 space-y-6" aria-label="Cart items">
-            {cartItems.map((item) => (
-              <CartItemCard
-                key={item.id}
-                item={item}
-                onUpdateQuantity={updateQuantity}
-                onRemove={removeItem}
-              />
-            ))}
+        <div className="flex flex-col lg:flex-row gap-12 items-start">
+          {/* Items list */}
+          <section className="flex-1 w-full" aria-label="Cart items">
+            {/* Column headers */}
+            <div className="hidden sm:flex items-center gap-4 pb-3 border-b border-edge mb-2 font-mono text-[10px] tracking-[0.2em] text-dim uppercase">
+              <span className="w-16 flex-shrink-0" />
+              <span className="flex-1">Product</span>
+              <span className="w-[106px]">Qty</span>
+              <span className="w-28 text-right">Total</span>
+              <span className="w-4" />
+            </div>
+            <div className="divide-y divide-edge">
+              {cartItems.map((item, index) => (
+                <CartItemRow
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  onUpdateQuantity={updateQuantity}
+                  onRemove={removeItem}
+                />
+              ))}
+            </div>
           </section>
 
-          <div className="lg:sticky lg:top-8">
-            <CartSummary
+          {/* Summary sidebar */}
+          <aside className="w-full lg:w-80 lg:sticky lg:top-8">
+            <OrderSummary
               total={total}
               itemCount={itemCount}
               onCheckout={handleCheckout}
             />
-          </div>
+          </aside>
         </div>
       )}
     </div>

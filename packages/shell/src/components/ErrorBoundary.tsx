@@ -27,28 +27,28 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         this.props.fallback || (
-          <div className="p-8 text-center">
-            <div className="text-6xl mb-4 text-gray-700 font-bold">ERROR</div>
-            <h2 className="text-xl font-semibold mb-2">
-              Oops! Something went wrong
+          <div className="py-20 text-center max-w-lg mx-auto">
+            <div className="font-mono text-[11px] tracking-[0.3em] text-rose uppercase mb-6">ERROR</div>
+            <h2 className="font-display text-3xl italic text-cream mb-4">
+              Something went wrong
             </h2>
-            <p className="text-gray-600 mb-4">
-              There was an error loading this module.
+            <p className="text-stone text-sm mb-8 leading-relaxed">
+              There was an error loading this module. The remote service may be unavailable.
             </p>
             <button
               onClick={() =>
                 this.setState({ hasError: false, error: undefined })
               }
-              className="px-4 py-2 bg-purple-600 text-gray-200 rounded-lg hover:bg-purple-700 transition-colors"
+              className="px-6 py-2.5 bg-transparent border border-citrine text-citrine font-mono text-xs tracking-wider uppercase hover:bg-citrine hover:text-noir transition-all duration-300 focus:outline-hidden"
             >
-              Try Again
+              Retry
             </button>
             {process.env.NODE_ENV === "development" && this.state.error && (
-              <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500">
-                  Error Details
+              <details className="mt-8 text-left">
+                <summary className="cursor-pointer font-mono text-xs text-dim hover:text-stone transition-colors">
+                  Stack trace
                 </summary>
-                <pre className="mt-2 p-4 bg-gray-100 rounded-sm text-xs overflow-auto">
+                <pre className="mt-3 p-4 bg-surface border border-edge font-mono text-[11px] text-stone overflow-auto leading-relaxed">
                   {this.state.error.message}
                 </pre>
               </details>

@@ -3,119 +3,90 @@ import { memo } from "react";
 const DashboardSkeleton = memo(() => (
   <div
     role="status"
-    className="w-full max-w-7xl mx-auto px-8 py-12 animate-pulse"
+    className="w-full max-w-7xl mx-auto animate-pulse"
   >
     {/* Header Skeleton */}
-    <div className="mb-16 text-center">
-      <div className="inline-block w-20 h-20 bg-gray-200 rounded-3xl mb-8" />
-      <div className="h-10 bg-gray-200 rounded-lg w-80 mx-auto mb-6" />
-      <div className="h-6 bg-gray-200 rounded-lg w-[600px] max-w-full mx-auto" />
+    <div className="mb-12">
+      <div className="h-3 w-24 bg-elevated mb-4" />
+      <div className="h-10 w-80 bg-elevated mb-3" />
+      <div className="h-4 w-[500px] max-w-full bg-muted" />
     </div>
 
     {/* Welcome Card Skeleton */}
-    <div className="mb-16">
-      <div className="bg-white border border-slate-200 rounded-2xl p-10 shadow-sm">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex-1">
-            <div className="h-8 bg-gray-200 rounded-lg w-80 mb-4" />
-            <div className="h-6 bg-gray-200 rounded-lg w-96 mb-6" />
-            <div className="flex items-center gap-6">
-              <div className="h-4 bg-gray-200 rounded w-32" />
-              <div className="h-4 bg-gray-200 rounded w-40" />
-              <div className="h-4 bg-gray-200 rounded w-36" />
-            </div>
+    <div className="mb-12 border border-edge p-8">
+      <div className="flex flex-col md:flex-row items-start justify-between gap-6">
+        <div className="flex-1">
+          <div className="h-7 w-72 bg-elevated mb-3" />
+          <div className="h-4 w-96 bg-muted mb-4" />
+          <div className="flex items-center gap-4">
+            <div className="h-3 w-28 bg-muted" />
+            <div className="h-3 w-24 bg-muted" />
           </div>
-          <div className="text-center">
-            <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4" />
-            <div className="h-4 bg-gray-200 rounded w-20 mx-auto mb-2" />
-            <div className="h-8 bg-gray-200 rounded w-24 mx-auto" />
+        </div>
+        <div>
+          <div className="w-20 h-20 bg-surface relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-muted/30 to-transparent animate-shimmer" style={{ backgroundSize: "200% 100%" }} />
           </div>
         </div>
       </div>
     </div>
 
-    {/* Stats Section */}
-    <div className="mb-16">
-      <div className="mb-10">
-        <div className="h-8 bg-gray-200 rounded-lg w-64 mb-4" />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    {/* Stats Grid Skeleton */}
+    <div className="mb-12">
+      <div className="h-3 w-32 bg-muted mb-8" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-edge">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm"
-          >
-            <div className="text-center">
-              <div className="inline-block w-16 h-16 bg-gray-200 rounded-2xl mb-8" />
-              <div className="h-10 bg-gray-200 rounded-lg mb-4" />
-              <div className="h-5 bg-gray-200 rounded-lg mb-6" />
-              <div className="h-6 w-32 bg-gray-200 rounded-full mx-auto" />
-            </div>
+          <div key={index} className="bg-noir p-6">
+            <div className="h-2.5 w-20 bg-muted mb-4" />
+            <div className="h-10 w-28 bg-elevated mb-3" />
+            <div className="h-3 w-24 bg-muted" />
           </div>
         ))}
       </div>
     </div>
 
     {/* Activity Section Skeleton */}
-    <div className="mb-10">
-      <div className="bg-white rounded-2xl border border-slate-200 p-10 shadow-sm">
-        <div className="mb-10">
-          <div className="h-8 bg-gray-200 rounded-lg w-64 mb-4" />
-          <div className="h-5 bg-gray-200 rounded-lg w-[500px] max-w-full" />
-        </div>
-        <div className="space-y-6">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-6 p-6 bg-slate-50 rounded-xl"
-            >
-              <div className="flex items-center gap-4 flex-shrink-0 mt-1">
-                <div className="w-3 h-3 bg-gray-200 rounded-full" />
-                <div className="w-8 h-8 bg-gray-200 rounded" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="h-5 bg-gray-200 rounded-lg mb-3 w-full" />
-                <div className="h-4 bg-gray-200 rounded w-24" />
-              </div>
+    <div className="mb-10 border border-edge p-8">
+      <div className="h-5 w-40 bg-elevated mb-2" />
+      <div className="h-3 w-72 bg-muted mb-8" />
+      <div className="space-y-0 divide-y divide-edge">
+        {Array.from({ length: 5 }).map((_, index) => (
+          <div key={index} className="flex items-start gap-4 py-4">
+            <div className="w-2 h-2 rounded-full bg-elevated flex-shrink-0 mt-1.5" />
+            <div className="flex-1">
+              <div className="h-4 bg-elevated mb-2 w-full" />
+              <div className="h-3 bg-muted w-20" />
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
 
     {/* Footer Skeleton */}
-    <div className="bg-white border border-slate-200 rounded-2xl p-10 shadow-sm mb-10">
-      <div className="text-center">
-        <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-6" />
-        <div className="h-6 bg-gray-200 rounded-lg w-80 mx-auto mb-4" />
-        <div className="h-5 bg-gray-200 rounded-lg w-[500px] max-w-full mx-auto mb-8" />
-        <div className="flex flex-wrap justify-center gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-4 bg-gray-200 rounded w-32" />
-          ))}
-        </div>
+    <div className="border border-edge p-8">
+      <div className="h-4 w-64 bg-elevated mx-auto mb-3" />
+      <div className="h-3 w-96 bg-muted mx-auto mb-6" />
+      <div className="flex flex-wrap justify-center gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-3 w-28 bg-muted" />
+        ))}
       </div>
     </div>
 
     {/* Streaming indicator */}
-    <div className="text-center mt-16">
-      <div className="inline-flex items-center gap-4 px-8 py-4 bg-purple-50 border border-purple-200 rounded-full">
-        <div className="flex gap-2">
-          <div
-            className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-            style={{ animationDelay: "0ms" }}
-          />
-          <div
-            className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-            style={{ animationDelay: "150ms" }}
-          />
-          <div
-            className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-            style={{ animationDelay: "300ms" }}
-          />
+    <div className="mt-12 pt-6 border-t border-edge">
+      <div className="flex items-center gap-3">
+        <div className="flex gap-1.5">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-1.5 h-1.5 rounded-full bg-citrine/40"
+              style={{ animation: `subtlePulse 1.4s ease-in-out ${i * 0.2}s infinite` }}
+            />
+          ))}
         </div>
-        <span className="text-purple-700 font-semibold">
-          Streaming Dashboard (Port 3003)
+        <span className="font-mono text-[11px] text-dim tracking-wider">
+          STREAMING DASHBOARD :3003
         </span>
       </div>
     </div>
