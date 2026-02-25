@@ -156,7 +156,7 @@ function ProductsCatalog() {
   }, []);
 
   return (
-    <div className="w-full max-w-7xl mx-auto" role="main">
+    <div className="w-full max-w-7xl mx-auto animate-fade-in" role="main">
       {/* Header */}
       <header className="mb-12 animate-fade-in-up">
         <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">

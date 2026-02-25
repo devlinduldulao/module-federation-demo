@@ -132,8 +132,19 @@ function App(): React.JSX.Element {
   const activeConfig = MODULES.find((m) => m.id === activeModule)!;
 
   const handleModuleChange = useCallback((moduleId: ModuleType) => {
-    setActiveModule(moduleId);
+    if (!document.startViewTransition) {
+      setActiveModule(moduleId);
+      dispatchModuleChange(moduleId);
+      return;
+    }
 
+    document.startViewTransition(() => {
+      setActiveModule(moduleId);
+      dispatchModuleChange(moduleId);
+    });
+  }, []);
+
+  const dispatchModuleChange = (moduleId: ModuleType) => {
     try {
       window.dispatchEvent(
         new CustomEvent("moduleChange", {
@@ -152,7 +163,7 @@ function App(): React.JSX.Element {
       },
       ...prev.slice(0, 2),
     ]);
-  }, []);
+  };
 
   // Global notification listener
   useEffect(() => {
