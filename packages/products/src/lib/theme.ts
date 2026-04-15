@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 
-export type ThemeName = "dark" | "dim" | "light";
+export type ThemeName = "dark" | "light";
 
 const THEME_STORAGE_KEY = "mf-demo-theme";
 
 const THEME_LABELS: Record<ThemeName, string> = {
   dark: "Dark",
-  dim: "Dim",
   light: "Light",
 };
 
 function isThemeName(value: unknown): value is ThemeName {
-  return value === "dark" || value === "dim" || value === "light";
+  return value === "dark" || value === "light";
 }
 
 function getThemeFromHost(): ThemeName {

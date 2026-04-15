@@ -1,5 +1,16 @@
 declare module "*.css";
 
+declare module "home/Home" {
+  const Home: import("react").ComponentType;
+  export default Home;
+}
+
+declare module "home/StreamingHome" {
+  const StreamingHome: import("react").ComponentType;
+  export function __resetHomeStreamingResourceCache(): void;
+  export default StreamingHome;
+}
+
 declare module "products/ProductsCatalog" {
   const ProductsCatalog: import("react").ComponentType;
   export default ProductsCatalog;
@@ -35,20 +46,20 @@ declare module "dashboard/StreamingUserDashboard" {
 
 interface Window {
   __MF_THEME__?: {
-    getTheme: () => "dark" | "dim" | "light";
-    setTheme: (theme: "dark" | "dim" | "light") => void;
+    getTheme: () => "dark" | "light";
+    setTheme: (theme: "dark" | "light") => void;
   };
 }
 
 interface WindowEventMap {
   moduleChange: CustomEvent<{
-    newModule: "products" | "cart" | "dashboard";
+    newModule: "home" | "products" | "cart" | "dashboard";
   }>;
   navigateToModule: CustomEvent<{
-    module: "products" | "cart" | "dashboard";
+    module: "home" | "products" | "cart" | "dashboard";
   }>;
   themeChange: CustomEvent<{
-    theme: "dark" | "dim" | "light";
+    theme: "dark" | "light";
     colorScheme: "dark" | "light";
   }>;
   showNotification: CustomEvent<{

@@ -1,4 +1,4 @@
-export type ThemeName = "dark" | "dim" | "light";
+export type ThemeName = "dark" | "light";
 
 type ThemeColorScheme = "dark" | "light";
 
@@ -38,31 +38,6 @@ export const THEME_DEFINITIONS: Readonly<Record<ThemeName, ThemeDefinition>> = {
       "--theme-grain-opacity": "0.025",
     },
   },
-  dim: {
-    label: "Dim",
-    description: "Softer dark mode with reduced glare.",
-    colorScheme: "dark",
-    variables: {
-      "--color-ink": "#120F0D",
-      "--color-noir": "#181412",
-      "--color-surface": "#221C19",
-      "--color-elevated": "#2B2420",
-      "--color-muted": "#342C27",
-      "--color-edge": "#433934",
-      "--color-edge-bright": "#5E5149",
-      "--color-cream": "#F1EBE3",
-      "--color-stone": "#C2B5A6",
-      "--color-dim": "#8D7F73",
-      "--color-citrine": "#C8E55B",
-      "--color-citrine-dim": "#9DAF49",
-      "--color-burnt": "#F08A5B",
-      "--color-ice": "#7DAFF5",
-      "--color-mint": "#58C9A3",
-      "--color-rose": "#F28A8A",
-      "--theme-grid-dot": "rgba(241, 235, 227, 0.34)",
-      "--theme-grain-opacity": "0.02",
-    },
-  },
   light: {
     label: "Light",
     description: "Clean white theme with crisp high-contrast text.",
@@ -95,7 +70,7 @@ function canUseDom(): boolean {
 }
 
 export function isThemeName(value: unknown): value is ThemeName {
-  return value === "dark" || value === "dim" || value === "light";
+  return value === "dark" || value === "light";
 }
 
 export function getStoredTheme(): ThemeName | null {

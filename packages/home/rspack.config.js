@@ -63,32 +63,16 @@ module.exports = {
         ],
         type: "javascript/auto",
       },
-      {
-        test: /\.(png|jpe?g|gif|svg|ico)$/i,
-        type: "asset/resource",
-        generator: {
-          filename: "images/[name].[hash:8][ext]",
-        },
-      },
-      {
-        test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        type: "asset/resource",
-        generator: {
-          filename: "fonts/[name].[hash:8][ext]",
-        },
-      },
     ],
   },
 
   plugins: [
     new rspack.container.ModuleFederationPlugin({
-      name: "shell",
+      name: "home",
       filename: "remoteEntry.js",
-      remotes: {
-        home: "home@http://localhost:3004/remoteEntry.js",
-        products: "products@http://localhost:3001/remoteEntry.js",
-        cart: "cart@http://localhost:3002/remoteEntry.js",
-        dashboard: "dashboard@http://localhost:3003/remoteEntry.js",
+      exposes: {
+        "./Home": "./src/Home.tsx",
+        "./StreamingHome": "./src/StreamingHome.tsx",
       },
       shared: {
         react: {
@@ -126,37 +110,12 @@ module.exports = {
 
   optimization: {
     minimize: !isDev,
-    splitChunks: {
-      chunks: "async",
-      minSize: 20000,
-      maxSize: 244000,
-      cacheGroups: {
-        default: {
-          minChunks: 2,
-          priority: -20,
-          reuseExistingChunk: true,
-        },
-        vendor: {
-          test: /[\\\\/]node_modules[\\\\/]/,
-          name: "vendors",
-          priority: -10,
-          chunks: "all",
-          enforce: true,
-        },
-        react: {
-          test: /[\\\\/]node_modules[\\\\/](react|react-dom)[\\\\/]/,
-          name: "react",
-          priority: 20,
-          chunks: "all",
-        },
-      },
-    },
     usedExports: true,
     sideEffects: false,
   },
 
   devServer: {
-    port: 3000,
+    port: 3004,
     hot: true,
     historyApiFallback: true,
     compress: true,
@@ -171,7 +130,6 @@ module.exports = {
         errors: true,
         warnings: false,
       },
-      progress: true,
     },
     static: {
       directory: path.join(__dirname, "public"),
@@ -186,7 +144,7 @@ module.exports = {
 
   performance: {
     hints: isDev ? false : "warning",
-    maxAssetSize: 512000,
-    maxEntrypointSize: 512000,
+    maxAssetSize: 256000,
+    maxEntrypointSize: 256000,
   },
 };

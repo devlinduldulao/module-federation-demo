@@ -6,6 +6,7 @@ import { THEME_STORAGE_KEY } from "./lib/theme";
 import { __resetProductsStreamingResourceCache } from "products/StreamingProductsCatalog";
 import { __resetCartStreamingResourceCache } from "cart/StreamingShoppingCart";
 import { __resetDashboardStreamingResourceCache } from "dashboard/StreamingUserDashboard";
+import { __resetHomeStreamingResourceCache } from "home/StreamingHome";
 
 vi.mock("./index.css", () => ({}));
 
@@ -52,6 +53,7 @@ describe("Shell App", () => {
     __resetProductsStreamingResourceCache();
     __resetCartStreamingResourceCache();
     __resetDashboardStreamingResourceCache();
+    __resetHomeStreamingResourceCache();
     localStorageMock.clear();
     document.documentElement.removeAttribute("data-theme");
     document.documentElement.removeAttribute("style");
@@ -64,24 +66,24 @@ describe("Shell App", () => {
     expect(screen.getByText("Demo")).toBeInTheDocument();
   });
 
-  it("renders all three navigation links", async () => {
+  it("renders all four navigation links", async () => {
     render(<App />);
+    expect(screen.getByRole("link", { name: /navigate to home/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /navigate to products/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /navigate to cart/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /navigate to dashboard/i })).toBeInTheDocument();
   });
 
-  it("redirects the root route to products", async () => {
+  it("renders the home module at the root route", async () => {
     window.history.pushState({}, "", "/");
 
     render(<App />);
 
-    await waitFor(() => {
-      expect(window.location.pathname).toBe("/products");
-    });
-
-    const productsLink = screen.getByRole("link", { name: /navigate to products/i });
-    expect(productsLink).toHaveAttribute("aria-current", "page");
+    expect(window.location.pathname).toBe("/");
+    const homeLink = screen.getByRole("link", { name: /navigate to home/i });
+    expect(homeLink).toHaveAttribute("aria-current", "page");
+    expect(screen.getByText("home")).toBeInTheDocument();
+    expect(screen.getByText(":3004")).toBeInTheDocument();
   });
 
   it("shows the status strip with active module info", async () => {
@@ -147,15 +149,15 @@ describe("Shell App", () => {
     expect(screen.getByText(":3002")).toBeInTheDocument();
   });
 
-  it("redirects unknown routes to products", async () => {
+  it("redirects unknown routes to home", async () => {
     window.history.pushState({}, "", "/unknown");
 
     render(<App />);
 
     await waitFor(() => {
-      expect(window.location.pathname).toBe("/products");
+      expect(window.location.pathname).toBe("/");
     });
-    expect(screen.getByText("products")).toBeInTheDocument();
+    expect(screen.getByText("home")).toBeInTheDocument();
   });
 
   it("dispatches moduleChange when the route changes", async () => {
@@ -211,17 +213,17 @@ describe("Shell App", () => {
     const handler = vi.fn();
     window.addEventListener("themeChange", handler);
 
-    await user.click(screen.getByRole("button", { name: /switch theme to dim/i }));
+    await user.click(screen.getByRole("button", { name: /switch theme to light/i }));
 
-    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("dim");
-    expect(document.documentElement.dataset.theme).toBe("dim");
-    expect(screen.getByRole("button", { name: /switch theme to dim/i })).toHaveAttribute(
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("light");
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(screen.getByRole("button", { name: /switch theme to light/i })).toHaveAttribute(
       "aria-pressed",
       "true"
     );
     expect((handler.mock.calls[0]?.[0] as CustomEvent).detail).toEqual({
-      theme: "dim",
-      colorScheme: "dark",
+      theme: "light",
+      colorScheme: "light",
     });
 
     window.removeEventListener("themeChange", handler);

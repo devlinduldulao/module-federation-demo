@@ -58,6 +58,14 @@ export default defineConfig({
         __dirname,
         "packages/dashboard/src/UserDashboard.tsx"
       ),
+      "home/StreamingHome": path.resolve(
+        __dirname,
+        "packages/home/src/StreamingHome.tsx"
+      ),
+      "home/Home": path.resolve(
+        __dirname,
+        "packages/home/src/Home.tsx"
+      ),
     },
   },
 });

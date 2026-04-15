@@ -1,13 +1,13 @@
 {
-  "name": "products",
+  "name": "home",
   "version": "1.0.0",
   "scripts": {
     "dev": "rspack serve",
     "build": "rspack build",
     "lint": "npm --prefix ../.. exec eslint -- src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "npm --prefix ../.. run test -- packages/products/src",
-    "test:watch": "npm --prefix ../.. run test:watch -- packages/products/src"
+    "test": "npm --prefix ../.. run test -- packages/home/src",
+    "test:watch": "npm --prefix ../.. run test:watch -- packages/home/src"
   },
   "dependencies": {
     "react": "^19.2.5",

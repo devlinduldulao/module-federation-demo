@@ -1,23 +1,7 @@
-export interface Product {
-  readonly id: number;
-  readonly name: string;
-  readonly price: number;
-  readonly image?: string;
-  readonly category: string;
-  readonly description: string;
-}
-
-export interface CartItem {
-  readonly id: number;
-  readonly name: string;
-  readonly price: number;
-  readonly quantity: number;
-}
-
-export type FilterCategory = "all" | "electronics" | "clothing" | "books";
-
-export interface AddToCartEvent extends CustomEvent {
-  detail: CartItem;
+export interface NavigateToModuleEvent extends CustomEvent {
+  detail: {
+    module: "products" | "cart" | "dashboard" | "home";
+  };
 }
 
 export interface NotificationEvent extends CustomEvent {
@@ -34,6 +18,15 @@ export interface ThemeChangeEvent extends CustomEvent {
   };
 }
 
+export interface ModuleDestination {
+  readonly id: string;
+  readonly label: string;
+  readonly description: string;
+  readonly port: string;
+  readonly path: string;
+  readonly icon: string;
+}
+
 declare global {
   interface Window {
     __MF_THEME__?: {
@@ -43,7 +36,7 @@ declare global {
   }
 
   interface WindowEventMap {
-    addToCart: AddToCartEvent;
+    navigateToModule: NavigateToModuleEvent;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
   }

@@ -27,7 +27,7 @@ export interface NotificationEvent extends CustomEvent {
 
 export interface ThemeChangeEvent extends CustomEvent {
   detail: {
-    theme: "dark" | "dim" | "light";
+    theme: "dark" | "light";
     colorScheme: "dark" | "light";
   };
 }
@@ -41,8 +41,8 @@ export interface NavigateToModuleEvent extends CustomEvent {
 declare global {
   interface Window {
     __MF_THEME__?: {
-      getTheme: () => "dark" | "dim" | "light";
-      setTheme: (theme: "dark" | "dim" | "light") => void;
+      getTheme: () => "dark" | "light";
+      setTheme: (theme: "dark" | "light") => void;
     };
   }
 

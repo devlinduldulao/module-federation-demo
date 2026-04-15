@@ -27,9 +27,24 @@ import {
 } from "./lib/theme";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ModuleFallback from "./components/ModuleFallback";
+import HomeSkeleton from "./components/HomeSkeleton";
 import ProductsSkeleton from "./components/ProductsSkeleton";
 import CartSkeleton from "./components/CartSkeleton";
 import DashboardSkeleton from "./components/DashboardSkeleton";
+
+const StreamingHome = lazy(() =>
+  import("home/StreamingHome").catch((error) => {
+    console.error("Failed to load StreamingHome:", error);
+    return {
+      default: () => (
+        <ModuleFallback
+          title="Home Module Unavailable"
+          message="The home service is currently unavailable."
+        />
+      ),
+    };
+  })
+);
 
 const StreamingProductsCatalog = lazy(() =>
   import("products/StreamingProductsCatalog").catch((error) => {
@@ -73,7 +88,7 @@ const StreamingUserDashboard = lazy(() =>
   })
 );
 
-type ModuleType = "products" | "cart" | "dashboard";
+type ModuleType = "home" | "products" | "cart" | "dashboard";
 type NotificationType = "success" | "error" | "info" | "warning";
 
 type CommandAction = {
@@ -93,6 +108,13 @@ type ModuleConfig = {
 };
 
 const MODULES = [
+  {
+    id: "home",
+    label: "Home",
+    path: "/",
+    port: "3004",
+    component: StreamingHome,
+  },
   {
     id: "products",
     label: "Products",
@@ -122,10 +144,11 @@ const MODULE_BY_PATH = new Map<string, ModuleConfig>(
   MODULES.map((module) => [module.path, module])
 );
 const KNOWN_PATHS = new Set<string>(MODULES.map((module) => module.path));
-const THEME_OPTIONS: readonly ThemeName[] = ["dark", "dim", "light"] as const;
+const THEME_OPTIONS: readonly ThemeName[] = ["dark", "light"] as const;
 const KEYBOARD_SHORTCUT_LABEL = "Ctrl/Cmd + K";
 
 const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
+  home: () => import("home/StreamingHome").catch(() => undefined),
   products: () => import("products/StreamingProductsCatalog").catch(() => undefined),
   cart: () => import("cart/StreamingShoppingCart").catch(() => undefined),
   dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => undefined),
@@ -392,7 +415,7 @@ const CommandPalette = memo(function CommandPalette({
                 No Matches
               </span>
               <p className="text-sm text-stone">
-                Try searching for dark, light, dim, cart, products, or dashboard.
+                Try searching for dark, light, cart, products, home, or dashboard.
               </p>
             </div>
           )}
@@ -407,6 +430,8 @@ function ModuleView({ module }: { module: ModuleConfig }): React.JSX.Element {
 
   const fallback = useMemo(() => {
     switch (module.id) {
+      case "home":
+        return <HomeSkeleton />;
       case "products":
         return <ProductsSkeleton />;
       case "cart":
@@ -414,7 +439,7 @@ function ModuleView({ module }: { module: ModuleConfig }): React.JSX.Element {
       case "dashboard":
         return <DashboardSkeleton />;
       default:
-        return <ProductsSkeleton />;
+        return <HomeSkeleton />;
     }
   }, [module.id]);
 
@@ -438,12 +463,7 @@ function ShellFrame(): React.JSX.Element {
   const activeModule = useMemo(() => getModuleForPath(location.pathname), [location.pathname]);
 
   useEffect(() => {
-    if (location.pathname === "/") {
-      navigate(ROOT_MODULE.path, { replace: true });
-      return;
-    }
-
-    if (!KNOWN_PATHS.has(location.pathname)) {
+    if (location.pathname !== "/" && !KNOWN_PATHS.has(location.pathname)) {
       navigate(DEFAULT_MODULE.path, { replace: true });
     }
   }, [location.pathname, navigate]);
@@ -468,7 +488,7 @@ function ShellFrame(): React.JSX.Element {
         return;
       }
 
-      if (event.newValue === "dark" || event.newValue === "dim" || event.newValue === "light") {
+      if (event.newValue === "dark" || event.newValue === "light") {
         setTheme(event.newValue);
       }
     };
@@ -700,7 +720,6 @@ function ShellFrame(): React.JSX.Element {
                   element={<ModuleView module={module} />}
                 />
               ))}
-              <Route path="/" element={<Navigate to={ROOT_MODULE.path} replace />} />
               <Route path="*" element={<Navigate to={DEFAULT_MODULE.path} replace />} />
             </Routes>
           </div>
