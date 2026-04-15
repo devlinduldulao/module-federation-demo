@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, act, cleanup, waitFor } from "@testing-library/react";
+import { render, screen, act, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 import { THEME_STORAGE_KEY } from "./lib/theme";
+import { __resetProductsStreamingResourceCache } from "products/StreamingProductsCatalog";
+import { __resetCartStreamingResourceCache } from "cart/StreamingShoppingCart";
+import { __resetDashboardStreamingResourceCache } from "dashboard/StreamingUserDashboard";
 
 vi.mock("./index.css", () => ({}));
 
@@ -46,6 +49,9 @@ describe("Shell App", () => {
   afterEach(() => {
     vi.useRealTimers();
     cleanup();
+    __resetProductsStreamingResourceCache();
+    __resetCartStreamingResourceCache();
+    __resetDashboardStreamingResourceCache();
     localStorageMock.clear();
     document.documentElement.removeAttribute("data-theme");
     document.documentElement.removeAttribute("style");
@@ -101,7 +107,7 @@ describe("Shell App", () => {
       "true"
     );
     expect(document.documentElement.dataset.theme).toBe("light");
-    expect(document.documentElement.style.getPropertyValue("--color-noir")).toBe("#F3EEE3");
+    expect(document.documentElement.style.getPropertyValue("--color-noir")).toBe("#FFFFFF");
   });
 
   it("switches to the cart route on click", async () => {
@@ -259,6 +265,28 @@ describe("Shell App", () => {
 
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByText(/loading cart/i)).toBeInTheDocument();
+  });
+
+  it("commits cart navigation immediately and replaces the previous page with the cart skeleton", async () => {
+    vi.useFakeTimers();
+
+    render(<App />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2600);
+    });
+
+    expect(
+      screen.getByText("Curated products for developers, designers, and tech enthusiasts.")
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("link", { name: /navigate to cart/i }));
+
+    expect(window.location.pathname).toBe("/cart");
+    expect(screen.getByText(/loading cart/i)).toBeInTheDocument();
+    expect(
+      screen.queryByText("Curated products for developers, designers, and tech enthusiasts.")
+    ).not.toBeInTheDocument();
   });
 
   it("shows dashboard skeleton while loading the dashboard module", async () => {

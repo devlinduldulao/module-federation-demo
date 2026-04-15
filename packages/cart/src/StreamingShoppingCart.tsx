@@ -35,6 +35,10 @@ function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
 
 const resourceCache = new Map<string, Resource<void>>();
 
+export function __resetCartStreamingResourceCache(): void {
+  resourceCache.clear();
+}
+
 function getResource(key: string, delayMs: number): Resource<void> {
   if (!resourceCache.has(key)) {
     resourceCache.set(key, createResource(() => delay(delayMs)));

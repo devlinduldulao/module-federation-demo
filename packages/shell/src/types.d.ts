@@ -7,6 +7,7 @@ declare module "products/ProductsCatalog" {
 
 declare module "products/StreamingProductsCatalog" {
   const StreamingProductsCatalog: import("react").ComponentType;
+  export function __resetProductsStreamingResourceCache(): void;
   export default StreamingProductsCatalog;
 }
 
@@ -17,6 +18,7 @@ declare module "cart/ShoppingCart" {
 
 declare module "cart/StreamingShoppingCart" {
   const StreamingShoppingCart: import("react").ComponentType;
+  export function __resetCartStreamingResourceCache(): void;
   export default StreamingShoppingCart;
 }
 
@@ -27,6 +29,7 @@ declare module "dashboard/UserDashboard" {
 
 declare module "dashboard/StreamingUserDashboard" {
   const StreamingUserDashboard: import("react").ComponentType;
+  export function __resetDashboardStreamingResourceCache(): void;
   export default StreamingUserDashboard;
 }
 

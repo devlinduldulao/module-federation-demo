@@ -419,8 +419,8 @@ function ModuleView({ module }: { module: ModuleConfig }): React.JSX.Element {
   }, [module.id]);
 
   return (
-    <ErrorBoundary>
-      <Suspense fallback={fallback}>
+    <ErrorBoundary key={module.id}>
+      <Suspense key={module.id} fallback={fallback}>
         <Component />
       </Suspense>
     </ErrorBoundary>
