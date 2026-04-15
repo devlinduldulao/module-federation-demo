@@ -80,7 +80,7 @@ The cart module listens for `addToCart`. The shell listens for `showNotification
 
 ```typescript
 const StreamingProductsCatalog = () => {
-  const resource = getResource("products-initial", 5000); // 5s simulated delay
+  const resource = getResource("products-initial", 2500); // 2.5s simulated delay
   resource.read(); // Throws a Promise for Suspense if pending
   return <ProductsCatalog />;
 };
@@ -96,3 +96,11 @@ npm run build  # Production build
 ```
 
 Visit `http://localhost:3001` to see the catalog standalone. The shell at `:3000` loads this module's `remoteEntry.js` automatically.
+
+## Testing
+
+`ProductsCatalog.test.tsx` covers product grid rendering, category filtering, add-to-cart event dispatch, notification events, and accessibility roles. Run from the repo root:
+
+```bash
+npm test
+```

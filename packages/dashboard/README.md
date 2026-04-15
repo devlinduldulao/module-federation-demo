@@ -113,3 +113,11 @@ const StreamingUserDashboard = () => {
 npm run dev    # Starts on :3003
 npm run build  # Production build
 ```
+
+## Testing
+
+`UserDashboard.test.tsx` covers stats display, trend percentages, activity stream rendering, welcome banner, Platinum badge, and accessibility roles. Run from the repo root:
+
+```bash
+npm test
+```

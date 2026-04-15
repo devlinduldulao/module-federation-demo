@@ -38,6 +38,10 @@ cd packages/shell && npm run dev      # :3000
 
 Each remote runs standalone at its own port with its own `index.html`.
 
+### Prefetching
+
+The shell prefetches remote entry points on tab hover using a `PREFETCH_MAP`. When a user hovers over a navigation tab, the corresponding remote module is fetched in the background so it loads instantly on click.
+
 ## Project Structure
 
 ```
@@ -48,6 +52,7 @@ module-federation-demo/
     │   ├── rspack.config.js           # MF remotes config
     │   ├── src/
     │   │   ├── App.tsx                # Navigation, Suspense orchestration
+    │   │   ├── App.test.tsx           # Shell integration tests
     │   │   ├── bootstrap.tsx          # createRoot entry
     │   │   ├── index.css              # Design system tokens + animations
     │   │   ├── types.d.ts             # Remote module declarations
@@ -63,31 +68,38 @@ module-federation-demo/
     │   ├── rspack.config.js           # MF exposes config
     │   └── src/
     │       ├── ProductsCatalog.tsx     # Standalone version
+    │       ├── ProductsCatalog.test.tsx
     │       ├── StreamingProductsCatalog.tsx  # Suspense-wrapped
-    │       └── types.ts
+    │       ├── types.ts
+    │       └── lib/utils.ts           # cn() utility
     ├── cart/                          # Remote — shopping cart
     │   ├── rspack.config.js
     │   └── src/
     │       ├── ShoppingCart.tsx
+    │       ├── ShoppingCart.test.tsx
     │       ├── StreamingShoppingCart.tsx
-    │       └── types.ts
+    │       ├── types.ts
+    │       └── lib/utils.ts           # cn() utility
     └── dashboard/                     # Remote — analytics dashboard
         ├── rspack.config.js
         └── src/
             ├── UserDashboard.tsx
+            ├── UserDashboard.test.tsx
             ├── StreamingUserDashboard.tsx
-            └── types.ts
+            ├── types.ts
+            └── lib/utils.ts           # cn() utility
 ```
 
 ## Tech Stack
 
 | Tool | Version | Role |
 |------|---------|------|
-| React | ^19.2.4 | UI library |
-| TypeScript | ^5.9.3 | Type safety |
-| Rspack | ^1.7.6 | Bundler + Module Federation |
+| React | ^19.2.5 | UI library |
+| TypeScript | ^6.0.2 | Type safety |
+| Rspack | ^1.7.11 | Bundler + Module Federation |
 | Tailwind CSS | v4 | Utility-first CSS via `@theme` |
-| PostCSS | ^8.5.6 | CSS pipeline (`@tailwindcss/postcss`) |
+| PostCSS | ^8.5.10 | CSS pipeline (`@tailwindcss/postcss`) |
+| Vitest | ^4.1.4 | Unit + component testing |
 | concurrently | ^9.2.1 | Dev server orchestration |
 
 ## Design System — "Noir Editorial"
@@ -142,8 +154,9 @@ new rspack.container.ModuleFederationPlugin({
     dashboard:"dashboard@http://localhost:3003/remoteEntry.js",
   },
   shared: {
-    react:       { singleton: true, strictVersion: false },
-    "react-dom": { singleton: true, strictVersion: false },
+    react:              { singleton: true, strictVersion: false },
+    "react-dom":        { singleton: true, strictVersion: false },
+    "react-dom/client": { singleton: true, strictVersion: false },
   },
 });
 ```
@@ -182,6 +195,13 @@ window.dispatchEvent(
     detail: { type: "success", message: "Item added to cart" },
   })
 );
+
+// Shell: notify on tab change
+window.dispatchEvent(
+  new CustomEvent("moduleChange", {
+    detail: { newModule: "cart" },
+  })
+);
 ```
 
 Events are typed in each package's `types.ts` via `WindowEventMap` augmentation:
@@ -198,6 +218,23 @@ declare global {
   }
 }
 ```
+
+## Testing
+
+The project uses **Vitest** + **React Testing Library** with `jsdom` for component testing. Tests live alongside source files.
+
+```bash
+npm test              # Run all tests once
+npm run test:watch    # Watch mode
+npm run test:coverage # Coverage report (v8)
+```
+
+Remote module imports are aliased in `vitest.config.ts` so federated components can be tested in isolation without running dev servers. Each package has its own test file:
+
+- `packages/shell/src/App.test.tsx` — navigation, tab switching, notification system, skeleton fallbacks
+- `packages/products/src/ProductsCatalog.test.tsx` — filtering, add-to-cart events, product grid
+- `packages/cart/src/ShoppingCart.test.tsx` — quantity controls, remove items, order summary, event listeners
+- `packages/dashboard/src/UserDashboard.test.tsx` — stats display, activity stream, welcome banner
 
 ## React Suspense Streaming Pattern
 

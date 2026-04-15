@@ -93,11 +93,19 @@ The cart starts with two pre-loaded items for demo purposes:
 
 ## Streaming Pattern
 
-Same Resource pattern as other remotes — `getResource("cart-initial", 5000)` delays 5 seconds for the shell's skeleton to display.
+Same Resource pattern as other remotes — `getResource("cart-initial", 3500)` delays 3.5 seconds for the shell's skeleton to display.
 
 ## Development
 
 ```bash
 npm run dev    # Starts on :3002
 npm run build  # Production build
+```
+
+## Testing
+
+`ShoppingCart.test.tsx` covers initial cart rendering, quantity controls, item removal, order summary calculations, `addToCart` event listener, and checkout notification. Run from the repo root:
+
+```bash
+npm test
 ```

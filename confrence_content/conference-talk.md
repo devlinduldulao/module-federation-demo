@@ -45,7 +45,7 @@ _[Your name and bio here]_
 |---|---|---|
 | React | 19.2 | UI framework with streaming Suspense |
 | Rspack | 1.7 | Bundler with native Module Federation |
-| TypeScript | 5.9 | Strict mode across all packages |
-| Tailwind CSS | 4.1 | Utility-first styling (Noir Editorial design system) |
-| Vitest | 4.0 | Unit + component testing |
+| TypeScript | 6.0 | Strict mode across all packages |
+| Tailwind CSS | 4.2 | Utility-first styling (Noir Editorial design system) |
+| Vitest | 4.1 | Unit + component testing |
 | React Testing Library | 16.x | Component test utilities |

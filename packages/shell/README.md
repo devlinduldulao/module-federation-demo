@@ -12,6 +12,9 @@ Runs on **localhost:3000**.
 - Show `ModuleFallback` when a remote server is offline
 - Render the navigation, status strip, notification toasts, and page layout
 - Listen for `showNotification` events from any module and display dark toasts
+- Dispatch `moduleChange` events when switching tabs so other modules can react
+- Prefetch remote entry points on tab hover via a `PREFETCH_MAP`
+- Use the View Transition API for smooth tab transitions
 
 ## File Structure
 
@@ -100,6 +103,18 @@ interface ModuleConfig {
 
 Active tab gets a citrine underline (`h-[2px] bg-citrine`). The status strip below the nav shows the current module name, port, and streaming status in monospace.
 
+When a tab is switched, the shell dispatches a `moduleChange` event:
+
+```ts
+window.dispatchEvent(
+  new CustomEvent("moduleChange", { detail: { newModule: moduleId } })
+);
+```
+
+## Prefetching
+
+The shell defines a `PREFETCH_MAP` that maps each module to a bare `import()` call. On hover, the corresponding remote entry point is fetched in the background so the module loads instantly when clicked — no router library required.
+
 ## Notification System
 
 The shell listens for `showNotification` events globally:
@@ -124,4 +139,12 @@ npm run dev    # Starts rspack-dev-server on :3000
 npm run build  # Production build to dist/
 ```
 
-Requires all three remotes to be running for full functionality, but the shell starts fine on its own — offline remotes show `ModuleFallback`.\n
+Requires all three remotes to be running for full functionality, but the shell starts fine on its own — offline remotes show `ModuleFallback`.
+
+## Testing
+
+`App.test.tsx` covers navigation rendering, tab switching, `moduleChange` event dispatch, notification display and auto-dismiss, skeleton fallback rendering, and accessibility roles. Run from the repo root:
+
+```bash
+npm test
+```\n
