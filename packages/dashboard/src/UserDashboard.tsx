@@ -151,11 +151,11 @@ function UserDashboard() {
   const { label: themeLabel } = useActiveTheme();
 
   return (
-    <div className="w-full max-w-7xl mx-auto animate-fade-in" role="main">
+    <div className="w-full mx-auto animate-fade-in" role="main">
       {/* Header */}
-      <header className="mb-12">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+      <header className="mb-16 lg:mb-24 animate-fade-in-up border-b border-edge pb-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
             <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
               Analytics Overview
             </span>
@@ -217,9 +217,11 @@ function UserDashboard() {
             Performance Metrics
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-edge">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 border-edge pb-10">
           {MOCK_STATS.map((stat, index) => (
-            <StatCard key={stat.id} stat={stat} index={index} />
+            <div key={stat.id} className="border border-edge p-px bg-surface/50 hover:bg-surface transition-colors duration-300">
+              <StatCard stat={stat} index={index} />
+            </div>
           ))}
         </div>
       </section>

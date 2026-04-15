@@ -225,11 +225,11 @@ function ShoppingCart() {
   }, [cartItems]);
 
   return (
-    <div className="w-full max-w-6xl mx-auto animate-fade-in" role="main">
+    <div className="w-full mx-auto animate-fade-in" role="main">
       {/* Header */}
-      <header className="mb-12 animate-fade-in-up">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
+      <header className="mb-12 lg:mb-20 animate-fade-in-up border-b border-edge pb-10">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
             <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
               Your Order
             </span>

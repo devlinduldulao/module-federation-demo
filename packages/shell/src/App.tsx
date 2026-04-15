@@ -623,8 +623,8 @@ function ShellFrame(): React.JSX.Element {
 
       <div className="relative z-10 flex min-h-screen flex-col">
         <header className="border-b border-edge">
-          <div className="mx-auto max-w-350 px-6 py-4 lg:px-10">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mx-auto max-w-screen-2xl px-4 py-5 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-baseline gap-2">
                 <span className="font-display text-2xl italic tracking-tight text-cream">MF</span>
                 <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">Demo</span>
@@ -665,9 +665,9 @@ function ShellFrame(): React.JSX.Element {
         </header>
 
         <div className="border-b border-edge bg-surface/50">
-          <div className="mx-auto max-w-350 px-6 lg:px-10">
-            <div className="flex h-9 items-center justify-between">
-              <div className="flex items-center gap-4 font-mono text-[11px] text-dim">
+          <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+            <div className="flex h-12 items-center justify-between">
+              <div className="flex items-center gap-6 font-mono text-[11px] text-dim">
                 <div className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-citrine" />
                   <span>STREAMING</span>
@@ -677,7 +677,7 @@ function ShellFrame(): React.JSX.Element {
                 <span className="text-edge">|</span>
                 <span>:{activeModule.port}</span>
               </div>
-              <div className="flex items-center gap-4 font-mono text-[11px] text-dim">
+              <div className="flex items-center gap-6 font-mono text-[11px] text-dim">
                 <span>React 19</span>
                 <span className="text-edge">|</span>
                 <span className="hidden sm:inline">Suspense</span>
@@ -691,7 +691,7 @@ function ShellFrame(): React.JSX.Element {
         </div>
 
         <main className="flex-1">
-          <div className="mx-auto max-w-350 px-6 py-10 lg:px-10">
+          <div className="mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
             <Routes>
               {MODULES.map((module) => (
                 <Route
@@ -707,8 +707,8 @@ function ShellFrame(): React.JSX.Element {
         </main>
 
         <footer className="mt-auto border-t border-edge">
-          <div className="mx-auto max-w-350 px-6 lg:px-10">
-            <div className="flex h-12 items-center justify-between font-mono text-[10px] tracking-wider text-dim uppercase">
+          <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+            <div className="flex h-16 items-center justify-between font-mono text-[10px] tracking-wider text-dim uppercase">
               <span>Independent Deployment</span>
               <div className="flex items-center gap-4">
                 <span>Hot Reload</span>
