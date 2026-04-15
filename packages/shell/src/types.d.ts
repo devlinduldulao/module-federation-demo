@@ -1,49 +1,48 @@
 declare module "*.css";
 
 declare module "products/ProductsCatalog" {
-  const ProductsCatalog: React.ComponentType;
+  const ProductsCatalog: import("react").ComponentType;
   export default ProductsCatalog;
 }
 
 declare module "products/StreamingProductsCatalog" {
-  const StreamingProductsCatalog: React.ComponentType;
+  const StreamingProductsCatalog: import("react").ComponentType;
   export default StreamingProductsCatalog;
 }
 
 declare module "cart/ShoppingCart" {
-  const ShoppingCart: React.ComponentType;
+  const ShoppingCart: import("react").ComponentType;
   export default ShoppingCart;
 }
 
 declare module "cart/StreamingShoppingCart" {
-  const StreamingShoppingCart: React.ComponentType;
+  const StreamingShoppingCart: import("react").ComponentType;
   export default StreamingShoppingCart;
 }
 
 declare module "dashboard/UserDashboard" {
-  const UserDashboard: React.ComponentType;
+  const UserDashboard: import("react").ComponentType;
   export default UserDashboard;
 }
 
 declare module "dashboard/StreamingUserDashboard" {
-  const StreamingUserDashboard: React.ComponentType;
+  const StreamingUserDashboard: import("react").ComponentType;
   export default StreamingUserDashboard;
 }
 
-declare global {
-  interface Window {
-    __MF_THEME__?: {
-      getTheme: () => "dark" | "dim" | "light";
-      setTheme: (theme: "dark" | "dim" | "light") => void;
-    };
-  }
-
-  interface WindowEventMap {
-    themeChange: CustomEvent<{
-      theme: "dark" | "dim" | "light";
-      colorScheme: "dark" | "light";
-    }>;
-  }
+interface Window {
+  __MF_THEME__?: {
+    getTheme: () => "dark" | "dim" | "light";
+    setTheme: (theme: "dark" | "dim" | "light") => void;
+  };
 }
 
-export {};
+interface WindowEventMap {
+  moduleChange: CustomEvent<{
+    newModule: "products" | "cart" | "dashboard";
+  }>;
+  themeChange: CustomEvent<{
+    theme: "dark" | "dim" | "light";
+    colorScheme: "dark" | "light";
+  }>;
+}

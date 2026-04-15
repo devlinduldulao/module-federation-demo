@@ -10,7 +10,7 @@ Runs on **localhost:3000**.
 - Provide per-module skeleton fallbacks (`ProductsSkeleton`, `CartSkeleton`, `DashboardSkeleton`)
 - Catch module-level errors with `ErrorBoundary` — a crashed remote never takes down the shell
 - Show `ModuleFallback` when a remote server is offline
-- Render the navigation, status strip, notification toasts, and page layout
+- Render the route-driven navigation, status strip, notification toasts, and page layout
 - Listen for `showNotification` events from any module and display dark toasts
 - Dispatch `moduleChange` events when switching tabs so other modules can react
 - Prefetch remote entry points on tab hover via a `PREFETCH_MAP`
@@ -91,7 +91,13 @@ The `key={activeModule}` prop forces React to unmount/remount when switching tab
 
 ## Navigation
 
-Tab-based navigation using a `ModuleConfig[]` array:
+The shell now uses `react-router-dom` for client-side routing. Each remote is mounted behind a shareable URL:
+
+- `/products`
+- `/cart`
+- `/dashboard`
+
+Routing is still driven from the shell-level `ModuleConfig[]` array:
 
 ```ts
 type ModuleType = "products" | "cart" | "dashboard";
@@ -99,12 +105,13 @@ type ModuleType = "products" | "cart" | "dashboard";
 interface ModuleConfig {
   readonly id: ModuleType;
   readonly label: string;
+  readonly path: string;
   readonly port: string;
   readonly component: React.LazyExoticComponent<React.ComponentType>;
 }
 ```
 
-Active tab gets a citrine underline (`h-[2px] bg-citrine`). The status strip below the nav shows the current module name, port, and streaming status in monospace.
+Each nav item is a real link, so the browser URL updates and users can bookmark or share any module directly. Active routes still get the citrine underline, and the status strip below the nav shows the current module name, port, and streaming status in monospace.
 
 When a tab is switched, the shell dispatches a `moduleChange` event:
 
@@ -174,7 +181,7 @@ Requires all three remotes to be running for full functionality, but the shell s
 
 ## Testing
 
-`App.test.tsx` covers navigation rendering, tab switching, `moduleChange` event dispatch, notification display and auto-dismiss, skeleton fallback rendering, theme restoration, theme persistence, and `themeChange` event broadcasting. Run from the repo root:
+`App.test.tsx` covers route rendering, direct URL entry, redirects, `moduleChange` event dispatch, notification display and auto-dismiss, skeleton fallback rendering, theme restoration, theme persistence, and `themeChange` event broadcasting. Run from the repo root:
 
 ```bash
 npm test

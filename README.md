@@ -13,7 +13,7 @@ Shell (host)           localhost:3000
 └── Dashboard (remote) localhost:3003   → StreamingUserDashboard
 ```
 
-Each remote exposes a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell lazy-loads the streaming variants and wraps them in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation.
+Each remote exposes a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell lazy-loads the streaming variants and wraps them in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. The shell also owns URL-based navigation, so `/products`, `/cart`, and `/dashboard` are directly shareable routes instead of in-memory tab state.
 
 ## Quick Start
 
