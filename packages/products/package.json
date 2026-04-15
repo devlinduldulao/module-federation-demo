@@ -4,9 +4,10 @@
   "scripts": {
     "dev": "rspack serve",
     "build": "rspack build",
-    "lint": "npm --prefix ../.. exec eslint packages/products/src --ext .ts,.tsx",
+    "lint": "npm --prefix ../.. exec eslint -- src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "npm --prefix ../.. run test -- packages/products/src"
+    "test": "npm --prefix ../.. run test -- packages/products/src",
+    "test:watch": "npm --prefix ../.. run test:watch -- packages/products/src"
   },
   "dependencies": {
     "react": "^19.2.5",

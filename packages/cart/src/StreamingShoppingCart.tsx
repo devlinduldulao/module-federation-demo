@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { cn } from "./lib/utils";
 import type { CartItem, AddToCartEvent } from "./types";
 
 // Simulate network delay for demonstration
@@ -29,7 +28,7 @@ interface Resource<T> {
 function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
   let status = "pending";
   let result: T;
-  let suspender = asyncFn().then(
+  const suspender = asyncFn().then(
     (data) => {
       status = "success";
       result = data;
@@ -64,7 +63,7 @@ function getResource(key: string, delayMs: number): Resource<void> {
   return resourceCache.get(key)!;
 }
 
-let currentResourceKey = "cart-initial";
+const currentResourceKey = "cart-initial";
 
 // Modern Suspense component
 const StreamingShoppingCart = () => {

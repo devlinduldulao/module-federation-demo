@@ -33,6 +33,13 @@ export interface ThemeChangeEvent extends CustomEvent {
 }
 
 declare global {
+  interface Window {
+    __MF_THEME__?: {
+      getTheme: () => "dark" | "dim" | "light";
+      setTheme: (theme: "dark" | "dim" | "light") => void;
+    };
+  }
+
   interface WindowEventMap {
     addToCart: AddToCartEvent;
     showNotification: NotificationEvent;

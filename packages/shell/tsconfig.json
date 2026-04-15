@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "target": "ES2025",
+    "lib": ["DOM", "ES2025"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -13,6 +13,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "rootDir": "./src",
     "noEmit": true,
     "jsx": "react-jsx",
     "declaration": false,
@@ -28,17 +29,15 @@
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
       "@lib/*": ["./src/lib/*"]
-    }
+    },
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom"]
   },
   "include": [
-    "src/**/*",
-    "**/*.ts",
-    "**/*.tsx"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

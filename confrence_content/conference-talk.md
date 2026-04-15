@@ -16,6 +16,7 @@ In this talk, we'll build a production-grade e-commerce shell that composes thre
 - Implement the `createResource` / Suspense streaming pattern inside federated remotes so each micro-frontend controls its own loading choreography
 - Build a resilient host shell with ErrorBoundary + Suspense composition that gracefully degrades when a remote is unavailable
 - Wire cross-module communication through custom DOM events (`addToCart`, `showNotification`, `moduleChange`) without coupling any two modules together
+- Coordinate shell-owned theming across remotes with shared CSS variables, `localStorage`, and a typed `themeChange` event
 - Add hover-based prefetching for federated remotes using a simple prefetch map — no router library required
 - Test federated components in isolation with Vitest and React Testing Library, including strategies for mocking remote imports and handling Suspense boundaries in test environments
 

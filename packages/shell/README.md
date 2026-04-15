@@ -1,6 +1,6 @@
 # Shell — Host Application
 
-The shell is the **host** in the Module Federation topology. It defines three remotes (`products`, `cart`, `dashboard`), renders a tab-based navigation, and wraps each lazily-loaded remote module in `<Suspense>` + `<ErrorBoundary>` for independent loading and fault isolation.
+The shell is the **host** in the Module Federation topology. It defines three remotes (`products`, `cart`, `dashboard`), renders navigation and shell chrome, owns the shared theme state, and wraps each lazily-loaded remote module in `<Suspense>` + `<ErrorBoundary>` for independent loading and fault isolation.
 
 Runs on **localhost:3000**.
 
@@ -14,7 +14,8 @@ Runs on **localhost:3000**.
 - Listen for `showNotification` events from any module and display dark toasts
 - Dispatch `moduleChange` events when switching tabs so other modules can react
 - Prefetch remote entry points on tab hover via a `PREFETCH_MAP`
-- Use the View Transition API for smooth tab transitions
+- Persist the selected theme in `localStorage`
+- Broadcast `themeChange` events and expose `window.__MF_THEME__` to remotes
 
 ## File Structure
 
@@ -26,8 +27,9 @@ shell/
 ├── public/index.html
 └── src/
     ├── index.tsx              # Dynamic import('./bootstrap')
-    ├── bootstrap.tsx          # createRoot + <App />
+    ├── bootstrap.tsx          # Theme init + createRoot + <App />
     ├── App.tsx                # Navigation, Suspense, ErrorBoundary orchestration
+    ├── App.test.tsx           # Shell behavior, events, theme persistence
     ├── index.css              # @theme tokens, animations, noise grain, scrollbar
     ├── types.d.ts             # declare module "products/..." etc.
     ├── components/
@@ -38,6 +40,7 @@ shell/
     │   ├── CartSkeleton.tsx       # Cart table skeleton
     │   └── DashboardSkeleton.tsx  # Dashboard stats + activity skeleton
     └── lib/
+        ├── theme.ts               # Theme definitions, persistence, event bridge
         └── utils.ts               # cn() — clsx + tailwind-merge
 ```
 
@@ -115,6 +118,31 @@ window.dispatchEvent(
 
 The shell defines a `PREFETCH_MAP` that maps each module to a bare `import()` call. On hover, the corresponding remote entry point is fetched in the background so the module loads instantly when clicked — no router library required.
 
+## Theme System
+
+The shell owns three themes:
+
+- `dark` — the default noir palette
+- `dim` — a softer low-glare dark palette
+- `light` — a warm paper-inspired light palette
+
+`bootstrap.tsx` calls `initializeTheme()` before mounting React, so the correct CSS variables are present on first paint. Theme changes are stored under `mf-demo-theme`, applied to `document.documentElement.dataset.theme`, and broadcast globally:
+
+```ts
+window.dispatchEvent(
+  new CustomEvent("themeChange", {
+    detail: { theme: "dim", colorScheme: "dark" },
+  })
+);
+```
+
+For remote modules that need shell-owned theming, the host also exposes:
+
+```ts
+window.__MF_THEME__?.getTheme();
+window.__MF_THEME__?.setTheme("light");
+```
+
 ## Notification System
 
 The shell listens for `showNotification` events globally:
@@ -137,14 +165,17 @@ Defined in `index.css` under `@theme { ... }` — see the root README for the fu
 ```bash
 npm run dev    # Starts rspack-dev-server on :3000
 npm run build  # Production build to dist/
+npm run lint   # Lint shell source through the workspace ESLint config
+npm run typecheck
+npm run test
 ```
 
 Requires all three remotes to be running for full functionality, but the shell starts fine on its own — offline remotes show `ModuleFallback`.
 
 ## Testing
 
-`App.test.tsx` covers navigation rendering, tab switching, `moduleChange` event dispatch, notification display and auto-dismiss, skeleton fallback rendering, and accessibility roles. Run from the repo root:
+`App.test.tsx` covers navigation rendering, tab switching, `moduleChange` event dispatch, notification display and auto-dismiss, skeleton fallback rendering, theme restoration, theme persistence, and `themeChange` event broadcasting. Run from the repo root:
 
 ```bash
 npm test
-```\n
+```

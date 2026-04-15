@@ -107,8 +107,8 @@ const StatCard = memo<{ stat: DashboardStat; index: number }>(
 StatCard.displayName = "StatCard";
 
 // Activity row
-const ActivityRow = memo<{ activity: ActivityItem; index: number }>(
-  ({ activity, index }) => {
+const ActivityRow = memo<{ activity: ActivityItem }>(
+  ({ activity }) => {
     const dotColors = {
       success: "bg-mint",
       info: "bg-ice",
@@ -225,8 +225,8 @@ function UserDashboard() {
             </p>
           </div>
           <div className="divide-y divide-edge" role="list" aria-label="Recent activities">
-            {MOCK_ACTIVITY.map((activity, index) => (
-              <ActivityRow key={activity.id} activity={activity} index={index} />
+            {MOCK_ACTIVITY.map((activity) => (
+              <ActivityRow key={activity.id} activity={activity} />
             ))}
           </div>
         </div>

@@ -27,6 +27,23 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). The shell will pull remote entry points from ports 3001–3003.
 
+### Quality Checks
+
+```bash
+# Lint every package
+npm run lint
+
+# Run TypeScript checks across the workspace
+npm run typecheck
+
+# Run all tests or one package suite
+npm test
+npm run test:shell
+npm run test:products
+npm run test:cart
+npm run test:dashboard
+```
+
 ### Run a single package
 
 ```bash
@@ -46,6 +63,7 @@ The shell prefetches remote entry points on tab hover using a `PREFETCH_MAP`. Wh
 
 ```
 module-federation-demo/
+├── eslint.config.mjs                  # Shared ESLint flat config
 ├── package.json                       # Workspace scripts (concurrently)
 └── packages/
     ├── shell/                         # Host application
@@ -63,7 +81,9 @@ module-federation-demo/
     │   │       ├── ProductsSkeleton.tsx
     │   │       ├── CartSkeleton.tsx
     │   │       └── DashboardSkeleton.tsx
-    │   └── lib/utils.ts               # cn() — clsx + tailwind-merge
+    │   └── lib/
+    │       ├── theme.ts               # Theme registry, persistence, window bridge
+    │       └── utils.ts               # cn() — clsx + tailwind-merge
     ├── products/                      # Remote — product catalog
     │   ├── rspack.config.js           # MF exposes config
     │   └── src/
@@ -104,7 +124,7 @@ module-federation-demo/
 
 ## Design System — "Noir Editorial"
 
-A dark, typographic design language that avoids generic pastel AI aesthetics. Defined via Tailwind v4 `@theme` tokens in each package's `index.css`.
+A typographic editorial design language that avoids generic pastel AI aesthetics. The default presentation is dark, but the shell can switch between `dark`, `dim`, and `light` palettes by updating shared CSS custom properties at runtime.
 
 ### Typography
 
@@ -115,6 +135,8 @@ A dark, typographic design language that avoids generic pastel AI aesthetics. De
 | Technical | IBM Plex Mono | Labels, prices, metadata, navigation |
 
 ### Color Tokens
+
+The values below are the default dark theme tokens. The shell persists the active theme in `localStorage` under `mf-demo-theme` and rewrites these CSS variables when the user changes themes.
 
 | Token | Hex | Usage |
 |-------|-----|-------|
@@ -202,6 +224,13 @@ window.dispatchEvent(
     detail: { newModule: "cart" },
   })
 );
+
+// Shell: broadcast a theme change to remotes
+window.dispatchEvent(
+  new CustomEvent("themeChange", {
+    detail: { theme: "light", colorScheme: "light" },
+  })
+);
 ```
 
 Events are typed in each package's `types.ts` via `WindowEventMap` augmentation:
@@ -215,9 +244,12 @@ declare global {
   interface WindowEventMap {
     addToCart: AddToCartEvent;
     showNotification: NotificationEvent;
+    themeChange: ThemeChangeEvent;
   }
 }
 ```
+
+The shell also exposes `window.__MF_THEME__` so remotes can read or update the active theme without importing host-only shell code.
 
 ## Testing
 
@@ -227,6 +259,8 @@ The project uses **Vitest** + **React Testing Library** with `jsdom` for compone
 npm test              # Run all tests once
 npm run test:watch    # Watch mode
 npm run test:coverage # Coverage report (v8)
+npm run lint          # Lint all packages with ESLint
+npm run typecheck     # TypeScript validation across all packages
 ```
 
 Remote module imports are aliased in `vitest.config.ts` so federated components can be tested in isolation without running dev servers. Each package has its own test file:
@@ -235,6 +269,8 @@ Remote module imports are aliased in `vitest.config.ts` so federated components 
 - `packages/products/src/ProductsCatalog.test.tsx` — filtering, add-to-cart events, product grid
 - `packages/cart/src/ShoppingCart.test.tsx` — quantity controls, remove items, order summary, event listeners
 - `packages/dashboard/src/UserDashboard.test.tsx` — stats display, activity stream, welcome banner
+
+The shell test suite also covers theme restoration from `localStorage`, theme persistence, and `themeChange` event broadcasting.
 
 ## React Suspense Streaming Pattern
 

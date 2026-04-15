@@ -82,7 +82,6 @@ describe("ShoppingCart", () => {
   });
 
   it("does not go below quantity 1", async () => {
-    const user = userEvent.setup();
     render(<ShoppingCart />);
 
     // MacBook starts at qty 1 — decrease button should be disabled

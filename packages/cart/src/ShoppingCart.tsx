@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
-import { cn } from "./lib/utils";
 import type { CartItem, AddToCartEvent } from "./types";
 
 // Cart item row

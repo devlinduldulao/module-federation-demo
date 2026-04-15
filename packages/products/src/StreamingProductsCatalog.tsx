@@ -95,7 +95,7 @@ interface Resource<T> {
 function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
   let status = "pending";
   let result: T;
-  let suspender = asyncFn().then(
+  const suspender = asyncFn().then(
     (data) => {
       status = "success";
       result = data;
@@ -131,12 +131,8 @@ function getResource(key: string, delayMs: number): Resource<void> {
   return resourceCache.get(key)!;
 }
 
-function clearResourceCache() {
-  resourceCache.clear();
-}
-
 // Module-specific resource keys
-let currentResourceKey = "products-initial";
+const currentResourceKey = "products-initial";
 
 // Modern Suspense component following React 18+ best practices
 const StreamingProductsCatalog = () => {

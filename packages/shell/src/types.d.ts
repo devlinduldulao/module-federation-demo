@@ -1,3 +1,5 @@
+declare module "*.css";
+
 declare module "products/ProductsCatalog" {
   const ProductsCatalog: React.ComponentType;
   export default ProductsCatalog;

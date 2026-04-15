@@ -24,6 +24,7 @@ cart/
 └── src/
     ├── index.tsx               # Standalone bootstrap
     ├── ShoppingCart.tsx        # Full cart with management
+  ├── ShoppingCart.test.tsx   # Cart behavior tests
     ├── StreamingShoppingCart.tsx # Resource + Suspense wrapper
     ├── index.css               # @theme tokens, animations
     ├── types.ts                # CartItem, events
@@ -51,7 +52,7 @@ interface AddToCartEvent extends CustomEvent {
 - **Table-like layout** — monospace column headers (Product, Qty, Total), bordered rows
 - **Inline quantity controls** — connected `−` / count / `+` cells with border dividers
 - **Order summary sidebar** — sticky panel with subtotal, shipping (free), tax, total in large serif italic
-- **Citrine checkout button** — `bg-citrine text-noir` with full-width emphasis
+- **Citrine checkout button** — `bg-citrine text-ink` with full-width emphasis
 - **Empty cart state** — serif italic heading with "Browse Products →" CTA
 - **Cross-module event listening** — adds items when `addToCart` fires from products
 
@@ -100,11 +101,14 @@ Same Resource pattern as other remotes — `getResource("cart-initial", 3500)` d
 ```bash
 npm run dev    # Starts on :3002
 npm run build  # Production build
+npm run lint   # Lint cart source through the workspace ESLint config
+npm run typecheck
+npm run test
 ```
 
 ## Testing
 
-`ShoppingCart.test.tsx` covers initial cart rendering, quantity controls, item removal, order summary calculations, `addToCart` event listener, and checkout notification. Run from the repo root:
+`ShoppingCart.test.tsx` covers initial cart rendering, quantity controls, item removal, order summary calculations, `addToCart` event listener, and checkout notification. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
 
 ```bash
 npm test

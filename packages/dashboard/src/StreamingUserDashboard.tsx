@@ -157,7 +157,7 @@ interface Resource<T> {
 function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
   let status = "pending";
   let result: T;
-  let suspender = asyncFn().then(
+  const suspender = asyncFn().then(
     (data) => { status = "success"; result = data; },
     (error) => { status = "error"; result = error; }
   );
@@ -181,7 +181,7 @@ function getResource(key: string, delayMs: number): Resource<void> {
   return resourceCache.get(key)!;
 }
 
-let currentResourceKey = "dashboard-initial";
+const currentResourceKey = "dashboard-initial";
 
 // Suspense wrapper
 const StreamingUserDashboard = () => {

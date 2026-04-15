@@ -24,6 +24,7 @@ dashboard/
 └── src/
     ├── index.tsx               # Standalone bootstrap
     ├── UserDashboard.tsx      # Full dashboard with stats + activity
+  ├── UserDashboard.test.tsx # Dashboard rendering tests
     ├── StreamingUserDashboard.tsx # Resource + Suspense wrapper
     ├── index.css               # @theme tokens, count-up animation, activity timeline
     ├── types.ts                # DashboardStat, ActivityItem
@@ -112,11 +113,14 @@ const StreamingUserDashboard = () => {
 ```bash
 npm run dev    # Starts on :3003
 npm run build  # Production build
+npm run lint   # Lint dashboard source through the workspace ESLint config
+npm run typecheck
+npm run test
 ```
 
 ## Testing
 
-`UserDashboard.test.tsx` covers stats display, trend percentages, activity stream rendering, welcome banner, Platinum badge, and accessibility roles. Run from the repo root:
+`UserDashboard.test.tsx` covers stats display, trend percentages, activity stream rendering, welcome banner, Platinum badge, and accessibility roles. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
 
 ```bash
 npm test

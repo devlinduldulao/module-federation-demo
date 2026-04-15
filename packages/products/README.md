@@ -26,6 +26,7 @@ products/
 └── src/
     ├── index.tsx               # Standalone bootstrap (renders ProductsCatalog)
     ├── ProductsCatalog.tsx     # Full catalog with filters + grid
+  ├── ProductsCatalog.test.tsx # Product catalog tests
     ├── StreamingProductsCatalog.tsx  # Resource + Suspense wrapper
     ├── index.css               # @theme tokens, animations
     ├── types.ts                # Product, CartItem, FilterCategory, events
@@ -93,13 +94,16 @@ The shell's `<Suspense fallback={<ProductsSkeleton />}>` catches the thrown prom
 ```bash
 npm run dev    # Starts on :3001
 npm run build  # Production build
+npm run lint   # Lint products source through the workspace ESLint config
+npm run typecheck
+npm run test
 ```
 
 Visit `http://localhost:3001` to see the catalog standalone. The shell at `:3000` loads this module's `remoteEntry.js` automatically.
 
 ## Testing
 
-`ProductsCatalog.test.tsx` covers product grid rendering, category filtering, add-to-cart event dispatch, notification events, and accessibility roles. Run from the repo root:
+`ProductsCatalog.test.tsx` covers product grid rendering, category filtering, add-to-cart event dispatch, notification events, and accessibility roles. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
 
 ```bash
 npm test
