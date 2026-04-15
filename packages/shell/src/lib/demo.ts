@@ -43,16 +43,16 @@ export interface RemoteVersionInfo {
 
 const MOCK_VERSIONS: Record<string, RemoteVersionInfo> = {
   home: { id: "home", version: "1.0.0", variant: "stable", buildHash: "a3f2c1d" },
-  products: { id: "products", version: "2.1.0", variant: "stable", buildHash: "b7e4f9a" },
-  cart: { id: "cart", version: "1.3.2", variant: "stable", buildHash: "c1d8e3b" },
-  dashboard: { id: "dashboard", version: "1.5.0", variant: "stable", buildHash: "d9f2a7c" },
+  records: { id: "records", version: "2.1.0", variant: "stable", buildHash: "b7e4f9a" },
+  prescriptions: { id: "prescriptions", version: "1.3.2", variant: "stable", buildHash: "c1d8e3b" },
+  analytics: { id: "analytics", version: "1.5.0", variant: "stable", buildHash: "d9f2a7c" },
 };
 
 const CANARY_VERSIONS: Record<string, RemoteVersionInfo> = {
   home: { id: "home", version: "1.1.0-canary.3", variant: "canary", buildHash: "e4a1b2c" },
-  products: { id: "products", version: "2.2.0-canary.1", variant: "canary", buildHash: "f8d3c5e" },
-  cart: { id: "cart", version: "1.4.0-canary.2", variant: "canary", buildHash: "a2b9d4f" },
-  dashboard: { id: "dashboard", version: "1.6.0-canary.1", variant: "canary", buildHash: "b5c8e1a" },
+  records: { id: "records", version: "2.2.0-canary.1", variant: "canary", buildHash: "f8d3c5e" },
+  prescriptions: { id: "prescriptions", version: "1.4.0-canary.2", variant: "canary", buildHash: "a2b9d4f" },
+  analytics: { id: "analytics", version: "1.6.0-canary.1", variant: "canary", buildHash: "b5c8e1a" },
 };
 
 export type DeploymentVariant = "stable" | "canary";

@@ -1,6 +1,6 @@
-# Dashboard — Remote Module
+# Analytics — Remote Module
 
-The dashboard micro-frontend provides an analytics overview with performance metrics and an activity stream. It exposes `UserDashboard` (instant render) and `StreamingUserDashboard` (Suspense-wrapped with simulated delay).
+The analytics micro-frontend provides a clinical analytics overview with performance metrics and an activity stream. It exposes `ClinicalAnalytics` (instant render) and `StreamingClinicalAnalytics` (Suspense-wrapped with simulated delay).
 
 Runs on **localhost:3003**.
 
@@ -8,26 +8,26 @@ Runs on **localhost:3003**.
 
 ```js
 exposes: {
-  "./UserDashboard":          "./src/UserDashboard.tsx",
-  "./StreamingUserDashboard": "./src/StreamingUserDashboard.tsx",
+  "./ClinicalAnalytics":          "./src/ClinicalAnalytics.tsx",
+  "./StreamingClinicalAnalytics": "./src/StreamingClinicalAnalytics.tsx",
 }
 ```
 
 ## File Structure
 
 ```
-dashboard/
-├── rspack.config.js           # MF remote — name: "dashboard", port: 3003
+analytics/
+├── rspack.config.js           # MF remote — name: "analytics", port: 3003
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html          # Standalone dev page
 └── src/
     ├── index.tsx              # Standalone bootstrap
-    ├── UserDashboard.tsx      # Full dashboard with stats + activity
-    ├── UserDashboard.test.tsx # Dashboard rendering tests
-    ├── StreamingUserDashboard.tsx # Resource + Suspense wrapper
+    ├── ClinicalAnalytics.tsx      # Full analytics with stats + activity
+    ├── ClinicalAnalytics.test.tsx # Analytics rendering tests
+    ├── StreamingClinicalAnalytics.tsx # Resource + Suspense wrapper
     ├── index.css              # @theme tokens, count-up animation, activity timeline
-    ├── types.ts               # DashboardStat, ActivityItem
+    ├── types.ts               # AnalyticsStat, ActivityItem
     └── lib/
         └── utils.ts           # cn() utility
 ```
@@ -35,16 +35,11 @@ dashboard/
 ## Key Types
 
 ```typescript
-interface DashboardStat {
-  readonly id: string;
+interface AnalyticsStat {
   readonly label: string;
-  readonly value: string;
-  readonly emoji?: string;
-  readonly color: string;       // Tailwind color class (e.g. "text-ice")
-  readonly trend?: {
-    direction: "up" | "down" | "neutral";
-    percentage: number;
-  };
+  readonly value: string | number;
+  readonly trend: "up" | "down" | "stable";
+  readonly trendValue: string;
 }
 
 interface ActivityItem {
@@ -68,7 +63,7 @@ interface ActivityItem {
 ```
 ┌──────────────────────────────────┐
 │ Analytics Overview (mono label)  │
-│ Dashboard (serif italic, 6xl)    │
+│ Analytics (serif italic, 6xl)    │
 ├──────────────────────────────────┤
 │ Welcome banner with gradient top │
 │ Welcome back, Developer          │
@@ -79,9 +74,9 @@ interface ActivityItem {
 │ +23%   │ +18%   │ +45%   │ +12%  │
 ├────────┴────────┴────────┴───────┤
 │ Activity Stream                  │
-│ ● MacBook Pro M3 delivered       │
-│ ● Added AirPods Pro to wishlist  │
-│ ● iPhone 15 Pro order processing │
+│ ● Sarah Chen prescription delivered       │
+│ ● Added Lisa Nguyen prescription to watchlist  │
+│ ● Lab results review pending    │
 ├──────────────────────────────────┤
 │ Micro-Frontend Architecture      │
 │ footer with port + timestamp     │
@@ -90,7 +85,7 @@ interface ActivityItem {
 
 ## Custom CSS
 
-The dashboard `index.css` includes module-specific additions:
+The analytics `index.css` includes module-specific additions:
 
 - `@keyframes countUp` — `translateY(20px)` to `0` for stat card entry
 - `.animate-count-up` class
@@ -101,10 +96,10 @@ The dashboard `index.css` includes module-specific additions:
 Same Resource pattern as other remotes:
 
 ```typescript
-const StreamingUserDashboard = () => {
-  const resource = getResource("dashboard-initial", 5000);
+const StreamingClinicalAnalytics = () => {
+  const resource = getResource("analytics-initial", 5000);
   resource.read();
-  return <UserDashboard />;
+  return <ClinicalAnalytics />;
 };
 ```
 
@@ -113,14 +108,14 @@ const StreamingUserDashboard = () => {
 ```bash
 npm run dev    # Starts on :3003
 npm run build  # Production build
-npm run lint   # Lint dashboard source through the workspace ESLint config
+npm run lint   # Lint analytics source through the workspace ESLint config
 npm run typecheck
 npm run test
 ```
 
 ## Testing
 
-`UserDashboard.test.tsx` covers stats display, trend percentages, activity stream rendering, welcome banner, Platinum badge, and accessibility roles. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
+`ClinicalAnalytics.test.tsx` covers stats display, trend percentages, activity stream rendering, welcome banner, Platinum badge, and accessibility roles. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
 
 ```bash
 npm test

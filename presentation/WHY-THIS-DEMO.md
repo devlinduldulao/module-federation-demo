@@ -31,9 +31,9 @@ Each remote in this demo is a **team boundary** — not just a code boundary:
 ```
 packages/
   home/       ← Team A: owns landing page, deploys independently
-  products/   ← Team B: owns catalog + filtering, own test suite
-  cart/       ← Team C: owns checkout flow, own Rspack config
-  dashboard/  ← Team D: owns analytics, own dev server on :3003
+  records/    ← Team B: owns medical records + filtering, own test suite
+  prescriptions/ ← Team C: owns prescription management, own Rspack config
+  analytics/  ← Team D: owns clinical analytics, own dev server on :3003
   shell/      ← Platform team: owns routing, theme, error handling
 ```
 
@@ -43,7 +43,7 @@ Each package has its own `package.json`, `tsconfig.json`, `rspack.config.js`, an
 |---|---|
 | 1 repo, 1 pipeline, 1 deploy queue | Each team owns their remote's repo, pipeline, and release cycle |
 | PR reviews cross team boundaries | PRs stay within the team that owns the module |
-| One broken test blocks everyone | A broken cart test doesn't block the products team |
+| One broken test blocks everyone | A broken prescriptions test doesn't block the records team |
 | "Don't merge yet, we're releasing" | Teams deploy independently, on their own schedule |
 | Shared `package.json` — everyone upgrades together or nobody does | Each remote pins its own dependencies |
 | Onboarding means learning the entire app | New devs learn one module, contribute on day one |
@@ -82,9 +82,9 @@ Five independent applications compose into a single shell. Each has its own:
 ```
 Shell (host)    :3000    ← owns routing, theme, notifications
 ├── Home        :3004    ← landing page with architecture overview
-├── Products    :3001    ← filterable catalog with add-to-cart
-├── Cart        :3002    ← quantity management, order summary
-└── Dashboard   :3003    ← analytics stats, activity stream
+├── Records     :3001    ← filterable medical records with add-to-prescriptions
+├── Prescriptions :3002  ← quantity management, order summary
+└── Analytics   :3003    ← clinical analytics stats, activity stream
 ```
 
 You can stop any remote, edit its code, restart it, and the shell picks up the changes without a refresh. That's not a slide — that's the actual dev experience.
@@ -106,19 +106,19 @@ You could have micro-frontends with terrible loading UX — most demos do. You c
 
 ### Not every module should load the same way
 
-The key UX insight: different content has different priority. A landing page should be instant. A product catalog should be ready before the user clicks. A dashboard can stream in on demand. This demo implements a **loading strategy taxonomy**:
+The key UX insight: different content has different priority. A landing page should be instant. A medical records viewer should be ready before the user clicks. A dashboard can stream in on demand. This demo implements a **loading strategy taxonomy**:
 
 | Strategy | Module | Behavior | Status strip |
 |----------|--------|----------|---------------|
 | **Instant** | Home | Lazy-loaded for code splitting, but imports the standalone component directly — no streaming delay. Renders the moment the chunk arrives. | 🟢 INSTANT |
-| **Eager** | Products | Imports the standalone component directly, preloaded on shell mount. By the time the user clicks, the chunk is already cached — no skeleton, no streaming delay. | 🟡 EAGER |
-| **Streamed** | Cart, Dashboard | Loaded on demand with skeleton fallbacks. The user sees a purpose-built skeleton that streams into real content. | 🟠 STREAMING |
+| **Eager** | Records | Imports the standalone component directly, preloaded on shell mount. By the time the user clicks, the chunk is already cached — no skeleton, no streaming delay. | 🟡 EAGER |
+| **Streamed** | Prescriptions, Analytics | Loaded on demand with skeleton fallbacks. The user sees a purpose-built skeleton that streams into real content. | 🟠 STREAMING |
 
 ```tsx
 // Shell App.tsx — three strategies in one file
 const Home = lazy(() => import("home/Home").catch(...));                       // INSTANT
-const ProductsCatalog = lazy(() => import("products/ProductsCatalog").catch(...)); // EAGER
-const StreamingShoppingCart = lazy(() => import("cart/...").catch(...));        // STREAMED
+const MedicalRecords = lazy(() => import("records/MedicalRecords").catch(...)); // EAGER
+const StreamingPrescriptionOrders = lazy(() => import("prescriptions/...").catch(...));        // STREAMED
 
 // Eagerly preload modules marked as "eager" at shell init
 const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
@@ -132,9 +132,9 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 Every other demo lazy-loads a remote and calls it a day. This one goes further: each remote **owns its loading choreography** through the Resource pattern.
 
 ```tsx
-const StreamingProductsCatalog = () => {
+const StreamingMedicalRecords = () => {
   resource.read();        // Throws a promise → Suspense catches it
-  return <ProductsCatalog />;
+  return <MedicalRecords />;
 };
 ```
 
@@ -142,9 +142,9 @@ The shell has **zero knowledge** of how long a remote takes to load. It just ren
 
 ### Why this matters for visitors
 
-- **No blank screens** — every route transition shows either instant content (Home, Products) or a skeleton immediately (Cart, Dashboard)
-- **Priority-based loading** — Home is instant, Products is eager, Cart/Dashboard stream on demand. Content importance drives the strategy.
-- **Per-module loading** — navigating to Cart doesn't re-load Products. Each module loads independently.
+- **No blank screens** — every route transition shows either instant content (Home, Records) or a skeleton immediately (Prescriptions, Analytics)
+- **Priority-based loading** — Home is instant, Records is eager, Prescriptions/Analytics stream on demand. Content importance drives the strategy.
+- **Per-module loading** — navigating to Prescriptions doesn't re-load Records. Each module loads independently.
 - **Layout stability** — skeletons match the real component's layout, so there's no content shift when the module loads
 - **Progressive disclosure** — the shell, navigation, and theme are already rendered. Only the module content area streams in.
 
@@ -186,9 +186,9 @@ This isn't a mock. The kill switch actually prevents the module from rendering, 
 Modules talk through typed `CustomEvent` dispatch on `window`:
 
 ```
-Products ──addToCart──────→ Cart (updates state)
-Products ──showNotification→ Shell (shows toast)
-Cart ──────navigateToModule→ Shell (changes route)
+Records ──addPrescription──────→ Prescriptions (updates state)
+Records ──showNotification→ Shell (shows toast)
+Prescriptions ──────navigateToModule→ Shell (changes route)
 Shell ─────themeChange─────→ All remotes (update palette)
 Shell ─────moduleChange────→ All remotes (know active tab)
 ```
@@ -223,7 +223,7 @@ Two themes (dark and light) switch at runtime by rewriting CSS custom properties
 
 ## 8. The Test Suite Proves It Works
 
-137 tests across 10 files. All green.
+136 tests across 10 files. All green.
 
 ```
 packages/shell/src/App.test.tsx                    — 21 tests
@@ -232,9 +232,9 @@ packages/shell/src/components/ModuleFallback.test.tsx — 5 tests
 packages/shell/src/components/DemoPanel.test.tsx   — 21 tests
 packages/shell/src/lib/theme.test.ts               — 21 tests
 packages/shell/src/lib/demo.test.ts                — 11 tests
-packages/products/src/ProductsCatalog.test.tsx      — 11 tests
-packages/cart/src/ShoppingCart.test.tsx             — 17 tests
-packages/dashboard/src/UserDashboard.test.tsx       — 11 tests
+packages/records/src/MedicalRecords.test.tsx        — 11 tests
+packages/prescriptions/src/PrescriptionOrders.test.tsx — 17 tests
+packages/analytics/src/ClinicalAnalytics.test.tsx   — 11 tests
 packages/home/src/Home.test.tsx                    — 13 tests
 ```
 
@@ -243,7 +243,7 @@ The tests cover:
 - Route rendering and navigation
 - Skeleton fallbacks during Suspense
 - Theme persistence and broadcasting
-- Cross-module event dispatch (`addToCart`, `showNotification`, `navigateToModule`)
+- Cross-module event dispatch (`addPrescription`, `showNotification`, `navigateToModule`)
 - Quantity controls, filtering, order summary math
 - Unknown route redirects
 
@@ -270,13 +270,13 @@ This isn't a "what if" demo built on experimental APIs. Everything here is stabl
 The demo has a natural flow for a 30-minute talk:
 
 1. **Open the app** → Home loads **instantly** (no skeleton, no delay — status strip shows INSTANT)
-2. **Click Products** → loads fast because it was **eagerly preloaded** (status strip shows EAGER)
-3. **Click Cart** → skeleton **streams** in on demand (status strip shows STREAMING)
-4. **Add a product to cart** → Cross-module event crosses boundaries
+2. **Click Records** → loads fast because it was **eagerly preloaded** (status strip shows EAGER)
+3. **Click Prescriptions** → skeleton **streams** in on demand (status strip shows STREAMING)
+4. **Add a prescription** → Cross-module event crosses boundaries
 5. **Open the Federation Lab** → Kill a remote live, watch it fail gracefully
 6. **Toggle A/B deployment** → Show independent versioning
 7. **Switch themes** → CSS variables cascade across all remotes
-8. **Run the test suite** → 137 tests, all green, no dev servers needed
+8. **Run the test suite** → 136 tests, all green, no dev servers needed
 
 Each step demonstrates a different micro-frontend concept. The audience sees real behavior, not diagrams.
 
@@ -312,7 +312,7 @@ This isn't "cool tech you'll never ship." Every pattern demonstrated maps direct
 
 ### Industries already doing this
 
-- **E-commerce** — product catalog, cart, checkout, account pages as independent remotes (IKEA, Zalando)
+- **E-commerce** — product pages, cart, checkout, account pages as independent remotes (IKEA, Zalando)
 - **SaaS platforms** — billing, analytics, settings, admin panels from different teams behind one shell
 - **Enterprise portals** — HR, IT, finance, compliance modules stitched into a single authenticated shell
 - **Media & streaming** — content feeds, player, recommendations, user profiles each owned by separate teams

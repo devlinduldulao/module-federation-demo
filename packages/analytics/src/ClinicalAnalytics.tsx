@@ -43,7 +43,7 @@ const StatCard = memo<{ stat: AnalyticsStat; index: number }>(({ stat, index }) 
 
     return (
         <article
-            className="border border-edge p-6 animate-fade-in-up"
+            className="border border-edge p-8 sm:p-10 animate-fade-in-up flex flex-col justify-center min-h-[180px] shadow-sm"
             style={{ animationDelay: `${index * 100}ms` }}
             aria-label={`${stat.label}: ${stat.value}`}
         >
@@ -51,7 +51,7 @@ const StatCard = memo<{ stat: AnalyticsStat; index: number }>(({ stat, index }) 
                 {stat.label}
             </span>
             <div className="flex items-end justify-between">
-                <span className="font-display text-4xl italic text-cream leading-none">
+                <span className="font-display text-5xl lg:text-6xl italic text-cream leading-none mt-2">
                     {stat.value}
                 </span>
                 <span className={`font-mono text-xs ${isPositive ? "text-mint" : "text-rose"}`}>
@@ -70,7 +70,7 @@ const ActivityItem = memo<{ activity: ClinicalActivity; index: number }>(({ acti
 
     return (
         <article
-            className="flex items-start gap-4 py-4 animate-fade-in-up"
+            className="flex items-start gap-6 py-6 animate-fade-in-up"
             style={{ animationDelay: `${index * 60}ms` }}
             aria-label={`Activity: ${activity.description}`}
         >
@@ -89,13 +89,13 @@ ActivityItem.displayName = "ActivityItem";
 
 // Welcome banner
 const WelcomeBanner = memo(() => (
-    <div className="border border-edge p-8 mb-12 animate-fade-in-up">
+    <div className="border border-edge p-10 sm:p-12 mb-16 animate-fade-in-up shadow-lg">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
                 <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase block mb-2">
                     Welcome back
                 </span>
-                <h3 className="font-display text-2xl italic text-cream">Dr. Thompson</h3>
+                <h3 className="font-display text-4xl lg:text-5xl italic text-cream mt-2">Dr. Thompson</h3>
             </div>
             <div className="flex items-center gap-4 font-mono text-[10px] text-dim">
                 <span>Shift: Day</span>
@@ -123,9 +123,9 @@ function ClinicalAnalytics() {
     );
 
     return (
-        <div className="w-full mx-auto animate-fade-in" role="main">
+        <div className="max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 py-12 lg:py-24 animate-fade-in" role="main">
             {/* Header */}
-            <header className="mb-12 lg:mb-20 animate-fade-in-up border-b border-edge pb-10">
+            <header className="mb-16 lg:mb-24 animate-fade-in-up border-b border-edge pb-12">
                 <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                     <div className="max-w-2xl">
                         <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
@@ -153,14 +153,14 @@ function ClinicalAnalytics() {
             <WelcomeBanner />
 
             {/* Stats grid */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12" aria-label="Clinical statistics">
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-16" aria-label="Clinical statistics">
                 {stats.map((stat, index) => (
                     <StatCard key={stat.label} stat={stat} index={index} />
                 ))}
             </section>
 
             {/* Activity feed */}
-            <section className="border border-edge p-8" aria-label="Clinical activity">
+            <section className="border border-edge p-10 sm:p-12 shadow-lg" aria-label="Clinical activity">
                 <h3 className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase mb-6">
                     Recent Activity
                 </h3>

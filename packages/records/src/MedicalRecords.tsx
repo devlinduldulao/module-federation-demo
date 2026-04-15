@@ -198,7 +198,7 @@ function MedicalRecords() {
   }, []);
 
   return (
-    <div className="w-full mx-auto animate-fade-in" role="main">
+    <div className="max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 py-12 lg:py-24 animate-fade-in" role="main">
       {/* Header */}
       <header className="mb-16 lg:mb-24 animate-fade-in-up">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -206,7 +206,7 @@ function MedicalRecords() {
             <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
               Patient Files
             </span>
-            <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
+            <h2 className="font-display text-6xl lg:text-7xl italic text-cream tracking-tight leading-tight mb-6">
               Records
             </h2>
             <p className="text-stone text-sm max-w-xl">

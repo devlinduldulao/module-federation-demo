@@ -9,9 +9,9 @@ Built for conference talks and technical demonstrations.
 ```
 Shell (host)           localhost:3000
 ├── Home (remote)      localhost:3004   → INSTANT  (Home — no streaming delay)
-├── Products (remote)  localhost:3001   → EAGER    (ProductsCatalog — preloaded on shell mount)
-├── Cart (remote)      localhost:3002   → STREAMED (StreamingShoppingCart — on demand)
-└── Dashboard (remote) localhost:3003   → STREAMED (StreamingUserDashboard — on demand)
+├── Records (remote)  localhost:3001   → EAGER    (MedicalRecords — preloaded on shell mount)
+├── Prescriptions (remote)      localhost:3002   → STREAMED (StreamingPrescriptionOrders — on demand)
+└── Analytics (remote) localhost:3003   → STREAMED (StreamingClinicalAnalytics — on demand)
 ```
 
 Each remote exposes both a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell chooses which to import based on **three loading strategies** and content priority:
@@ -19,10 +19,10 @@ Each remote exposes both a **Streaming** component (wraps a Resource-based Suspe
 | Strategy | Module | Behavior |
 |----------|--------|----------|
 | **Instant** | Home | Lazy-loaded for code splitting, but imports the standalone component directly — no streaming delay. Renders the moment the chunk arrives. |
-| **Eager** | Products | Imports the standalone component directly and preloads the chunk on shell mount — already cached before the user clicks. No skeleton, no streaming delay. Still uses `lazy()` because Module Federation remotes are separate builds resolved at runtime via `import()` — you can't use a static `import`. The eager `import()` fires at shell init and warms the cache; `lazy()` resolves from it instantly. |
-| **Streamed** | Cart, Dashboard | Loaded on demand with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. |
+| **Eager** | Records | Imports the standalone component directly and preloads the chunk on shell mount — already cached before the user clicks. No skeleton, no streaming delay. Still uses `lazy()` because Module Federation remotes are separate builds resolved at runtime via `import()` — you can't use a static `import`. The eager `import()` fires at shell init and warms the cache; `lazy()` resolves from it instantly. |
+| **Streamed** | Prescriptions, Analytics | Loaded on demand with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. |
 
-All modules are wrapped in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. The shell owns URL-based navigation, so `/`, `/products`, `/cart`, and `/dashboard` are directly shareable routes. The status strip shows the active module's loading strategy (INSTANT / EAGER / STREAMING) with a color-coded indicator.
+All modules are wrapped in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. The shell owns URL-based navigation, so `/`, `/records`, `/prescriptions`, and `/analytics` are directly shareable routes. The status strip shows the active module's loading strategy (INSTANT / EAGER / STREAMING) with a color-coded indicator.
 
 The root route `/` renders the **Home** landing page, which provides an overview of the architecture and navigation cards to each module. Unknown routes redirect to `/`.
 
@@ -55,18 +55,18 @@ npm run typecheck
 # Run all tests or one package suite
 npm test
 npm run test:shell
-npm run test:products
-npm run test:cart
-npm run test:dashboard
+npm run test:records
+npm run test:prescriptions
+npm run test:analytics
 ```
 
 ### Run a single package
 
 ```bash
 cd packages/home && npm run dev       # :3004
-cd packages/products && npm run dev   # :3001
-cd packages/cart && npm run dev       # :3002
-cd packages/dashboard && npm run dev  # :3003
+cd packages/records && npm run dev        # :3001
+cd packages/prescriptions && npm run dev  # :3002
+cd packages/analytics && npm run dev      # :3003
 cd packages/shell && npm run dev      # :3000
 ```
 
@@ -76,7 +76,7 @@ Each remote runs standalone at its own port with its own `index.html`.
 
 The shell uses a **two-tier preloading strategy**:
 
-1. **Eager preload** — modules with `loadStrategy: "eager"` (Products) are preloaded the moment the shell mounts, so their chunks and streaming data are likely cached before the user navigates.
+1. **Eager preload** — modules with `loadStrategy: "eager"` (Records) are preloaded the moment the shell mounts, so their chunks and streaming data are likely cached before the user navigates.
 2. **Hover prefetch** — remaining modules are prefetched when the user hovers a navigation tab, using a `PREFETCHERS` map of bare `import()` calls.
 
 ## Project Structure
@@ -100,9 +100,9 @@ module-federation-demo/
     │   │       ├── DemoPanel.tsx       # Federation Lab demo controls
     │   │       ├── LoadingSpinner.tsx  # Generic loading dots
     │   │       ├── HomeSkeleton.tsx
-    │   │       ├── ProductsSkeleton.tsx
-    │   │       ├── CartSkeleton.tsx
-    │   │       └── DashboardSkeleton.tsx
+    │   │       ├── RecordsSkeleton.tsx
+    │   │       ├── PrescriptionsSkeleton.tsx
+    │   │       └── AnalyticsSkeleton.tsx
     │   └── lib/
     │       ├── theme.ts               # Theme registry, persistence, window bridge
     │       ├── health.ts              # Remote health monitoring (useRemoteHealth)
@@ -115,28 +115,28 @@ module-federation-demo/
     │       ├── StreamingHome.tsx      # Suspense-wrapped
     │       ├── types.ts
     │       └── lib/utils.ts           # cn() utility
-    ├── products/                      # Remote — product catalog
+    ├── records/                      # Remote — medical records
     │   ├── rspack.config.js           # MF exposes config
     │   └── src/
-    │       ├── ProductsCatalog.tsx     # Standalone version
-    │       ├── ProductsCatalog.test.tsx
-    │       ├── StreamingProductsCatalog.tsx  # Suspense-wrapped
+    │       ├── MedicalRecords.tsx     # Standalone version
+    │       ├── MedicalRecords.test.tsx
+    │       ├── StreamingMedicalRecords.tsx  # Suspense-wrapped
     │       ├── types.ts
     │       └── lib/utils.ts           # cn() utility
-    ├── cart/                          # Remote — shopping cart
+    ├── prescriptions/                          # Remote — prescription orders
     │   ├── rspack.config.js
     │   └── src/
-    │       ├── ShoppingCart.tsx
-    │       ├── ShoppingCart.test.tsx
-    │       ├── StreamingShoppingCart.tsx
+    │       ├── PrescriptionOrders.tsx
+    │       ├── PrescriptionOrders.test.tsx
+    │       ├── StreamingPrescriptionOrders.tsx
     │       ├── types.ts
     │       └── lib/utils.ts           # cn() utility
-    └── dashboard/                     # Remote — analytics dashboard
+    └── analytics/                     # Remote — clinical analytics
         ├── rspack.config.js
         └── src/
-            ├── UserDashboard.tsx
-            ├── UserDashboard.test.tsx
-            ├── StreamingUserDashboard.tsx
+            ├── ClinicalAnalytics.tsx
+            ├── ClinicalAnalytics.test.tsx
+            ├── StreamingClinicalAnalytics.tsx
             ├── types.ts
             └── lib/utils.ts           # cn() utility
 ```
@@ -203,9 +203,9 @@ new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {
     home:     "home@http://localhost:3004/remoteEntry.js",
-    products: "products@http://localhost:3001/remoteEntry.js",
-    cart:     "cart@http://localhost:3002/remoteEntry.js",
-    dashboard:"dashboard@http://localhost:3003/remoteEntry.js",
+    records: "records@http://localhost:3001/remoteEntry.js",
+    prescriptions:     "prescriptions@http://localhost:3002/remoteEntry.js",
+    analytics:"analytics@http://localhost:3003/remoteEntry.js",
   },
   shared: {
     react:              { singleton: true, strictVersion: false },
@@ -215,16 +215,16 @@ new rspack.container.ModuleFederationPlugin({
 });
 ```
 
-### Remote (example: products)
+### Remote (example: records)
 
 ```js
-// rspack.config.js — products
+// rspack.config.js — records
 new rspack.container.ModuleFederationPlugin({
-  name: "products",
+  name: "records",
   filename: "remoteEntry.js",
   exposes: {
-    "./ProductsCatalog":          "./src/ProductsCatalog.tsx",
-    "./StreamingProductsCatalog": "./src/StreamingProductsCatalog.tsx",
+    "./MedicalRecords":          "./src/MedicalRecords.tsx",
+    "./StreamingMedicalRecords": "./src/StreamingMedicalRecords.tsx",
   },
   shared: { react: { singleton: true }, "react-dom": { singleton: true } },
 });
@@ -235,10 +235,10 @@ new rspack.container.ModuleFederationPlugin({
 Modules communicate through typed `CustomEvent` dispatch on `window`:
 
 ```typescript
-// Products → Cart: add item
+// Records → Prescriptions: add item
 window.dispatchEvent(
-  new CustomEvent("addToCart", {
-    detail: { id: 1, name: "Laptop", price: 999.99, quantity: 1 },
+  new CustomEvent("addPrescription", {
+    detail: { id: 1, name: "Sarah Chen", price: 999.99, quantity: 1 },
     bubbles: true,
   })
 );
@@ -246,21 +246,21 @@ window.dispatchEvent(
 // Any module → Shell: trigger notification toast
 window.dispatchEvent(
   new CustomEvent("showNotification", {
-    detail: { type: "success", message: "Item added to cart" },
+    detail: { type: "success", message: "Prescription created" },
   })
 );
 
 // Shell: notify on tab change
 window.dispatchEvent(
   new CustomEvent("moduleChange", {
-    detail: { newModule: "cart" },
+    detail: { newModule: "prescriptions" },
   })
 );
 
 // Remote -> Shell: request host-owned navigation without importing the router
 window.dispatchEvent(
   new CustomEvent("navigateToModule", {
-    detail: { module: "products" },
+    detail: { module: "records" },
   })
 );
 
@@ -275,14 +275,14 @@ window.dispatchEvent(
 Events are typed in each package's `types.ts` via `WindowEventMap` augmentation:
 
 ```typescript
-export interface AddToCartEvent extends CustomEvent {
-  detail: CartItem;
+export interface AddPrescriptionEvent extends CustomEvent {
+  detail: PrescriptionItem;
 }
 
 declare global {
   interface WindowEventMap {
-    addToCart: AddToCartEvent;
-    navigateToModule: CustomEvent<{ module: "home" | "products" | "cart" | "dashboard" }>;
+    addPrescription: AddPrescriptionEvent;
+    navigateToModule: CustomEvent<{ module: "home" | "records" | "prescriptions" | "analytics" }>;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
   }
@@ -305,9 +305,9 @@ The status bar shows a live count of killed remotes and the active deployment ri
 ### Individual kill scripts
 
 ```bash
-npm run kill:products    # Stop products on :3001
-npm run kill:cart         # Stop cart on :3002
-npm run kill:dashboard    # Stop dashboard on :3003
+npm run kill:records    # Stop products on :3001
+npm run kill:prescriptions         # Stop cart on :3002
+npm run kill:analytics    # Stop dashboard on :3003
 npm run kill:home         # Stop home on :3004
 npm run kill:ports        # Stop all demo ports (3000–3004)
 ```
@@ -327,9 +327,9 @@ npm run typecheck     # TypeScript validation across all packages
 Remote module imports are aliased in `vitest.config.ts` so federated components can be tested in isolation without running dev servers. Each package has its own test file:
 
 - `packages/shell/src/App.test.tsx` — navigation, tab switching, notification system, skeleton fallbacks
-- `packages/products/src/ProductsCatalog.test.tsx` — filtering, add-to-cart events, product grid
-- `packages/cart/src/ShoppingCart.test.tsx` — quantity controls, remove items, order summary, event listeners
-- `packages/dashboard/src/UserDashboard.test.tsx` — stats display, activity stream, welcome banner
+- `packages/records/src/MedicalRecords.test.tsx` — filtering, add-to-cart events, records grid
+- `packages/prescriptions/src/PrescriptionOrders.test.tsx` — quantity controls, remove items, order summary, event listeners
+- `packages/analytics/src/ClinicalAnalytics.test.tsx` — stats display, activity stream, welcome banner
 
 The shell test suite also covers theme restoration from `localStorage`, theme persistence, and `themeChange` event broadcasting.
 
@@ -359,7 +359,7 @@ The shell wraps each lazy-loaded remote in `<Suspense fallback={<Skeleton />}>` 
 
 - **Instant** (Home) — imports the standalone component via `home/Home`, no streaming delay
 - **Eager** (Products) — imports the streaming wrapper but preloads it on shell mount
-- **Streamed** (Cart, Dashboard) — loaded on demand with skeleton fallbacks
+- **Streamed** (Prescriptions, Analytics) — loaded on demand with skeleton fallbacks
 
 ## Conference Demo Value
 
@@ -379,14 +379,14 @@ This project demonstrates these micro-frontend concepts during a live talk:
 ### What to show in a talk
 
 - Start `npm run dev`, open `:3000` — Home loads **instantly** (no skeleton delay, status strip shows INSTANT)
-- Click Products — loads fast because it was **eagerly preloaded** on shell mount (status strip shows EAGER)
-- Click Cart — observe skeleton **streaming** in (status strip shows STREAMING)
-- Navigate to `/products`, add an item, then use the cart empty-state CTA to show remote-requested host navigation
-- Open the Federation Lab (click **Lab** in the header) and kill the products remote — products shows `ModuleFallback`, cart and dashboard continue working
-- Restore the remote from the Lab panel — products comes back
+- Click Records — loads fast because it was **eagerly preloaded** on shell mount (status strip shows EAGER)
+- Click Prescriptions — observe skeleton **streaming** in (status strip shows STREAMING)
+- Navigate to `/records`, add a prescription, then use the prescriptions empty-state CTA to show remote-requested host navigation
+- Open the Federation Lab (click **Lab** in the header) and kill the records remote — records shows `ModuleFallback`, prescriptions and analytics continue working
+- Restore the remote from the Lab panel — records comes back
 - Toggle the A/B deployment ring from stable to canary — version info updates per module
 - Kill a real remote server (`Ctrl+C` on `:3001`) — the health monitor detects it offline
-- Restart it — products comes back without refreshing the shell
+- Restart it — records comes back without refreshing the shell
 - Inspect the network tab — each module loads its own `remoteEntry.js` chunk
 
 ## Scripts
@@ -397,13 +397,13 @@ This project demonstrates these micro-frontend concepts during a live talk:
 | `npm run build` | Build all five packages for production |
 | `npm run dev:shell` | Start only the shell (`:3000`) |
 | `npm run dev:home` | Start only home (`:3004`) |
-| `npm run dev:products` | Start only products (`:3001`) |
-| `npm run dev:cart` | Start only cart (`:3002`) |
-| `npm run dev:dashboard` | Start only dashboard (`:3003`) |
+| `npm run dev:records` | Start only products (`:3001`) |
+| `npm run dev:prescriptions` | Start only cart (`:3002`) |
+| `npm run dev:analytics` | Start only dashboard (`:3003`) |
 | `npm run kill:ports` | Kill all demo ports (`3000`–`3004`) |
-| `npm run kill:products` | Kill only the products port (`:3001`) |
-| `npm run kill:cart` | Kill only the cart port (`:3002`) |
-| `npm run kill:dashboard` | Kill only the dashboard port (`:3003`) |
+| `npm run kill:records` | Kill only the products port (`:3001`) |
+| `npm run kill:prescriptions` | Kill only the cart port (`:3002`) |
+| `npm run kill:analytics` | Kill only the dashboard port (`:3003`) |
 | `npm run kill:home` | Kill only the home port (`:3004`) |
 
 ## Prerequisites

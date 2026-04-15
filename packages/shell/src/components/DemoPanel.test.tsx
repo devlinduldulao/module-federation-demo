@@ -7,23 +7,23 @@ import type { RemoteVersionInfo, KilledRemotes } from "../lib/demo";
 
 const HEALTH: RemoteHealth[] = [
     { id: "home", port: "3004", status: "online", latencyMs: 12, lastChecked: Date.now() },
-    { id: "products", port: "3001", status: "online", latencyMs: 8, lastChecked: Date.now() },
-    { id: "cart", port: "3002", status: "offline", latencyMs: null, lastChecked: null },
-    { id: "dashboard", port: "3003", status: "checking", latencyMs: null, lastChecked: null },
+    { id: "records", port: "3001", status: "online", latencyMs: 8, lastChecked: Date.now() },
+    { id: "prescriptions", port: "3002", status: "offline", latencyMs: null, lastChecked: null },
+    { id: "analytics", port: "3003", status: "checking", latencyMs: null, lastChecked: null },
 ];
 
 const KILLED: KilledRemotes = {
     home: false,
-    products: false,
-    cart: false,
-    dashboard: false,
+    records: false,
+    prescriptions: false,
+    analytics: false,
 };
 
 const VERSIONS: RemoteVersionInfo[] = [
     { id: "home", version: "1.0.0", variant: "stable", buildHash: "a3f2c1d" },
-    { id: "products", version: "2.1.0", variant: "stable", buildHash: "b7e4f9a" },
-    { id: "cart", version: "1.3.2", variant: "stable", buildHash: "c1d8e3b" },
-    { id: "dashboard", version: "1.5.0", variant: "stable", buildHash: "d9f2a7c" },
+    { id: "records", version: "2.1.0", variant: "stable", buildHash: "b7e4f9a" },
+    { id: "prescriptions", version: "1.3.2", variant: "stable", buildHash: "c1d8e3b" },
+    { id: "analytics", version: "1.5.0", variant: "stable", buildHash: "d9f2a7c" },
 ];
 
 const defaults = {
@@ -88,9 +88,9 @@ describe("DemoPanel", () => {
         render(<DemoPanel {...defaults} />);
         expect(screen.getByText("Remote Health")).toBeInTheDocument();
         expect(screen.getAllByText("home").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("products").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("cart").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("dashboard").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("records").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("prescriptions").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("analytics").length).toBeGreaterThan(0);
     });
 
     it("shows latency for online remotes", () => {
@@ -112,7 +112,7 @@ describe("DemoPanel", () => {
             screen.getByRole("button", { name: /kill home module/i })
         ).toBeInTheDocument();
         expect(
-            screen.getByRole("button", { name: /kill products module/i })
+            screen.getByRole("button", { name: /kill records module/i })
         ).toBeInTheDocument();
     });
 
@@ -121,19 +121,19 @@ describe("DemoPanel", () => {
         render(<DemoPanel {...defaults} />);
 
         await user.click(
-            screen.getByRole("button", { name: /kill products module/i })
+            screen.getByRole("button", { name: /kill records module/i })
         );
-        expect(defaults.onToggleKill).toHaveBeenCalledWith("products");
+        expect(defaults.onToggleKill).toHaveBeenCalledWith("records");
     });
 
     it("shows LIVE for non-killed modules and DOWN for killed", () => {
-        const killedState = { ...KILLED, cart: true };
+        const killedState = { ...KILLED, prescriptions: true };
         render(<DemoPanel {...defaults} killed={killedState} />);
 
         // Get all LIVE labels - should be 5 (2 from health Online + 3 from kill switches)
         const liveElements = screen.getAllByText("LIVE");
         expect(liveElements.length).toBeGreaterThan(0);
-        // Cart should show DOWN in kill switches
+        // Prescriptions should show DOWN in kill switches
         expect(screen.getByText("DOWN")).toBeInTheDocument();
     });
 
@@ -155,7 +155,7 @@ describe("DemoPanel", () => {
 
     it("calls onRestoreAll when Restore All button is clicked", async () => {
         const user = userEvent.setup();
-        const killedState = { home: true, products: true, cart: true, dashboard: true };
+        const killedState = { home: true, records: true, prescriptions: true, analytics: true };
         render(<DemoPanel {...defaults} killed={killedState} />);
 
         await user.click(
@@ -165,7 +165,7 @@ describe("DemoPanel", () => {
     });
 
     it("disables Kill All when all are already killed", () => {
-        const killedState = { home: true, products: true, cart: true, dashboard: true };
+        const killedState = { home: true, records: true, prescriptions: true, analytics: true };
         render(<DemoPanel {...defaults} killed={killedState} />);
 
         expect(
