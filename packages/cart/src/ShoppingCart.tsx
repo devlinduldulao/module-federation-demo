@@ -132,6 +132,7 @@ const OrderSummary = memo<{
       <button
         onClick={onCheckout}
         className="w-full bg-citrine text-noir font-mono text-sm tracking-wider py-4 hover:bg-citrine-dim transition-colors duration-300"
+        style={{ color: "#0C0C0C" }}
         aria-label={`Checkout ${itemCount} items for $${total.toFixed(2)}`}
       >
         Checkout &rarr;
