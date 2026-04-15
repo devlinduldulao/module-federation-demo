@@ -1,0 +1,100 @@
+# Deploys the micro-frontend app to GitHub Pages.
+#
+# SETUP (one-time):
+#   1. Go to repo Settings → Pages
+#   2. Set "Source" to "GitHub Actions"
+#   3. Push to main — this workflow handles the rest
+#
+# HOW IT WORKS:
+#   - Remotes (home, records, prescriptions, analytics) are built first
+#   - Shell is built with REMOTE_BASE_URL pointing to the Pages URL
+#   - All outputs are assembled into a single directory:
+#       /                → shell (host app)
+#       /remotes/home/   → home remote (remoteEntry.js + chunks)
+#       /remotes/records/        → records remote
+#       /remotes/prescriptions/  → prescriptions remote
+#       /remotes/analytics/      → analytics remote
+#   - 404.html is a copy of index.html (SPA fallback for client-side routing)
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install --force
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      # Build all four remotes (no special env vars — publicPath: "auto" works)
+      - name: Build remotes
+        run: |
+          for remote in home records prescriptions analytics; do
+            echo "::group::Building $remote"
+            (cd packages/$remote && npm run build)
+            echo "::endgroup::"
+          done
+
+      # Build the shell host with production remote URLs and base path
+      - name: Build shell
+        run: cd packages/shell && npm run build
+        env:
+          REMOTE_BASE_URL: ${{ steps.pages.outputs.base_url }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      # Assemble all build outputs into a single deployable directory
+      - name: Assemble site
+        run: |
+          mkdir -p _site/remotes
+
+          # Shell → site root
+          cp -r packages/shell/dist/* _site/
+
+          # Remotes → /remotes/<name>/
+          for remote in home records prescriptions analytics; do
+            cp -r packages/$remote/dist _site/remotes/$remote
+          done
+
+          # SPA fallback: GitHub Pages serves 404.html for unknown paths.
+          # Since the shell's index.html uses absolute publicPath, scripts
+          # resolve correctly regardless of the URL path.
+          cp _site/index.html _site/404.html
+
+          # Prevent Jekyll from ignoring files starting with _
+          touch _site/.nojekyll
+
+          echo "Site assembled:"
+          find _site -maxdepth 3 -type f | head -40
+
+      - uses: actions/upload-pages-artifact@v3
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

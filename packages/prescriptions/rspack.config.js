@@ -13,6 +13,12 @@ module.exports = {
   mode: isDev ? "development" : "production",
   target: "web",
 
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    publicPath: "auto",
+    clean: true,
+  },
+
   resolve: {
     extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
   },

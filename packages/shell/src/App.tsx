@@ -879,6 +879,7 @@ function ShellFrame(): React.JSX.Element {
 function App(): React.JSX.Element {
   return (
     <BrowserRouter
+      basename={process.env.BASE_PATH || "/"}
       future={{
         v7_relativeSplatPath: true,
         v7_startTransition: true,
