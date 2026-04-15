@@ -2,7 +2,6 @@ import React, {
   Suspense,
   lazy,
   memo,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -10,15 +9,18 @@ import React, {
 } from "react";
 import {
   BrowserRouter,
-  NavLink,
   Navigate,
+  NavLink,
   Route,
   Routes,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
+import { Toaster, toast } from "sonner";
 import { cn } from "./lib/utils";
 import {
   THEME_DEFINITIONS,
+  THEME_STORAGE_KEY,
   applyTheme,
   getInitialTheme,
   type ThemeName,
@@ -72,28 +74,25 @@ const StreamingUserDashboard = lazy(() =>
 );
 
 type ModuleType = "products" | "cart" | "dashboard";
+type NotificationType = "success" | "error" | "info";
 
-interface ModuleConfig {
-  readonly id: ModuleType;
-  readonly label: string;
-  readonly path: string;
-  readonly port: string;
-  readonly component: React.LazyExoticComponent<React.ComponentType>;
-}
-
-interface Notification {
+type CommandAction = {
   id: string;
-  type: "success" | "error" | "info";
-  message: string;
-}
-
-const PREFETCH_MAP: Record<ModuleType, () => Promise<unknown>> = {
-  products: () => import("products/StreamingProductsCatalog").catch(() => { }),
-  cart: () => import("cart/StreamingShoppingCart").catch(() => { }),
-  dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => { }),
+  title: string;
+  subtitle: string;
+  keywords: string;
+  run: () => void;
 };
 
-const MODULES: readonly ModuleConfig[] = [
+type ModuleConfig = {
+  id: ModuleType;
+  label: string;
+  path: string;
+  port: string;
+  component: React.LazyExoticComponent<React.ComponentType>;
+};
+
+const MODULES = [
   {
     id: "products",
     label: "Products",
@@ -115,29 +114,56 @@ const MODULES: readonly ModuleConfig[] = [
     port: "3003",
     component: StreamingUserDashboard,
   },
-] as const;
+] as const satisfies readonly ModuleConfig[];
 
 const DEFAULT_MODULE = MODULES[0]!;
 const ROOT_MODULE = MODULES.find((module) => module.id === "dashboard")!;
-const MODULE_BY_PATH = new Map(MODULES.map((module) => [module.path, module]));
-const THEMES = Object.entries(THEME_DEFINITIONS) as Array<[
-  ThemeName,
-  (typeof THEME_DEFINITIONS)[ThemeName],
-]>;
+const MODULE_BY_PATH = new Map<string, ModuleConfig>(
+  MODULES.map((module) => [module.path, module])
+);
+const KNOWN_PATHS = new Set<string>(MODULES.map((module) => module.path));
+const THEME_OPTIONS: readonly ThemeName[] = ["dark", "dim", "light"] as const;
+const KEYBOARD_SHORTCUT_LABEL = "Ctrl/Cmd + K";
+
+const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
+  products: () => import("products/StreamingProductsCatalog").catch(() => undefined),
+  cart: () => import("cart/StreamingShoppingCart").catch(() => undefined),
+  dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => undefined),
+};
 
 function getModuleForPath(pathname: string): ModuleConfig {
+  if (pathname === "/") {
+    return ROOT_MODULE;
+  }
+
   return MODULE_BY_PATH.get(pathname) ?? DEFAULT_MODULE;
 }
 
-const NavigationButton = memo<{ module: ModuleConfig }>(({ module }) => {
-  const handleMouseEnter = useCallback(() => {
-    PREFETCH_MAP[module.id]();
-  }, [module.id]);
+function showToast(type: NotificationType, message: string): void {
+  if (type === "success") {
+    toast.success(message);
+    return;
+  }
 
+  if (type === "error") {
+    toast.error(message);
+    return;
+  }
+
+  toast(message);
+}
+
+const NavigationItem = memo(function NavigationItem({
+  module,
+}: {
+  module: ModuleConfig;
+}) {
   return (
     <NavLink
       to={module.path}
-      onMouseEnter={handleMouseEnter}
+      onMouseEnter={() => {
+        PREFETCHERS[module.id]();
+      }}
       className={({ isActive }) =>
         cn(
           "relative px-5 py-2.5 font-mono text-sm tracking-wide transition-all duration-500 focus:outline-hidden",
@@ -151,7 +177,7 @@ const NavigationButton = memo<{ module: ModuleConfig }>(({ module }) => {
           <span className="relative z-10">{module.label.toUpperCase()}</span>
           <span
             className={cn(
-              "absolute bottom-0 left-0 h-[2px] bg-citrine transition-all duration-500",
+              "absolute bottom-0 left-0 h-0.5 bg-citrine transition-all duration-500",
               isActive ? "w-full" : "w-0"
             )}
           />
@@ -161,40 +187,217 @@ const NavigationButton = memo<{ module: ModuleConfig }>(({ module }) => {
   );
 });
 
-NavigationButton.displayName = "NavigationButton";
-
-const ThemeSwitchButton = memo<{
-  themeName: ThemeName;
-  isActive: boolean;
-  onSelect: (themeName: ThemeName) => void;
-}>(({ themeName, isActive, onSelect }) => {
-  const definition = THEME_DEFINITIONS[themeName];
-
+const ThemeSelector = memo(function ThemeSelector({
+  theme,
+  onSelect,
+}: {
+  theme: ThemeName;
+  onSelect: (theme: ThemeName) => void;
+}) {
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(themeName)}
-      className={cn(
-        "rounded-full border px-3 py-1 font-mono text-[10px] tracking-[0.28em] uppercase transition-colors duration-300",
-        isActive
-          ? "border-citrine bg-citrine/10 text-citrine"
-          : "border-edge text-dim hover:border-edge-bright hover:text-cream"
-      )}
-      aria-label={`Switch theme to ${themeName}`}
-      aria-pressed={isActive}
-      title={definition.description}
-    >
-      {definition.label}
-    </button>
+    <label className="inline-flex items-center gap-2 border border-edge bg-surface/70 px-3 py-2">
+      <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase">
+        Theme
+      </span>
+      <select
+        value={theme}
+        onChange={(event) => onSelect(event.target.value as ThemeName)}
+        className="min-w-24 bg-transparent font-mono text-[10px] tracking-[0.2em] text-cream uppercase focus:outline-hidden"
+        aria-label="Choose theme"
+      >
+        {THEME_OPTIONS.map((themeOption) => {
+          const definition = THEME_DEFINITIONS[themeOption];
+
+          return (
+            <option key={themeOption} value={themeOption}>
+              {definition.label}
+            </option>
+          );
+        })}
+      </select>
+    </label>
   );
 });
 
-ThemeSwitchButton.displayName = "ThemeSwitchButton";
+const SettingsDrawer = memo(function SettingsDrawer({
+  isOpen,
+  theme,
+  onClose,
+  onSelectTheme,
+}: {
+  isOpen: boolean;
+  theme: ThemeName;
+  onClose: () => void;
+  onSelectTheme: (theme: ThemeName) => void;
+}) {
+  if (!isOpen) {
+    return null;
+  }
 
-function ModuleRenderer({ module }: { module: ModuleConfig }): React.JSX.Element {
+  return (
+    <>
+      <button
+        type="button"
+        className="fixed inset-0 z-40 bg-noir/60 backdrop-blur-sm"
+        aria-label="Close appearance settings"
+        onClick={onClose}
+      />
+      <aside className="fixed right-0 top-0 z-50 h-full w-full max-w-md border-l border-edge bg-noir/95 p-6 backdrop-blur-enhanced">
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div>
+            <span className="mb-2 block font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
+              Appearance Settings
+            </span>
+            <h3 className="font-display text-3xl italic text-cream">Theme Control</h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex size-10 items-center justify-center border border-edge font-mono text-xs text-dim transition-colors duration-200 hover:border-cream hover:text-cream"
+            aria-label="Close theme settings"
+          >
+            ×
+          </button>
+        </div>
+
+        <p className="mb-6 text-sm leading-relaxed text-stone">
+          The shell owns theme state and broadcasts updates across the federation through shared CSS variables and the global theme event contract.
+        </p>
+
+        <div className="mb-8 space-y-3">
+          {THEME_OPTIONS.map((themeOption) => {
+            const definition = THEME_DEFINITIONS[themeOption];
+            const isActive = themeOption === theme;
+
+            return (
+              <button
+                key={themeOption}
+                type="button"
+                onClick={() => onSelectTheme(themeOption)}
+                className={cn(
+                  "w-full border px-4 py-4 text-left transition-all duration-300 focus:outline-hidden",
+                  isActive
+                    ? "border-citrine bg-citrine/10"
+                    : "border-edge hover:border-edge-bright hover:bg-surface/70"
+                )}
+                aria-label={`Apply ${definition.label} theme from settings`}
+                aria-pressed={isActive}
+              >
+                <div className="mb-2 flex items-center justify-between gap-4">
+                  <span
+                    className={cn(
+                      "font-mono text-[11px] tracking-[0.3em] uppercase",
+                      isActive ? "text-citrine" : "text-dim"
+                    )}
+                  >
+                    {definition.label}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase text-dim">
+                    {isActive ? "Active" : "Available"}
+                  </span>
+                </div>
+                <p className="text-sm leading-relaxed text-stone">{definition.description}</p>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center justify-between gap-4 border-t border-edge pt-6 font-mono text-[10px] tracking-wider text-dim uppercase">
+          <span>Persisted in localStorage</span>
+          <span>{THEME_STORAGE_KEY}</span>
+        </div>
+      </aside>
+    </>
+  );
+});
+
+const CommandPalette = memo(function CommandPalette({
+  isOpen,
+  query,
+  onQueryChange,
+  commands,
+  onClose,
+}: {
+  isOpen: boolean;
+  query: string;
+  onQueryChange: (query: string) => void;
+  commands: readonly CommandAction[];
+  onClose: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current?.focus();
+    }
+  }, [isOpen]);
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        className="fixed inset-0 z-40 bg-noir/65 backdrop-blur-sm"
+        aria-label="Close command palette"
+        onClick={onClose}
+      />
+      <div className="fixed inset-x-4 top-8 z-50 mx-auto w-full max-w-2xl border border-edge bg-noir/95 shadow-2xl backdrop-blur-enhanced">
+        <div className="border-b border-edge px-5 py-4">
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
+              Command Palette
+            </span>
+            <span className="font-mono text-[10px] text-dim uppercase">Esc to close</span>
+          </div>
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(event) => onQueryChange(event.target.value)}
+            placeholder="Search theme and navigation commands"
+            className="w-full border border-edge bg-transparent px-4 py-3 font-mono text-sm text-cream placeholder:text-dim focus:outline-hidden"
+            aria-label="Search commands"
+          />
+        </div>
+
+        <div className="max-h-[60vh] overflow-y-auto">
+          {commands.length > 0 ? (
+            commands.map((command) => (
+              <button
+                key={command.id}
+                type="button"
+                onClick={command.run}
+                className="w-full border-b border-edge px-5 py-4 text-left transition-colors duration-200 hover:bg-surface/70 focus:outline-hidden"
+                aria-label={command.title}
+              >
+                <span className="mb-1 block font-mono text-[11px] tracking-[0.2em] text-cream uppercase">
+                  {command.title}
+                </span>
+                <span className="text-sm text-stone">{command.subtitle}</span>
+              </button>
+            ))
+          ) : (
+            <div className="px-5 py-10 text-center">
+              <span className="mb-3 block font-mono text-[11px] tracking-[0.3em] text-dim uppercase">
+                No Matches
+              </span>
+              <p className="text-sm text-stone">
+                Try searching for dark, light, dim, cart, products, or dashboard.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+});
+
+function ModuleView({ module }: { module: ModuleConfig }): React.JSX.Element {
   const Component = module.component;
 
-  const skeleton = useMemo(() => {
+  const fallback = useMemo(() => {
     switch (module.id) {
       case "products":
         return <ProductsSkeleton />;
@@ -209,205 +412,280 @@ function ModuleRenderer({ module }: { module: ModuleConfig }): React.JSX.Element
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={skeleton} key={module.id}>
+      <Suspense fallback={fallback}>
         <Component />
       </Suspense>
     </ErrorBoundary>
   );
 }
 
-function ShellLayout(): React.JSX.Element {
+function ShellFrame(): React.JSX.Element {
   const location = useLocation();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [activeTheme, setActiveTheme] = useState<ThemeName>(() => getInitialTheme());
-  const hasMountedRef = useRef(false);
+  const navigate = useNavigate();
+  const [theme, setTheme] = useState<ThemeName>(() => getInitialTheme());
+  const [isThemeDrawerOpen, setIsThemeDrawerOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState("");
 
-  const activeConfig = useMemo(
-    () => getModuleForPath(location.pathname),
-    [location.pathname]
-  );
-
-  const dispatchModuleChange = useCallback((moduleId: ModuleType) => {
-    try {
-      window.dispatchEvent(
-        new CustomEvent("moduleChange", {
-          detail: { newModule: moduleId },
-        })
-      );
-    } catch (error) {
-      console.warn("Failed to dispatch module change event:", error);
-    }
-  }, []);
+  const activeModule = useMemo(() => getModuleForPath(location.pathname), [location.pathname]);
 
   useEffect(() => {
-    applyTheme(activeTheme, { persist: false, broadcast: false });
-  }, []);
-
-  useEffect(() => {
-    dispatchModuleChange(activeConfig.id);
-
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true;
+    if (location.pathname === "/") {
+      navigate(ROOT_MODULE.path, { replace: true });
       return;
     }
 
-    setNotifications((prev) => [
-      {
-        id: Date.now().toString(),
-        type: "info",
-        message: `${activeConfig.label} module loaded`,
-      },
-      ...prev.slice(0, 2),
-    ]);
-  }, [activeConfig, dispatchModuleChange]);
+    if (!KNOWN_PATHS.has(location.pathname)) {
+      navigate(DEFAULT_MODULE.path, { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   useEffect(() => {
-    const handleNotification = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      const { type, message } = customEvent.detail;
-      setNotifications((prev) => [
-        { id: Date.now().toString(), type, message },
-        ...prev.slice(0, 2),
-      ]);
+    applyTheme(theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const handleShowNotification = (event: Event) => {
+      const customEvent = event as CustomEvent<{ type: NotificationType; message: string }>;
+      showToast(customEvent.detail.type, customEvent.detail.message);
     };
 
-    window.addEventListener("showNotification", handleNotification);
-    return () =>
-      window.removeEventListener("showNotification", handleNotification);
+    window.addEventListener("showNotification", handleShowNotification);
+    return () => window.removeEventListener("showNotification", handleShowNotification);
   }, []);
 
   useEffect(() => {
-    if (notifications.length === 0) {
-      return;
-    }
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== THEME_STORAGE_KEY) {
+        return;
+      }
 
-    const timer = setTimeout(() => {
-      setNotifications((prev) => prev.slice(0, -1));
-    }, 3000);
+      if (event.newValue === "dark" || event.newValue === "dim" || event.newValue === "light") {
+        setTheme(event.newValue);
+      }
+    };
 
-    return () => clearTimeout(timer);
-  }, [notifications]);
-
-  const handleThemeChange = useCallback((themeName: ThemeName) => {
-    setActiveTheme(themeName);
-    applyTheme(themeName);
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("moduleChange", {
+        detail: { newModule: activeModule.id },
+      })
+    );
+
+    PREFETCHERS[activeModule.id]();
+  }, [activeModule]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setIsCommandPaletteOpen(true);
+        return;
+      }
+
+      if (event.key === "Escape") {
+        setIsThemeDrawerOpen(false);
+        setIsCommandPaletteOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (!isCommandPaletteOpen) {
+      setCommandQuery("");
+    }
+  }, [isCommandPaletteOpen]);
+
+  const handleThemeChange = (nextTheme: ThemeName) => {
+    if (nextTheme !== theme) {
+      setTheme(nextTheme);
+    }
+  };
+
+  const commandActions = useMemo<readonly CommandAction[]>(() => {
+    const navigationCommands = MODULES.map((module) => ({
+      id: `goto-${module.id}`,
+      title: `Switch to ${module.label}`,
+      subtitle: `Load the ${module.label.toLowerCase()} micro-frontend on port ${module.port}`,
+      keywords: `${module.id} ${module.label.toLowerCase()} module navigation ${module.port}`,
+      run: () => {
+        navigate(module.path);
+        setIsCommandPaletteOpen(false);
+      },
+    }));
+
+    const themeCommands = THEME_OPTIONS.map((themeOption) => ({
+      id: `theme-${themeOption}`,
+      title: `Apply ${THEME_DEFINITIONS[themeOption].label} Theme`,
+      subtitle: THEME_DEFINITIONS[themeOption].description,
+      keywords: `${themeOption} theme appearance colors`,
+      run: () => {
+        handleThemeChange(themeOption);
+        setIsCommandPaletteOpen(false);
+      },
+    }));
+
+    return [...navigationCommands, ...themeCommands];
+  }, [navigate, theme]);
+
+  const filteredCommands = useMemo(() => {
+    const normalizedQuery = commandQuery.trim().toLowerCase();
+
+    if (normalizedQuery.length === 0) {
+      return commandActions;
+    }
+
+    return commandActions.filter((command) =>
+      `${command.title} ${command.subtitle} ${command.keywords}`
+        .toLowerCase()
+        .includes(normalizedQuery)
+    );
+  }, [commandActions, commandQuery]);
+
   return (
-    <div className="min-h-screen bg-noir relative">
+    <div className="relative min-h-screen bg-noir">
       <div
-        className="fixed inset-0 pointer-events-none opacity-[0.03]"
+        className="pointer-events-none fixed inset-0 opacity-[0.03]"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 1px 1px, rgba(250,250,249,0.5) 1px, transparent 0)",
+            "radial-gradient(circle at 1px 1px, var(--theme-grid-dot, rgba(250,250,249,0.5)) 1px, transparent 0)",
           backgroundSize: "32px 32px",
         }}
       />
+      <div className="fixed left-0 right-0 top-0 z-50 h-px bg-linear-to-r from-transparent via-citrine/40 to-transparent" />
 
-      <div className="fixed top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-citrine/40 to-transparent z-50" />
+      <Toaster
+        position="bottom-right"
+        closeButton
+        richColors={false}
+        duration={3000}
+        expand
+        visibleToasts={3}
+        toastOptions={{
+          unstyled: true,
+          classNames: {
+            toast:
+              "pointer-events-auto w-[min(360px,calc(100vw-2rem))] border border-edge bg-noir/96 px-4 py-3 shadow-2xl backdrop-blur-enhanced",
+            title: "font-mono text-xs tracking-wide text-cream",
+            description: "font-mono text-[11px] leading-relaxed text-stone",
+            closeButton:
+              "border border-edge bg-transparent text-dim transition-colors duration-200 hover:border-cream hover:text-cream",
+            success: "border-mint/35 text-mint",
+            error: "border-rose/35 text-rose",
+            info: "border-edge text-stone",
+          },
+        }}
+      />
 
-      <div className="fixed top-6 right-6 z-50 space-y-2">
-        {notifications.map((notification) => (
-          <div
-            key={notification.id}
-            className={cn(
-              "px-4 py-2.5 border font-mono text-xs tracking-wide transition-all duration-300 animate-in slide-in-from-right",
-              notification.type === "success" &&
-              "bg-noir border-mint/30 text-mint",
-              notification.type === "error" &&
-              "bg-noir border-rose/30 text-rose",
-              notification.type === "info" && "bg-noir border-edge text-stone"
-            )}
-          >
-            {notification.message}
-          </div>
-        ))}
-      </div>
+      <SettingsDrawer
+        isOpen={isThemeDrawerOpen}
+        theme={theme}
+        onClose={() => setIsThemeDrawerOpen(false)}
+        onSelectTheme={handleThemeChange}
+      />
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        query={commandQuery}
+        onQueryChange={setCommandQuery}
+        commands={filteredCommands}
+        onClose={() => setIsCommandPaletteOpen(false)}
+      />
 
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <div className="relative z-10 flex min-h-screen flex-col">
         <header className="border-b border-edge">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-4">
+          <div className="mx-auto max-w-350 px-6 py-4 lg:px-10">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center justify-between gap-6">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-display text-2xl italic text-cream tracking-tight">
-                    MF
-                  </span>
-                  <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
-                    Demo
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {THEMES.map(([themeName]) => (
-                    <ThemeSwitchButton
-                      key={themeName}
-                      themeName={themeName}
-                      isActive={activeTheme === themeName}
-                      onSelect={handleThemeChange}
-                    />
-                  ))}
-                </div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-display text-2xl italic tracking-tight text-cream">MF</span>
+                <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">Demo</span>
               </div>
 
               <div className="flex flex-col gap-3 lg:items-end">
-                <nav
-                  className="flex items-center gap-1"
-                  role="navigation"
-                  aria-label="Module navigation"
-                >
+                <nav className="flex flex-wrap items-center gap-1" aria-label="Module navigation">
                   {MODULES.map((module) => (
-                    <NavigationButton key={module.id} module={module} />
+                    <NavigationItem key={module.id} module={module} />
                   ))}
                 </nav>
+
+                <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto">
+                  <ThemeSelector theme={theme} onSelect={handleThemeChange} />
+                  <button
+                    type="button"
+                    onClick={() => setIsThemeDrawerOpen(true)}
+                    className="border border-edge px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-dim uppercase transition-all duration-300 hover:border-cream hover:text-cream focus:outline-hidden"
+                    aria-label="Open appearance settings"
+                  >
+                    Settings
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsCommandPaletteOpen(true)}
+                    className="border border-edge px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-dim uppercase transition-all duration-300 hover:border-cream hover:text-cream focus:outline-hidden"
+                    aria-label="Open command palette"
+                  >
+                    Commands
+                  </button>
+                  <span className="hidden font-mono text-[10px] text-dim uppercase sm:inline">
+                    {KEYBOARD_SHORTCUT_LABEL}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </header>
 
         <div className="border-b border-edge bg-surface/50">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-            <div className="flex items-center justify-between h-9">
+          <div className="mx-auto max-w-350 px-6 lg:px-10">
+            <div className="flex h-9 items-center justify-between">
               <div className="flex items-center gap-4 font-mono text-[11px] text-dim">
                 <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-citrine animate-subtle-pulse" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-citrine" />
                   <span>STREAMING</span>
                 </div>
                 <span className="text-edge">|</span>
-                <span>{activeConfig.label.toLowerCase()}</span>
+                <span>{activeModule.id}</span>
                 <span className="text-edge">|</span>
-                <span>:{activeConfig.port}</span>
+                <span>:{activeModule.port}</span>
               </div>
-              <div className="font-mono text-[11px] text-dim hidden sm:flex items-center gap-4">
+              <div className="flex items-center gap-4 font-mono text-[11px] text-dim">
                 <span>React 19</span>
                 <span className="text-edge">|</span>
-                <span>Suspense</span>
+                <span className="hidden sm:inline">Suspense</span>
                 <span className="text-edge">|</span>
-                <span>{THEME_DEFINITIONS[activeTheme].label}</span>
+                <span className="hidden sm:inline">Module Federation</span>
+                <span className="text-edge">|</span>
+                <span>{THEME_DEFINITIONS[theme].label}</span>
               </div>
             </div>
           </div>
         </div>
 
         <main className="flex-1">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-10">
+          <div className="mx-auto max-w-350 px-6 py-10 lg:px-10">
             <Routes>
-              <Route path="/" element={<Navigate to={ROOT_MODULE.path} replace />} />
               {MODULES.map((module) => (
                 <Route
                   key={module.id}
                   path={module.path}
-                  element={<ModuleRenderer module={module} />}
+                  element={<ModuleView module={module} />}
                 />
               ))}
+              <Route path="/" element={<Navigate to={ROOT_MODULE.path} replace />} />
               <Route path="*" element={<Navigate to={DEFAULT_MODULE.path} replace />} />
             </Routes>
           </div>
         </main>
 
-        <footer className="border-t border-edge mt-auto">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-            <div className="flex items-center justify-between h-12 font-mono text-[10px] tracking-wider text-dim uppercase">
+        <footer className="mt-auto border-t border-edge">
+          <div className="mx-auto max-w-350 px-6 lg:px-10">
+            <div className="flex h-12 items-center justify-between font-mono text-[10px] tracking-wider text-dim uppercase">
               <span>Independent Deployment</span>
               <div className="flex items-center gap-4">
                 <span>Hot Reload</span>
@@ -424,16 +702,12 @@ function ShellLayout(): React.JSX.Element {
   );
 }
 
-ShellLayout.displayName = "ShellLayout";
-
 function App(): React.JSX.Element {
   return (
     <BrowserRouter>
-      <ShellLayout />
+      <ShellFrame />
     </BrowserRouter>
   );
 }
-
-App.displayName = "App";
 
 export default App;

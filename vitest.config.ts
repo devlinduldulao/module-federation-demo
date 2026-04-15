@@ -31,6 +31,7 @@ export default defineConfig({
       "react-dom/client": path.join(rootNodeModules, "react-dom/client"),
       "react-dom": path.join(rootNodeModules, "react-dom"),
       "react-router-dom": path.join(rootNodeModules, "react-router-dom"),
+      sonner: path.join(rootNodeModules, "sonner"),
 
       // Resolve MF remote imports to actual source files for transform
       "products/StreamingProductsCatalog": path.resolve(

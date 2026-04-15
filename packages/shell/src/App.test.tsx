@@ -88,7 +88,7 @@ describe("Shell App", () => {
   it("shows the tech stack label and theme controls", async () => {
     render(<App />);
     expect(screen.getByText("React 19")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /switch theme to dark/i })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /choose theme/i })).toBeInTheDocument();
   });
 
   it("restores the saved theme from localStorage on load", async () => {
@@ -96,10 +96,7 @@ describe("Shell App", () => {
 
     render(<App />);
 
-    expect(screen.getByRole("button", { name: /switch theme to light/i })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    expect(screen.getByRole("combobox", { name: /choose theme/i })).toHaveValue("light");
     expect(document.documentElement.dataset.theme).toBe("light");
     expect(document.documentElement.style.getPropertyValue("--color-noir")).toBe("#F3EEE3");
   });
@@ -168,13 +165,13 @@ describe("Shell App", () => {
     window.removeEventListener("moduleChange", handler);
   });
 
-  it("shows an info notification on route change", async () => {
+  it("does not show a page loaded notification on route change", async () => {
     const user = userEvent.setup();
     render(<App />);
 
     await user.click(screen.getByRole("link", { name: /navigate to cart/i }));
 
-    expect(screen.getByText("Cart module loaded")).toBeInTheDocument();
+    expect(screen.queryByText("Cart module loaded")).not.toBeInTheDocument();
   });
 
   it("persists and broadcasts theme changes from the shell", async () => {
@@ -184,14 +181,11 @@ describe("Shell App", () => {
     const handler = vi.fn();
     window.addEventListener("themeChange", handler);
 
-    await user.click(screen.getByRole("button", { name: /switch theme to dim/i }));
+    await user.selectOptions(screen.getByRole("combobox", { name: /choose theme/i }), "dim");
 
     expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("dim");
     expect(document.documentElement.dataset.theme).toBe("dim");
-    expect(screen.getByRole("button", { name: /switch theme to dim/i })).toHaveAttribute(
-      "aria-pressed",
-      "true"
-    );
+    expect(screen.getByRole("combobox", { name: /choose theme/i })).toHaveValue("dim");
     expect((handler.mock.calls[0]?.[0] as CustomEvent).detail).toEqual({
       theme: "dim",
       colorScheme: "dark",
@@ -211,7 +205,9 @@ describe("Shell App", () => {
       );
     });
 
-    expect(screen.getByText("Item added!")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Item added!")).toBeInTheDocument();
+    });
   });
 
   it("renders footer with architecture keywords", async () => {
@@ -260,12 +256,16 @@ describe("Shell App", () => {
       );
     });
 
-    expect(screen.getByText("Temporary toast")).toBeInTheDocument();
-
-    act(() => {
-      vi.advanceTimersByTime(3100);
+    await waitFor(() => {
+      expect(screen.getByText("Temporary toast")).toBeInTheDocument();
     });
 
-    expect(screen.queryByText("Temporary toast")).not.toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(4500);
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText("Temporary toast")).not.toBeInTheDocument();
+    });
   });
 });
