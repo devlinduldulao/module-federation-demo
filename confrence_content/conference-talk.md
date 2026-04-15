@@ -2,20 +2,20 @@
 
 ## Description
 
-Micro-frontends let teams ship independently. React 19 Suspense lets components stream. This talk shows what happens when you stop treating them as separate ideas and start treating Suspense as a first-class micro-frontend primitive. Through a live-coded e-commerce demo — a shell host composing four federated React 19 remotes via Rspack Module Federation — we'll explore how each remote can own its entire loading choreography with the `createResource` pattern, how a host shell can stay completely ignorant of its children's internals using nothing but `<Suspense>` and `<ErrorBoundary>`, and how custom DOM events replace shared state for cross-module communication that survives independent deployments. You'll see real streaming, real fault isolation with a live kill-switch demo panel, and a real test suite — no slides-only architecture diagrams.
+Micro-frontends let teams ship independently. React 19 Suspense lets components stream. This talk shows what happens when you stop treating them as separate ideas and start treating Suspense as a first-class micro-frontend primitive. Through a live-coded healthcare demo — a shell host composing four federated React 19 remotes via Rspack Module Federation — we'll explore how each remote can own its entire loading choreography with the `createResource` pattern, how a host shell can stay completely ignorant of its children's internals using nothing but `<Suspense>` and `<ErrorBoundary>`, and how custom DOM events replace shared state for cross-module communication that survives independent deployments. You'll see real streaming, real fault isolation with a live kill-switch demo panel, and a real test suite — no slides-only architecture diagrams.
 
 ## Abstract
 
 Module Federation promised us independently deployed micro-frontends. React 19 promised us streaming Suspense. What happens when you combine them?
 
-In this talk, we'll build a production-grade e-commerce shell that composes four independent React 19 applications — a landing page, product catalog, shopping cart, and user dashboard — into a single cohesive experience using Rspack Module Federation. But we won't stop at lazy loading remote components. We'll push further into **streaming micro-frontends**: remote modules that leverage React's Suspense resource pattern to progressively render content with skeleton fallbacks, all orchestrated by a host shell that has zero knowledge of its children's internals.
+In this talk, we'll build a production-grade healthcare shell that composes four independent React 19 applications — a landing page, medical records viewer, prescription orders, and clinical analytics dashboard — into a single cohesive experience using Rspack Module Federation. But we won't stop at lazy loading remote components. We'll push further into **streaming micro-frontends**: remote modules that leverage React's Suspense resource pattern to progressively render content with skeleton fallbacks, all orchestrated by a host shell that has zero knowledge of its children's internals.
 
 **You'll learn how to:**
 
 - Architect a Module Federation monorepo with Rspack that supports independent deployment, hot reload, and fault isolation across teams
 - Implement the `createResource` / Suspense streaming pattern inside federated remotes so each micro-frontend controls its own loading choreography
 - Build a resilient host shell with ErrorBoundary + Suspense composition that gracefully degrades when a remote is unavailable
-- Wire cross-module communication through custom DOM events (`addToCart`, `showNotification`, `moduleChange`) without coupling any two modules together
+- Wire cross-module communication through custom DOM events (`addPrescription`, `showNotification`, `moduleChange`) without coupling any two modules together
 - Coordinate shell-owned theming across remotes with shared CSS variables, `localStorage`, and a typed `themeChange` event
 - Add hover-based prefetching for federated remotes using a simple prefetch map — no router library required
 - Test federated components in isolation with Vitest and React Testing Library, including strategies for mocking remote imports and handling Suspense boundaries in test environments

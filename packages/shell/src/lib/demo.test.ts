@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useKillSwitch, useVersionRegistry } from "./demo";
 
-const MODULE_IDS = ["home", "products", "cart", "dashboard"] as const;
+const MODULE_IDS = ["home", "records", "prescriptions", "analytics"] as const;
 
 describe("useKillSwitch", () => {
   it("initializes all modules as not killed", () => {
@@ -15,12 +15,12 @@ describe("useKillSwitch", () => {
   it("toggles a single module", () => {
     const { result } = renderHook(() => useKillSwitch(MODULE_IDS));
 
-    act(() => result.current.toggle("products"));
-    expect(result.current.killed.products).toBe(true);
-    expect(result.current.killed.cart).toBe(false);
+    act(() => result.current.toggle("records"));
+    expect(result.current.killed.records).toBe(true);
+    expect(result.current.killed.prescriptions).toBe(false);
 
-    act(() => result.current.toggle("products"));
-    expect(result.current.killed.products).toBe(false);
+    act(() => result.current.toggle("records"));
+    expect(result.current.killed.records).toBe(false);
   });
 
   it("kills all modules", () => {
@@ -46,11 +46,11 @@ describe("useKillSwitch", () => {
     const { result } = renderHook(() => useKillSwitch(MODULE_IDS));
 
     act(() => result.current.killAll());
-    act(() => result.current.toggle("cart"));
+    act(() => result.current.toggle("prescriptions"));
 
-    expect(result.current.killed.cart).toBe(false);
-    expect(result.current.killed.products).toBe(true);
-    expect(result.current.killed.dashboard).toBe(true);
+    expect(result.current.killed.prescriptions).toBe(false);
+    expect(result.current.killed.records).toBe(true);
+    expect(result.current.killed.analytics).toBe(true);
   });
 });
 
@@ -71,7 +71,7 @@ describe("useVersionRegistry", () => {
       variant: "stable",
     });
     expect(versions[1]).toMatchObject({
-      id: "products",
+      id: "records",
       version: "2.1.0",
       variant: "stable",
     });
@@ -89,7 +89,7 @@ describe("useVersionRegistry", () => {
       variant: "canary",
     });
     expect(versions[1]).toMatchObject({
-      id: "products",
+      id: "records",
       version: "2.2.0-canary.1",
       variant: "canary",
     });

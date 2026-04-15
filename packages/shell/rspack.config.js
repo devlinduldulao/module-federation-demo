@@ -3,6 +3,13 @@ const RefreshPlugin = require("@rspack/plugin-react-refresh");
 const path = require("path");
 
 const isDev = process.env.NODE_ENV === "development";
+const REMOTE_BASE_URL = process.env.REMOTE_BASE_URL; // set in CI for GitHub Pages
+const BASE_PATH = process.env.BASE_PATH || "";
+
+const remoteUrl = (name, devPort) =>
+  REMOTE_BASE_URL
+    ? `${name}@${REMOTE_BASE_URL}/remotes/${name}/remoteEntry.js`
+    : `${name}@http://localhost:${devPort}/remoteEntry.js`;
 
 /** @type {import('@rspack/cli').Configuration} */
 module.exports = {
@@ -12,6 +19,12 @@ module.exports = {
   },
   mode: isDev ? "development" : "production",
   target: "web",
+
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    publicPath: BASE_PATH ? `${BASE_PATH}/` : "auto",
+    clean: true,
+  },
 
   resolve: {
     extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
@@ -85,10 +98,10 @@ module.exports = {
       name: "shell",
       filename: "remoteEntry.js",
       remotes: {
-        home: "home@http://localhost:3004/remoteEntry.js",
-        products: "products@http://localhost:3001/remoteEntry.js",
-        cart: "cart@http://localhost:3002/remoteEntry.js",
-        dashboard: "dashboard@http://localhost:3003/remoteEntry.js",
+        home: remoteUrl("home", 3004),
+        records: remoteUrl("records", 3001),
+        prescriptions: remoteUrl("prescriptions", 3002),
+        analytics: remoteUrl("analytics", 3003),
       },
       shared: {
         react: {
@@ -120,6 +133,7 @@ module.exports = {
       "process.env.NODE_ENV": JSON.stringify(
         process.env.NODE_ENV || "development"
       ),
+      "process.env.BASE_PATH": JSON.stringify(BASE_PATH),
     }),
     isDev && new RefreshPlugin(),
   ].filter(Boolean),

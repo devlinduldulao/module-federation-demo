@@ -30,9 +30,9 @@ describe("Home", () => {
 
     it("renders all three destination cards", () => {
         render(<Home />);
-        expect(screen.getByText("Products")).toBeInTheDocument();
-        expect(screen.getByText("Cart")).toBeInTheDocument();
-        expect(screen.getByText("Dashboard")).toBeInTheDocument();
+        expect(screen.getByText("Records")).toBeInTheDocument();
+        expect(screen.getByText("Prescriptions")).toBeInTheDocument();
+        expect(screen.getByText("Analytics")).toBeInTheDocument();
     });
 
     it("shows port numbers for each destination", () => {
@@ -45,13 +45,13 @@ describe("Home", () => {
     it("shows destination descriptions", () => {
         render(<Home />);
         expect(
-            screen.getByText(/browse our curated collection/i)
+            screen.getByText(/access patient medical records/i)
         ).toBeInTheDocument();
         expect(
-            screen.getByText(/review your selections/i)
+            screen.getByText(/manage active prescription orders/i)
         ).toBeInTheDocument();
         expect(
-            screen.getByText(/track your activity/i)
+            screen.getByText(/monitor real-time clinical metrics/i)
         ).toBeInTheDocument();
     });
 
@@ -87,12 +87,12 @@ describe("Home", () => {
 
         render(<Home />);
         await user.click(
-            screen.getByRole("button", { name: /go to products module/i })
+            screen.getByRole("button", { name: /go to records module/i })
         );
 
         expect(handler).toHaveBeenCalledTimes(1);
         expect((handler.mock.calls[0][0] as CustomEvent).detail).toEqual({
-            module: "products",
+            module: "records",
         });
 
         window.removeEventListener("navigateToModule", handler);
@@ -105,13 +105,13 @@ describe("Home", () => {
 
         render(<Home />);
         await user.click(
-            screen.getByRole("button", { name: /go to cart module/i })
+            screen.getByRole("button", { name: /go to prescriptions module/i })
         );
 
         expect(handler).toHaveBeenCalledTimes(1);
         expect((handler.mock.calls[0][0] as CustomEvent).detail).toEqual({
             type: "info",
-            message: "Navigating to Cart",
+            message: "Navigating to Prescriptions",
         });
 
         window.removeEventListener("showNotification", handler);
@@ -124,11 +124,11 @@ describe("Home", () => {
 
         render(<Home />);
         await user.click(
-            screen.getByRole("button", { name: /go to dashboard module/i })
+            screen.getByRole("button", { name: /go to analytics module/i })
         );
 
         expect((handler.mock.calls[0][0] as CustomEvent).detail).toEqual({
-            module: "dashboard",
+            module: "analytics",
         });
 
         window.removeEventListener("navigateToModule", handler);

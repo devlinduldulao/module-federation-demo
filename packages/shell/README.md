@@ -1,6 +1,6 @@
 # Shell — Host Application
 
-The shell is the **host** in the Module Federation topology. It defines four remotes (`home`, `products`, `cart`, `dashboard`), renders navigation and shell chrome, owns the shared theme state, and wraps each lazily-loaded remote module in `<Suspense>` + `<ErrorBoundary>` for independent loading and fault isolation.
+The shell is the **host** in the Module Federation topology. It defines four remotes (`home`, `records`, `prescriptions`, `analytics`), renders navigation and shell chrome, owns the shared theme state, and wraps each lazily-loaded remote module in `<Suspense>` + `<ErrorBoundary>` for independent loading and fault isolation.
 
 Runs on **localhost:3000**.
 
@@ -9,7 +9,7 @@ The root route `/` renders the **Home** landing page. Unknown routes redirect to
 ## Responsibilities
 
 - Lazy-load remote streaming components via `React.lazy` + dynamic `import()`
-- Provide per-module skeleton fallbacks (`HomeSkeleton`, `ProductsSkeleton`, `CartSkeleton`, `DashboardSkeleton`)
+- Provide per-module skeleton fallbacks (`HomeSkeleton`, `RecordsSkeleton`, `PrescriptionsSkeleton`, `AnalyticsSkeleton`)
 - Catch module-level errors with `ErrorBoundary` — a crashed remote never takes down the shell
 - Show `ModuleFallback` when a remote server is offline or killed via the demo panel
 - Render the route-driven navigation, status strip, notification toasts, and page layout
@@ -25,7 +25,7 @@ The root route `/` renders the **Home** landing page. Unknown routes redirect to
 
 ```
 shell/
-├── rspack.config.js           # MF host — remotes: home, products, cart, dashboard
+├── rspack.config.js           # MF host — remotes: home, records, prescriptions, analytics
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html
@@ -35,16 +35,16 @@ shell/
     ├── App.tsx                # Navigation, Suspense, ErrorBoundary orchestration
     ├── App.test.tsx           # Shell behavior, events, theme persistence
     ├── index.css              # @theme tokens, animations, noise grain, scrollbar
-    ├── types.d.ts             # declare module "home/...", "products/..." etc.
+    ├── types.d.ts             # declare module "home/...", "records/..." etc.
     ├── components/
     │   ├── ErrorBoundary.tsx      # Class component, catches JS errors per module
     │   ├── ModuleFallback.tsx     # Module unavailable card with retry
     │   ├── DemoPanel.tsx          # Federation Lab — health, kill switches, A/B deployment
     │   ├── LoadingSpinner.tsx     # Three citrine dots with staggered pulse
     │   ├── HomeSkeleton.tsx       # Home landing page skeleton
-    │   ├── ProductsSkeleton.tsx   # Products grid skeleton with shimmer
-    │   ├── CartSkeleton.tsx       # Cart table skeleton
-    │   └── DashboardSkeleton.tsx  # Dashboard stats + activity skeleton
+    │   ├── RecordsSkeleton.tsx   # Records grid skeleton with shimmer
+    │   ├── PrescriptionsSkeleton.tsx       # Prescriptions table skeleton
+    │   └── AnalyticsSkeleton.tsx  # Dashboard stats + activity skeleton
     └── lib/
         ├── theme.ts               # Theme definitions, persistence, event bridge
         ├── health.ts              # useRemoteHealth — polls remoteEntry.js endpoints
@@ -59,9 +59,9 @@ new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {
     home:      "home@http://localhost:3004/remoteEntry.js",
-    products:  "products@http://localhost:3001/remoteEntry.js",
-    cart:      "cart@http://localhost:3002/remoteEntry.js",
-    dashboard: "dashboard@http://localhost:3003/remoteEntry.js",
+    records:  "records@http://localhost:3001/remoteEntry.js",
+    prescriptions:      "prescriptions@http://localhost:3002/remoteEntry.js",
+    analytics: "analytics@http://localhost:3003/remoteEntry.js",
   },
   shared: {
     react:            { singleton: true, strictVersion: false },
@@ -74,11 +74,11 @@ new rspack.container.ModuleFederationPlugin({
 ## How Lazy Loading Works
 
 ```tsx
-const ProductsCatalog = lazy(() =>
-  import("products/ProductsCatalog").catch((error) => {
-    console.error("Failed to load ProductsCatalog:", error);
+const MedicalRecords = lazy(() =>
+  import("records/MedicalRecords").catch((error) => {
+    console.error("Failed to load MedicalRecords:", error);
     return {
-      default: () => <ModuleFallback title="Products Module Unavailable" />,
+      default: () => <ModuleFallback title="Records Module Unavailable" />,
     };
   })
 );
@@ -90,7 +90,7 @@ In `App.tsx`, the active module is rendered inside:
 
 ```tsx
 <ErrorBoundary>
-  <Suspense fallback={<ProductsSkeleton />} key={activeModule}>
+  <Suspense fallback={<RecordsSkeleton />} key={activeModule}>
     <Component />
   </Suspense>
 </ErrorBoundary>
@@ -103,14 +103,14 @@ The `key={activeModule}` prop forces React to unmount/remount when switching tab
 The shell now uses `react-router-dom` for client-side routing. Each remote is mounted behind a shareable URL:
 
 - `/` (Home)
-- `/products`
-- `/cart`
-- `/dashboard`
+- `/records`
+- `/prescriptions`
+- `/analytics`
 
 Routing is still driven from the shell-level `ModuleConfig[]` array:
 
 ```ts
-type ModuleType = "home" | "products" | "cart" | "dashboard";
+type ModuleType = "home" | "records" | "prescriptions" | "analytics";
 
 interface ModuleConfig {
   readonly id: ModuleType;
@@ -136,12 +136,12 @@ Remotes can request navigation by dispatching:
 ```ts
 window.dispatchEvent(
   new CustomEvent("navigateToModule", {
-    detail: { module: "products" },
+    detail: { module: "records" },
   })
 );
 ```
 
-The shell remains the only owner of router state, but remotes can still trigger intentional flows such as “Browse Products” from the cart empty state.
+The shell remains the only owner of router state, but remotes can still trigger intentional flows such as "Browse Records" from the prescriptions empty state.
 
 ## Prefetching
 

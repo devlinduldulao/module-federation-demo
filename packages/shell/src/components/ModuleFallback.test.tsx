@@ -11,13 +11,13 @@ describe("ModuleFallback", () => {
     it("renders the title and message", () => {
         render(
             <ModuleFallback
-                title="Products Unavailable"
-                message="The products service is down."
+                title="Records Unavailable"
+                message="The records service is down."
             />
         );
-        expect(screen.getByText("Products Unavailable")).toBeInTheDocument();
+        expect(screen.getByText("Records Unavailable")).toBeInTheDocument();
         expect(
-            screen.getByText("The products service is down.")
+            screen.getByText("The records service is down.")
         ).toBeInTheDocument();
     });
 

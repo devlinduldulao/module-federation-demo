@@ -29,9 +29,9 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import ModuleFallback from "./components/ModuleFallback";
 import DemoPanel from "./components/DemoPanel";
 import HomeSkeleton from "./components/HomeSkeleton";
-import ProductsSkeleton from "./components/ProductsSkeleton";
-import CartSkeleton from "./components/CartSkeleton";
-import DashboardSkeleton from "./components/DashboardSkeleton";
+import RecordsSkeleton from "./components/RecordsSkeleton";
+import PrescriptionsSkeleton from "./components/PrescriptionsSkeleton";
+import AnalyticsSkeleton from "./components/AnalyticsSkeleton";
 import { useRemoteHealth } from "./lib/health";
 import { useKillSwitch, useVersionRegistry } from "./lib/demo";
 
@@ -39,9 +39,9 @@ import { useKillSwitch, useVersionRegistry } from "./lib/demo";
 // Loading strategies — not every module should load the same way:
 //   INSTANT:  Home     — lazy-loaded for code splitting, no streaming delay.
 //                        Renders the moment the chunk arrives.
-//   EAGER:    Products — standalone component, preloaded on shell mount.
+//   EAGER:    Records  — standalone component, preloaded on shell mount.
 //                        Chunk is already cached before the user clicks.
-//   STREAMED: Cart, Dashboard — loaded on demand with skeleton streaming.
+//   STREAMED: Prescriptions, Analytics — loaded on demand with skeleton streaming.
 // ---------------------------------------------------------------------------
 
 // INSTANT — Home loads without a streaming delay. We import the standalone
@@ -61,53 +61,53 @@ const Home = lazy(() =>
   })
 );
 
-// EAGER — Products is preloaded immediately (see EAGER_PRELOAD below) and
+// EAGER — Records is preloaded immediately (see EAGER_PRELOAD below) and
 // imports the standalone component directly — no streaming delay. By the time
 // the user navigates here, the chunk is already cached.
-const ProductsCatalog = lazy(() =>
-  import("products/ProductsCatalog").catch((error) => {
-    console.error("Failed to load ProductsCatalog:", error);
+const MedicalRecords = lazy(() =>
+  import("records/MedicalRecords").catch((error) => {
+    console.error("Failed to load MedicalRecords:", error);
     return {
       default: () => (
         <ModuleFallback
-          title="Products Module Unavailable"
-          message="The products service is currently unavailable."
+          title="Records Module Unavailable"
+          message="The records service is currently unavailable."
         />
       ),
     };
   })
 );
 
-// STREAMED — Cart and Dashboard load on demand with skeleton fallbacks.
-const StreamingShoppingCart = lazy(() =>
-  import("cart/StreamingShoppingCart").catch((error) => {
-    console.error("Failed to load StreamingShoppingCart:", error);
+// STREAMED — Prescriptions and Analytics load on demand with skeleton fallbacks.
+const StreamingPrescriptionOrders = lazy(() =>
+  import("prescriptions/StreamingPrescriptionOrders").catch((error) => {
+    console.error("Failed to load StreamingPrescriptionOrders:", error);
     return {
       default: () => (
         <ModuleFallback
-          title="Cart Module Unavailable"
-          message="The cart service is currently unavailable."
+          title="Prescriptions Module Unavailable"
+          message="The prescriptions service is currently unavailable."
         />
       ),
     };
   })
 );
 
-const StreamingUserDashboard = lazy(() =>
-  import("dashboard/StreamingUserDashboard").catch((error) => {
-    console.error("Failed to load StreamingUserDashboard:", error);
+const StreamingClinicalAnalytics = lazy(() =>
+  import("analytics/StreamingClinicalAnalytics").catch((error) => {
+    console.error("Failed to load StreamingClinicalAnalytics:", error);
     return {
       default: () => (
         <ModuleFallback
-          title="Dashboard Module Unavailable"
-          message="The dashboard service is currently unavailable."
+          title="Analytics Module Unavailable"
+          message="The analytics service is currently unavailable."
         />
       ),
     };
   })
 );
 
-type ModuleType = "home" | "products" | "cart" | "dashboard";
+type ModuleType = "home" | "records" | "prescriptions" | "analytics";
 type NotificationType = "success" | "error" | "info" | "warning";
 
 type CommandAction = {
@@ -139,27 +139,27 @@ const MODULES = [
     loadStrategy: "instant",
   },
   {
-    id: "products",
-    label: "Products",
-    path: "/products",
+    id: "records",
+    label: "Records",
+    path: "/records",
     port: "3001",
-    component: ProductsCatalog,
+    component: MedicalRecords,
     loadStrategy: "eager",
   },
   {
-    id: "cart",
-    label: "Cart",
-    path: "/cart",
+    id: "prescriptions",
+    label: "Prescriptions",
+    path: "/prescriptions",
     port: "3002",
-    component: StreamingShoppingCart,
+    component: StreamingPrescriptionOrders,
     loadStrategy: "streamed",
   },
   {
-    id: "dashboard",
-    label: "Dashboard",
-    path: "/dashboard",
+    id: "analytics",
+    label: "Analytics",
+    path: "/analytics",
     port: "3003",
-    component: StreamingUserDashboard,
+    component: StreamingClinicalAnalytics,
     loadStrategy: "streamed",
   },
 ] as const satisfies readonly ModuleConfig[];
@@ -175,9 +175,9 @@ const KEYBOARD_SHORTCUT_LABEL = "Ctrl/Cmd + K";
 
 const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
   home: () => import("home/Home").catch(() => undefined),
-  products: () => import("products/ProductsCatalog").catch(() => undefined),
-  cart: () => import("cart/StreamingShoppingCart").catch(() => undefined),
-  dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => undefined),
+  records: () => import("records/MedicalRecords").catch(() => undefined),
+  prescriptions: () => import("prescriptions/StreamingPrescriptionOrders").catch(() => undefined),
+  analytics: () => import("analytics/StreamingClinicalAnalytics").catch(() => undefined),
 };
 
 // Eagerly preload modules marked as "eager" so their chunks (and streaming
@@ -449,7 +449,7 @@ const CommandPalette = memo(function CommandPalette({
                 No Matches
               </span>
               <p className="text-sm text-stone">
-                Try searching for dark, light, cart, products, home, or dashboard.
+                Try searching for dark, light, prescriptions, records, home, or analytics.
               </p>
             </div>
           )}
@@ -466,12 +466,12 @@ function ModuleView({ module, isKilled }: { module: ModuleConfig; isKilled: bool
     switch (module.id) {
       case "home":
         return <HomeSkeleton />;
-      case "products":
-        return <ProductsSkeleton />;
-      case "cart":
-        return <CartSkeleton />;
-      case "dashboard":
-        return <DashboardSkeleton />;
+      case "records":
+        return <RecordsSkeleton />;
+      case "prescriptions":
+        return <PrescriptionsSkeleton />;
+      case "analytics":
+        return <AnalyticsSkeleton />;
       default:
         return <HomeSkeleton />;
     }
@@ -879,6 +879,7 @@ function ShellFrame(): React.JSX.Element {
 function App(): React.JSX.Element {
   return (
     <BrowserRouter
+      basename={process.env.BASE_PATH || "/"}
       future={{
         v7_relativeSplatPath: true,
         v7_startTransition: true,

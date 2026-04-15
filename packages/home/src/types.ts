@@ -1,6 +1,6 @@
 export interface NavigateToModuleEvent extends CustomEvent {
   detail: {
-    module: "products" | "cart" | "dashboard" | "home";
+    module: "records" | "prescriptions" | "analytics" | "home";
   };
 }
 

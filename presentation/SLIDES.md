@@ -14,9 +14,9 @@
 ```
 Shell (host)    :3000
 ├── Home        :3004
-├── Products    :3001
-├── Cart        :3002
-└── Dashboard   :3003
+├── Records     :3001
+├── Prescriptions :3002
+└── Analytics   :3003
 ```
 
 *"What happens when you stop treating Suspense and Module Federation as separate ideas?"*
@@ -101,7 +101,7 @@ With Suspense:     User clicks a tab → skeleton instantly → content streams 
 └─────────────────────────────────────────────────────┘
          │          │          │          │
     ┌────┴───┐ ┌────┴───┐ ┌───┴───┐ ┌────┴─────┐
-    │  Home  │ │Products│ │ Cart  │ │Dashboard │
+    │  Home  │ │Records │ │Prescr│ │Analytics │
     │ :3004  │ │ :3001  │ │ :3002 │ │  :3003   │
     │INSTANT │ │ EAGER  │ │STREAM │ │ STREAM   │
     └────────┘ └────────┘ └───────┘ └──────────┘
@@ -112,8 +112,8 @@ With Suspense:     User clicks a tab → skeleton instantly → content streams 
 | Strategy | Module | Behavior |
 |----------|--------|----------|
 | **Instant** | Home | Lazy for code splitting, but no streaming delay. Renders the moment the chunk arrives. |
-| **Eager** | Products | Imports the standalone component directly, preloaded on shell mount — already cached before the user clicks. No skeleton, no streaming delay. |
-| **Streamed** | Cart, Dashboard | Loaded on demand with skeleton streaming. |
+| **Eager** | Records | Imports the standalone component directly, preloaded on shell mount — already cached before the user clicks. No skeleton, no streaming delay. |
+| **Streamed** | Prescriptions, Analytics | Loaded on demand with skeleton streaming. |
 
 ---
 
@@ -134,13 +134,13 @@ With Suspense:     User clicks a tab → skeleton instantly → content streams 
 ### Remote (exposes)
 
 ```js
-// packages/products/rspack.config.js
+// packages/records/rspack.config.js
 new rspack.container.ModuleFederationPlugin({
-  name: "products",
+  name: "records",
   filename: "remoteEntry.js",
   exposes: {
-    "./ProductsCatalog":          "./src/ProductsCatalog.tsx",
-    "./StreamingProductsCatalog": "./src/StreamingProductsCatalog.tsx",
+    "./MedicalRecords":          "./src/MedicalRecords.tsx",
+    "./StreamingMedicalRecords": "./src/StreamingMedicalRecords.tsx",
   },
   shared: {
     react:       { singleton: true, strictVersion: false },
@@ -157,9 +157,9 @@ new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {
     home:      "home@http://localhost:3004/remoteEntry.js",
-    products:  "products@http://localhost:3001/remoteEntry.js",
-    cart:      "cart@http://localhost:3002/remoteEntry.js",
-    dashboard: "dashboard@http://localhost:3003/remoteEntry.js",
+    records:  "records@http://localhost:3001/remoteEntry.js",
+    prescriptions:      "prescriptions@http://localhost:3002/remoteEntry.js",
+    analytics: "analytics@http://localhost:3003/remoteEntry.js",
   },
   shared: {
     react:       { singleton: true, strictVersion: false },
@@ -177,9 +177,9 @@ new rspack.container.ModuleFederationPlugin({
 ### How streaming works inside a federated remote
 
 ```tsx
-// StreamingProductsCatalog.tsx
+// StreamingMedicalRecords.tsx
 
-import ProductsCatalog from "./ProductsCatalog";
+import MedicalRecords from "./MedicalRecords";
 
 function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
   let status = "pending";
@@ -199,10 +199,10 @@ function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
   };
 }
 
-const StreamingProductsCatalog = () => {
-  const resource = getResource("products-initial", 2500);
+const StreamingMedicalRecords = () => {
+  const resource = getResource("records-initial", 2500);
   resource.read();  // Throws promise → triggers <Suspense> in the shell
-  return <ProductsCatalog />;
+  return <MedicalRecords />;
 };
 ```
 
@@ -225,17 +225,17 @@ const Home = lazy(() =>
   }))
 );
 
-// EAGER — Products imports standalone component, preloaded on shell mount
-const ProductsCatalog = lazy(() =>
-  import("products/ProductsCatalog").catch(() => ({
-    default: () => <ModuleFallback title="Products Unavailable" />,
+// EAGER — Records imports standalone component, preloaded on shell mount
+const MedicalRecords = lazy(() =>
+  import("records/MedicalRecords").catch(() => ({
+    default: () => <ModuleFallback title="Records Unavailable" />,
   }))
 );
 
-// STREAMED — Cart and Dashboard load on demand with skeleton fallbacks
-const StreamingShoppingCart = lazy(() =>
-  import("cart/StreamingShoppingCart").catch(() => ({
-    default: () => <ModuleFallback title="Cart Unavailable" />,
+// STREAMED — Prescriptions and Analytics load on demand with skeleton fallbacks
+const StreamingPrescriptionOrders = lazy(() =>
+  import("prescriptions/StreamingPrescriptionOrders").catch(() => ({
+    default: () => <ModuleFallback title="Prescriptions Unavailable" />,
   }))
 );
 
@@ -251,7 +251,7 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 **Why `lazy()` even for eager modules?** You can't use a static `import` with Module Federation — the remote is a separate build on a separate server, resolved at runtime. `lazy()` + a pre-warmed `import()` cache is the standard pattern: the `import()` fires at shell init, the browser caches the resolved module, and when React later calls the same `import()` inside `lazy()`, it resolves instantly from cache. You get both code splitting *and* instant rendering.
 
-**Why different strategies?** Home is your landing page — users expect it instantly. Products is high-value content — preload it so it's ready when they click. Cart and Dashboard are secondary — stream them on demand.
+**Why different strategies?** Home is your landing page — users expect it instantly. Records is high-value content — preload it so it's ready when they click. Prescriptions and Analytics are secondary — stream them on demand.
 
 ---
 
@@ -261,19 +261,19 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 ```bash
 # Open the Federation Lab panel (click "Lab" button or Ctrl+K → "Open Federation Lab")
-# Toggle the products kill switch — the shell renders ModuleFallback
-# Cart and Dashboard are unaffected
-# Or: stop the actual products dev server for a real fault demo
+# Toggle the records kill switch — the shell renders ModuleFallback
+# Prescriptions and Analytics are unaffected
+# Or: stop the actual records dev server for a real fault demo
 ```
 
 ```tsx
 // lazy() with .catch() — the secret sauce
-const ProductsCatalog = lazy(() =>
-  import("products/ProductsCatalog").catch(() => ({
+const MedicalRecords = lazy(() =>
+  import("records/MedicalRecords").catch(() => ({
     default: () => (
       <ModuleFallback
-        title="Products Module Unavailable"
-        message="The products service is currently unavailable."
+        title="Records Module Unavailable"
+        message="The records service is currently unavailable."
       />
     ),
   }))
@@ -289,33 +289,33 @@ const ProductsCatalog = lazy(() =>
 ### Events > Shared State
 
 ```
-Products                Shell               Cart
+Records                 Shell               Prescriptions
    │                      │                   │
-   ├─ addToCart ──────────►│                   │
+   ├─ addPrescription ───────────────────────────►│                   │
   ├─ navigateToModule ───►│                   │
    │                      ├─ showNotification─►│ (toast)
-   │                      │                   ├── updates cart state
+   │                      │                   ├── updates prescription state
    │                      │                   │
 ```
 
 ```tsx
-// Products dispatches
-window.dispatchEvent(new CustomEvent("addToCart", {
-  detail: { id: 1, name: "MacBook Pro M3", price: 2499.99, quantity: 1 },
+// Records dispatches
+window.dispatchEvent(new CustomEvent("addPrescription", {
+  detail: { id: 1, name: "Sarah Chen prescription", price: 2499.99, quantity: 1 },
 }));
 
-// Cart listens
+// Prescriptions listens
 useEffect(() => {
   const handler = (e: CustomEvent) => {
-    setCartItems(prev => [...prev, e.detail]);
+    setPrescriptionItems(prev => [...prev, e.detail]);
   };
-  window.addEventListener("addToCart", handler);
-  return () => window.removeEventListener("addToCart", handler);
+  window.addEventListener("addPrescription", handler);
+  return () => window.removeEventListener("addPrescription", handler);
 }, []);
 
-// Cart can also request host-owned navigation
+// Prescriptions can also request host-owned navigation
 window.dispatchEvent(new CustomEvent("navigateToModule", {
-  detail: { module: "products" },
+  detail: { module: "records" },
 }));
 ```
 
@@ -335,7 +335,7 @@ window.dispatchEvent(new CustomEvent("navigateToModule", {
 ```tsx
 // types.ts — shared across all remotes
 
-interface AddToCartEvent extends CustomEvent {
+interface AddPrescriptionEvent extends CustomEvent {
   detail: {
     readonly id: number;
     readonly name: string;
@@ -346,8 +346,8 @@ interface AddToCartEvent extends CustomEvent {
 
 declare global {
   interface WindowEventMap {
-    addToCart: AddToCartEvent;
-    navigateToModule: CustomEvent<{ module: "home" | "products" | "cart" | "dashboard" }>;
+    addPrescription: AddPrescriptionEvent;
+    navigateToModule: CustomEvent<{ module: "home" | "records" | "prescriptions" | "analytics" }>;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
     moduleChange: CustomEvent<{ newModule: string }>;
@@ -372,9 +372,9 @@ Shell (owns theme)
   ├── Exposes window.__MF_THEME__
   └── Broadcasts "themeChange" event
         │
-        ├── Products → useActiveTheme() hook
-        ├── Cart     → useActiveTheme() hook
-        └── Dashboard → useActiveTheme() hook
+        ├── Records      → useActiveTheme() hook
+        ├── Prescriptions → useActiveTheme() hook
+        └── Analytics    → useActiveTheme() hook
 ```
 
 ```tsx
@@ -407,9 +407,9 @@ export function useActiveTheme() {
 ```tsx
 const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
   home:      () => import("home/Home").catch(() => undefined),
-  products:  () => import("products/ProductsCatalog").catch(() => undefined),
-  cart:      () => import("cart/StreamingShoppingCart").catch(() => undefined),
-  dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => undefined),
+  records:       () => import("records/MedicalRecords").catch(() => undefined),
+  prescriptions: () => import("prescriptions/StreamingPrescriptionOrders").catch(() => undefined),
+  analytics:     () => import("analytics/StreamingClinicalAnalytics").catch(() => undefined),
 };
 
 // EAGER — preload on shell mount (fires at module evaluation time)
@@ -423,13 +423,13 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 | Strategy | When it loads | Example |
 |----------|--------------|----------|
 | **Instant** | Chunk fetched lazily, no streaming delay | Home |
-| **Eager** | Preloaded the moment the shell mounts, no streaming delay | Products |
-| **Hover** | Prefetched when user hovers a tab | Cart, Dashboard |
+| **Eager** | Preloaded the moment the shell mounts, no streaming delay | Records |
+| **Hover** | Prefetched when user hovers a tab | Prescriptions, Analytics |
 
-> Products is already cached by the time the user clicks.  
-> Cart and Dashboard start loading when the cursor touches the tab.
+> Records is already cached by the time the user clicks.  
+> Prescriptions and Analytics start loading when the cursor touches the tab.
 
-**Audience Q: "Why `lazy()` for eager modules?"** — Module Federation remotes are separate builds on separate servers, resolved at runtime via `import()`. You can't use a static `import`. The eager pattern fires `import()` at shell init so the chunk is cached; `lazy()` later resolves from that cache instantly. This is confirmed by the test: *"renders products immediately without a skeleton (eager strategy)"*.
+**Audience Q: "Why `lazy()` for eager modules?"** — Module Federation remotes are separate builds on separate servers, resolved at runtime via `import()`. You can't use a static `import`. The eager pattern fires `import()` at shell init so the chunk is cached; `lazy()` later resolves from that cache instantly. This is confirmed by the test: *"renders records immediately without a skeleton (eager strategy)"*.
 
 ---
 
@@ -444,14 +444,14 @@ resolve: {
     "home/Home": path.resolve(
       __dirname, "packages/home/src/Home.tsx"
     ),
-    "products/ProductsCatalog": path.resolve(
-      __dirname, "packages/products/src/ProductsCatalog.tsx"
+    "records/MedicalRecords": path.resolve(
+      __dirname, "packages/records/src/MedicalRecords.tsx"
     ),
-    "cart/StreamingShoppingCart": path.resolve(
-      __dirname, "packages/cart/src/StreamingShoppingCart.tsx"
+    "prescriptions/StreamingPrescriptionOrders": path.resolve(
+      __dirname, "packages/prescriptions/src/StreamingPrescriptionOrders.tsx"
     ),
-    "dashboard/StreamingUserDashboard": path.resolve(
-      __dirname, "packages/dashboard/src/StreamingUserDashboard.tsx"
+    "analytics/StreamingClinicalAnalytics": path.resolve(
+      __dirname, "packages/analytics/src/StreamingClinicalAnalytics.tsx"
     ),
     // ...
   },
@@ -459,22 +459,22 @@ resolve: {
 ```
 
 ```tsx
-// ProductsCatalog.test.tsx
-it("dispatches addToCart event on Add click", async () => {
+// MedicalRecords.test.tsx
+it("dispatches addPrescription event on Add click", async () => {
   const handler = vi.fn();
-  window.addEventListener("addToCart", handler);
+  window.addEventListener("addPrescription", handler);
 
-  render(<ProductsCatalog />);
-  await user.click(screen.getByRole("button", { name: /add MacBook Pro M3/i }));
+  render(<MedicalRecords />);
+  await user.click(screen.getByRole("button", { name: /create prescription for Sarah Chen/i }));
 
   expect(handler).toHaveBeenCalledTimes(1);
   expect(handler.mock.calls[0][0].detail).toEqual({
-    id: 1, name: "MacBook Pro M3", price: 2499.99, quantity: 1,
+    id: 1, name: "Sarah Chen prescription", price: 2499.99, quantity: 1,
   });
 });
 ```
 
-**137 tests across 10 files — all passing.**
+**136 tests across 10 files — all passing.**
 
 ---
 
@@ -504,23 +504,23 @@ it("dispatches addToCart event on Add click", async () => {
 ### 1. Full federation + DX story (2 min)
 - Open `localhost:3000` — Home landing page loads **instantly** (no skeleton, no delay — it's the "instant" strategy)
 - Point out: "Home loads the moment the chunk arrives — no streaming delay. Watch the status strip: it says INSTANT."
-- Click **Products** — it loads fast because it was **eagerly preloaded** on shell mount. Status strip shows EAGER.
-- Click **Cart** — observe the skeleton streaming in. Status strip shows STREAMING. "This is the streamed strategy — loaded on demand."
+- Click **Records** — it loads fast because it was **eagerly preloaded** on shell mount. Status strip shows EAGER.
+- Click **Prescriptions** — observe the skeleton streaming in. Status strip shows STREAMING. "This is the streamed strategy — loaded on demand."
 - Explain: "Three loading strategies for three content priorities. The shell decides *how* each module loads based on its importance."
-- Navigate to Products, add product to cart — toast notification + cart sync
-- Empty the cart — use the CTA to prove a remote can request host navigation without importing the router
+- Navigate to Records, add a prescription — toast notification + prescriptions sync
+- Empty the prescriptions list — use the CTA to prove a remote can request host navigation without importing the router
 
 ### 2. Federation Lab — fault isolation (2 min)
 - Click **Lab** button in the header (or Ctrl+K → "Open Federation Lab")
 - Show the **Remote Health Monitor** — all 4 remotes showing green with latency
-- Toggle the **Kill Switch** for products — products shows `ModuleFallback`, other modules keep running
-- Navigate between cart and dashboard to prove they’re unaffected
-- Restore products from the Lab panel
-- Optionally kill the real products server (`Ctrl+C`) and show the health monitor detect it going offline
+- Toggle the **Kill Switch** for records — records shows `ModuleFallback`, other modules keep running
+- Navigate between prescriptions and analytics to prove they're unaffected
+- Restore records from the Lab panel
+- Optionally kill the real records server (`Ctrl+C`) and show the health monitor detect it going offline
 
 ### 3. A/B deployment (1 min)
 - In the Federation Lab, toggle from **Stable** to **Canary** ring
-- Show version info changing per module (e.g., products 2.1.0 → 2.2.0-canary.1)
+- Show version info changing per module (e.g., records 2.1.0 → 2.2.0-canary.1)
 - Note the status bar showing "CANARY" indicator
 - Explain: "In production, each remote could be deployed at a different version independently"
 
@@ -530,13 +530,13 @@ it("dispatches addToCart event on Add click", async () => {
 - Show localStorage persistence — refresh and theme persists
 
 ### 5. Code walkthrough (3 min)
-- `StreamingShoppingCart.tsx` — resource pattern (12 lines)
+- `StreamingPrescriptionOrders.tsx` — resource pattern (12 lines)
 - `App.tsx` — lazy + catch + Suspense + ErrorBoundary + kill switch check
-- Cross-module `addToCart` event flow
+- Cross-module `addPrescription` event flow
 - `lib/health.ts` — useRemoteHealth hook (HEAD requests to remoteEntry.js)
 
 ### 6. Testing (1 min)
-- Run `npm test` — 137 tests, all green
+- Run `npm test` — 136 tests, all green
 - Show vitest.config.ts alias trick for MF imports
 
 ---
@@ -565,8 +565,8 @@ Sub-second HMR in a monorepo with 4 applications. Module Federation is a first-c
 ```tsx
 // Three strategies in one shell:
 { id: "home",      loadStrategy: "instant"  }  // No streaming delay
-{ id: "products",  loadStrategy: "eager"    }  // Preloaded on shell mount
-{ id: "cart",      loadStrategy: "streamed" }  // On demand with skeletons
+{ id: "records",        loadStrategy: "eager"    }  // Preloaded on shell mount
+{ id: "prescriptions",  loadStrategy: "streamed" }  // On demand with skeletons
 ```
 The landing page is instant. High-priority content is eager. Secondary content streams on demand. The shell decides based on content importance.
 
@@ -579,7 +579,7 @@ The landing page is instant. High-priority content is eager. Secondary content s
 | Signal | Pattern to Adopt |
 |---|---|
 | Multiple teams ship the same SPA and block each other on releases | **Module Federation** — independent builds, independent deploys |
-| Your app has distinct domains (catalog, checkout, account, admin) | **Federated remotes** — one per domain, each owns its own data |
+| Your app has distinct domains (records, prescriptions, analytics, admin) | **Federated remotes** — one per domain, each owns its own data |
 | Users wait for a full bundle before they see anything | **Suspense streaming** — skeletons render instantly, content streams in |
 | One broken feature takes down the whole page | **ErrorBoundary + lazy().catch()** — fault isolation per module |
 | Shared state libraries create invisible coupling between features | **CustomEvents on window** — zero-import communication |
@@ -589,7 +589,7 @@ The landing page is instant. High-priority content is eager. Secondary content s
 
 ### Where this runs in production today
 
-- **E-commerce platforms** — product pages, cart, checkout, account each as federated remotes
+- **Healthcare platforms** — patient records, prescriptions, analytics, scheduling each as federated remotes
 - **SaaS dashboards** — billing, analytics, settings, admin panels from different teams
 - **Enterprise portals** — HR, IT, finance modules stitched into one shell
 - **Media platforms** — content feeds, player, recommendations, user profiles

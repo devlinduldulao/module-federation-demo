@@ -4,28 +4,28 @@ import { ModuleDestination } from "./types";
 
 const MODULE_DESTINATIONS: readonly ModuleDestination[] = [
   {
-    id: "products",
-    label: "Products",
-    description: "Browse our curated collection of tech, clothing, and books for developers and creators.",
+    id: "records",
+    label: "Records",
+    description: "Access patient medical records including lab results, imaging reports, and clinical consultations.",
     port: "3001",
-    path: "/products",
-    icon: "SHOP",
+    path: "/records",
+    icon: "REC",
   },
   {
-    id: "cart",
-    label: "Cart",
-    description: "Review your selections, adjust quantities, and prepare your order for checkout.",
+    id: "prescriptions",
+    label: "Prescriptions",
+    description: "Manage active prescription orders, adjust refill counts, and submit for pharmacy review.",
     port: "3002",
-    path: "/cart",
-    icon: "CART",
+    path: "/prescriptions",
+    icon: "Rx",
   },
   {
-    id: "dashboard",
-    label: "Dashboard",
-    description: "Track your activity, view order history, and manage your account overview.",
+    id: "analytics",
+    label: "Analytics",
+    description: "Monitor real-time clinical metrics, patient activity feed, and operational insights.",
     port: "3003",
-    path: "/dashboard",
-    icon: "DASH",
+    path: "/analytics",
+    icon: "STAT",
   },
 ] as const;
 
@@ -48,7 +48,7 @@ const DestinationCard = memo<{
     aria-label={`Navigate to ${destination.label}`}
   >
     {/* Icon placeholder */}
-    <div className="aspect-[2/1] bg-elevated relative overflow-hidden flex items-center justify-center">
+    <div className="aspect-[16/9] min-h-[220px] bg-elevated relative overflow-hidden flex items-center justify-center">
       <span className="font-mono text-2xl text-dim tracking-widest group-hover:text-citrine transition-colors duration-500">
         {destination.icon}
       </span>
@@ -56,22 +56,22 @@ const DestinationCard = memo<{
       <div className="absolute bottom-0 left-0 w-full h-0.5 bg-citrine scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
     </div>
 
-    <div className="p-6 flex flex-col flex-1">
+    <div className="p-8 sm:p-10 flex flex-col flex-1 h-full min-h-[300px]">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-display text-2xl italic text-cream group-hover:text-citrine transition-colors duration-300">
+        <h3 className="font-display text-3xl lg:text-4xl mb-4 italic text-cream group-hover:text-citrine transition-colors duration-300">
           {destination.label}
         </h3>
         <span className="font-mono text-[10px] tracking-[0.2em] text-dim">
           :{destination.port}
         </span>
       </div>
-      <p className="text-stone text-sm leading-relaxed mb-6 flex-1">
+      <p className="text-stone text-base leading-relaxed mb-10 flex-1">
         {destination.description}
       </p>
 
       <button
         onClick={() => onNavigate(destination)}
-        className="w-full font-mono text-xs tracking-wider text-citrine border border-edge px-4 py-3 hover:bg-citrine hover:text-ink transition-all duration-300 text-center"
+        className="w-full font-mono text-sm tracking-widest text-citrine border-2 border-edge px-6 py-4 hover:border-citrine hover:bg-citrine hover:text-ink transition-all duration-300 text-center uppercase mt-auto"
         aria-label={`Go to ${destination.label} module`}
       >
         Enter {destination.label} &rarr;
@@ -107,18 +107,18 @@ function Home() {
   }, []);
 
   return (
-    <div className="w-full mx-auto animate-fade-in" role="main">
+    <div className="max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 py-12 lg:py-24 animate-fade-in" role="main">
       {/* Hero Section */}
-      <header className="mb-16 lg:mb-24 animate-fade-in-up">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <header className="mb-20 lg:mb-32 animate-fade-in-up">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
               Micro-Frontend Architecture
             </span>
-            <h2 className="font-display text-5xl lg:text-7xl italic text-cream tracking-tight leading-none mb-4">
+            <h2 className="font-display text-6xl lg:text-8xl italic text-cream tracking-tight leading-tight mb-6">
               Welcome Home
             </h2>
-            <p className="text-stone text-sm max-w-xl leading-relaxed">
+            <p className="text-stone text-base max-w-2xl leading-loose">
               A demonstration of Module Federation with independently deployed micro-frontends.
               Each module runs on its own port, ships its own bundle, and can be developed in isolation.
             </p>
@@ -140,17 +140,17 @@ function Home() {
         style={{ animationDelay: "80ms" }}
         aria-label="Architecture overview"
       >
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-edge">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-edge overflow-hidden border border-edge">
           {ARCHITECTURE_HIGHLIGHTS.map((item, index) => (
             <div
               key={item.label}
-              className="bg-noir p-6 animate-fade-in-up"
+              className="bg-noir p-8 sm:p-12 animate-fade-in-up flex flex-col justify-center min-h-[140px]"
               style={{ animationDelay: `${(index + 1) * 80}ms` }}
             >
               <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase block mb-2">
                 {item.label}
               </span>
-              <span className="font-display text-xl italic text-cream">
+              <span className="font-display text-2xl lg:text-3xl italic text-cream mt-3">
                 {item.value}
               </span>
             </div>
@@ -177,7 +177,7 @@ function Home() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-12">
           {MODULE_DESTINATIONS.map((destination, index) => (
             <div key={destination.id} className="bg-edge p-px">
               <DestinationCard

@@ -3,8 +3,8 @@ import { render, screen, act, cleanup, fireEvent, waitFor } from "@testing-libra
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 import { THEME_STORAGE_KEY } from "./lib/theme";
-import { __resetCartStreamingResourceCache } from "cart/StreamingShoppingCart";
-import { __resetDashboardStreamingResourceCache } from "dashboard/StreamingUserDashboard";
+import { __resetPrescriptionsStreamingResourceCache } from "prescriptions/StreamingPrescriptionOrders";
+import { __resetAnalyticsStreamingResourceCache } from "analytics/StreamingClinicalAnalytics";
 
 vi.mock("./index.css", () => ({}));
 
@@ -42,14 +42,14 @@ describe("Shell App", () => {
       value: localStorageMock,
       configurable: true,
     });
-    window.history.pushState({}, "", "/products");
+    window.history.pushState({}, "", "/records");
   });
 
   afterEach(() => {
     vi.useRealTimers();
     cleanup();
-    __resetCartStreamingResourceCache();
-    __resetDashboardStreamingResourceCache();
+    __resetPrescriptionsStreamingResourceCache();
+    __resetAnalyticsStreamingResourceCache();
     localStorageMock.clear();
     document.documentElement.removeAttribute("data-theme");
     document.documentElement.removeAttribute("style");
@@ -65,9 +65,9 @@ describe("Shell App", () => {
   it("renders all four navigation links", async () => {
     render(<App />);
     expect(screen.getByRole("link", { name: /navigate to home/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /navigate to products/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /navigate to cart/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /navigate to dashboard/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /navigate to records/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /navigate to prescriptions/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /navigate to analytics/i })).toBeInTheDocument();
   });
 
   it("renders the home module at the root route", async () => {
@@ -85,7 +85,7 @@ describe("Shell App", () => {
   it("shows the status strip with active module info", async () => {
     render(<App />);
     expect(screen.getByText("EAGER")).toBeInTheDocument();
-    expect(screen.getByText("products")).toBeInTheDocument();
+    expect(screen.getByText("records")).toBeInTheDocument();
     expect(screen.getByText(":3001")).toBeInTheDocument();
   });
 
@@ -108,39 +108,39 @@ describe("Shell App", () => {
     expect(document.documentElement.style.getPropertyValue("--color-noir")).toBe("#FFFFFF");
   });
 
-  it("switches to the cart route on click", async () => {
+  it("switches to the prescriptions route on click", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const cartLink = screen.getByRole("link", { name: /navigate to cart/i });
-    await user.click(cartLink);
+    const prescriptionsLink = screen.getByRole("link", { name: /navigate to prescriptions/i });
+    await user.click(prescriptionsLink);
 
-    expect(cartLink).toHaveAttribute("aria-current", "page");
-    expect(window.location.pathname).toBe("/cart");
-    expect(screen.getByText("cart")).toBeInTheDocument();
+    expect(prescriptionsLink).toHaveAttribute("aria-current", "page");
+    expect(window.location.pathname).toBe("/prescriptions");
+    expect(screen.getByText("prescriptions")).toBeInTheDocument();
     expect(screen.getByText(":3002")).toBeInTheDocument();
   });
 
-  it("switches to the dashboard route on click", async () => {
+  it("switches to the analytics route on click", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const dashboardLink = screen.getByRole("link", { name: /navigate to dashboard/i });
-    await user.click(dashboardLink);
+    const analyticsLink = screen.getByRole("link", { name: /navigate to analytics/i });
+    await user.click(analyticsLink);
 
-    expect(dashboardLink).toHaveAttribute("aria-current", "page");
-    expect(window.location.pathname).toBe("/dashboard");
-    expect(screen.getByText("dashboard")).toBeInTheDocument();
+    expect(analyticsLink).toHaveAttribute("aria-current", "page");
+    expect(window.location.pathname).toBe("/analytics");
+    expect(screen.getByText("analytics")).toBeInTheDocument();
     expect(screen.getByText(":3003")).toBeInTheDocument();
   });
 
-  it("renders the cart module directly from the current URL", async () => {
-    window.history.pushState({}, "", "/cart");
+  it("renders the prescriptions module directly from the current URL", async () => {
+    window.history.pushState({}, "", "/prescriptions");
 
     render(<App />);
 
     await waitFor(() => {
-      expect(screen.getByText("cart")).toBeInTheDocument();
+      expect(screen.getByText("prescriptions")).toBeInTheDocument();
     });
     expect(screen.getByText(":3002")).toBeInTheDocument();
   });
@@ -162,11 +162,11 @@ describe("Shell App", () => {
     window.addEventListener("moduleChange", handler);
 
     render(<App />);
-    await user.click(screen.getByRole("link", { name: /navigate to cart/i }));
+    await user.click(screen.getByRole("link", { name: /navigate to prescriptions/i }));
 
     expect(handler).toHaveBeenCalledTimes(2);
     expect((handler.mock.calls.at(-1)?.[0] as CustomEvent).detail).toEqual({
-      newModule: "cart",
+      newModule: "prescriptions",
     });
 
     window.removeEventListener("moduleChange", handler);
@@ -178,16 +178,16 @@ describe("Shell App", () => {
     act(() => {
       window.dispatchEvent(
         new CustomEvent("navigateToModule", {
-          detail: { module: "dashboard" },
+          detail: { module: "analytics" },
         })
       );
     });
 
     await waitFor(() => {
-      expect(window.location.pathname).toBe("/dashboard");
+      expect(window.location.pathname).toBe("/analytics");
     });
 
-    expect(screen.getByRole("link", { name: /navigate to dashboard/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /navigate to analytics/i })).toHaveAttribute(
       "aria-current",
       "page"
     );
@@ -197,9 +197,9 @@ describe("Shell App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("link", { name: /navigate to cart/i }));
+    await user.click(screen.getByRole("link", { name: /navigate to prescriptions/i }));
 
-    expect(screen.queryByText("Cart module loaded")).not.toBeInTheDocument();
+    expect(screen.queryByText("Prescriptions module loaded")).not.toBeInTheDocument();
   });
 
   it("persists and broadcasts theme changes from the shell", async () => {
@@ -249,55 +249,55 @@ describe("Shell App", () => {
     expect(screen.getByText("Fault Isolation")).toBeInTheDocument();
   });
 
-  it("renders products immediately without a skeleton (eager strategy)", async () => {
+  it("renders records immediately without a skeleton (eager strategy)", async () => {
     render(<App />);
-    // Products uses the standalone component (no streaming delay), so content
+    // Records uses the standalone component (no streaming delay), so content
     // renders right away instead of showing a skeleton.
     await waitFor(() => {
       expect(
-        screen.getByText("Curated products for developers, designers, and tech enthusiasts.")
+        screen.getByText("Clinical records across lab results, imaging, and consultations for active patients.")
       ).toBeInTheDocument();
     });
-    expect(screen.queryByText(/loading products/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/loading records/i)).not.toBeInTheDocument();
   });
 
-  it("shows cart skeleton while loading the cart module", async () => {
+  it("shows prescriptions skeleton while loading the prescriptions module", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("link", { name: /navigate to cart/i }));
+    await user.click(screen.getByRole("link", { name: /navigate to prescriptions/i }));
 
     expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByText(/loading cart/i)).toBeInTheDocument();
+    expect(screen.getByText(/streaming prescriptions/i)).toBeInTheDocument();
   });
 
-  it("commits cart navigation immediately and replaces the products page with the cart skeleton", async () => {
+  it("commits prescriptions navigation immediately and replaces the records page with the prescriptions skeleton", async () => {
     render(<App />);
 
-    // Products renders instantly (eager, no streaming delay)
+    // Records renders instantly (eager, no streaming delay)
     await waitFor(() => {
       expect(
-        screen.getByText("Curated products for developers, designers, and tech enthusiasts.")
+        screen.getByText("Clinical records across lab results, imaging, and consultations for active patients.")
       ).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("link", { name: /navigate to cart/i }));
+    fireEvent.click(screen.getByRole("link", { name: /navigate to prescriptions/i }));
 
-    expect(window.location.pathname).toBe("/cart");
-    expect(screen.getByText(/loading cart/i)).toBeInTheDocument();
+    expect(window.location.pathname).toBe("/prescriptions");
+    expect(screen.getByText(/streaming prescriptions/i)).toBeInTheDocument();
     expect(
-      screen.queryByText("Curated products for developers, designers, and tech enthusiasts.")
+      screen.queryByText("Clinical records across lab results, imaging, and consultations for active patients.")
     ).not.toBeInTheDocument();
   });
 
-  it("shows dashboard skeleton while loading the dashboard module", async () => {
+  it("shows analytics skeleton while loading the analytics module", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("link", { name: /navigate to dashboard/i }));
+    await user.click(screen.getByRole("link", { name: /navigate to analytics/i }));
 
     expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByText(/loading dashboard/i)).toBeInTheDocument();
+    expect(screen.getByText(/streaming analytics/i)).toBeInTheDocument();
   });
 
   it("auto-removes notifications after 3 seconds", async () => {
