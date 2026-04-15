@@ -84,9 +84,9 @@ With Suspense:     User clicks a tab → skeleton instantly → content streams 
 │                                                     │
 │  ┌─────────┐  ┌─────────┐  ┌─────────────────────┐ │
 │  │ Nav     │  │ Theme   │  │ Status Strip         │ │
-│  │ Router  │  │ Control │  │ STREAMING | module   │ │
-│  └─────────┘  └─────────┘  └─────────────────────┘ │
-│                                                     │
+│  │ Router  │  │ Control │  │ INSTANT | EAGER |    │ │
+│  └─────────┘  └─────────┘  │ STREAMING | module   │ │
+│                             └─────────────────────┘ │
 │  ┌─────────────────────────────────────────────────┐ │
 │  │           <ErrorBoundary>                       │ │
 │  │             <Suspense fallback={<Skeleton />}>  │ │
@@ -99,12 +99,21 @@ With Suspense:     User clicks a tab → skeleton instantly → content streams 
 │  │ Footer: Independent Deploy / Zero Coupling      │ │
 │  └─────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────┘
-         │         │         │         │
-    ┌────┴───┐ ┌───┴────┐ ┌──┴───┐ ┌──┴──────┐
-    │  Home  │ │Products│ │ Cart │ │Dashboard│
-    │ :3004  │ │ :3001  │ │:3002 │ │  :3003  │
-    └────────┘ └────────┘ └──────┘ └─────────┘
+         │          │          │          │
+    ┌────┴───┐ ┌────┴───┐ ┌───┴───┐ ┌────┴─────┐
+    │  Home  │ │Products│ │ Cart  │ │Dashboard │
+    │ :3004  │ │ :3001  │ │ :3002 │ │  :3003   │
+    │INSTANT │ │ EAGER  │ │STREAM │ │ STREAM   │
+    └────────┘ └────────┘ └───────┘ └──────────┘
 ```
+
+**Loading strategy taxonomy — not every module loads the same way:**
+
+| Strategy | Module | Behavior |
+|----------|--------|----------|
+| **Instant** | Home | Lazy for code splitting, but no streaming delay. Renders the moment the chunk arrives. |
+| **Eager** | Products | Imports the standalone component directly, preloaded on shell mount — already cached before the user clicks. No skeleton, no streaming delay. |
+| **Streamed** | Cart, Dashboard | Loaded on demand with skeleton streaming. |
 
 ---
 
@@ -202,31 +211,47 @@ const StreamingProductsCatalog = () => {
 
 ---
 
-## Slide 8 — Shell Composition
+## Slide 8 — Shell Composition + Loading Strategies
 
-### How the shell stays ignorant of remote internals
+### Not every module should load the same way
 
 ```tsx
-// Shell App.tsx
+// Shell App.tsx — three loading strategies in one file
 
-const StreamingProductsCatalog = lazy(() =>
-  import("products/StreamingProductsCatalog").catch((error) => ({
+// INSTANT — Home renders the moment the chunk arrives (no streaming delay)
+const Home = lazy(() =>
+  import("home/Home").catch(() => ({
+    default: () => <ModuleFallback title="Home Unavailable" />,
+  }))
+);
+
+// EAGER — Products imports standalone component, preloaded on shell mount
+const ProductsCatalog = lazy(() =>
+  import("products/ProductsCatalog").catch(() => ({
     default: () => <ModuleFallback title="Products Unavailable" />,
   }))
 );
 
-// In the render:
-<ErrorBoundary>
-  <Suspense fallback={<ProductsSkeleton />}>
-    <StreamingProductsCatalog />
-  </Suspense>
-</ErrorBoundary>
+// STREAMED — Cart and Dashboard load on demand with skeleton fallbacks
+const StreamingShoppingCart = lazy(() =>
+  import("cart/StreamingShoppingCart").catch(() => ({
+    default: () => <ModuleFallback title="Cart Unavailable" />,
+  }))
+);
+
+// Eagerly preload "eager" modules at shell init
+const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
+for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 ```
 
-**Three layers of resilience:**
+**Three layers of resilience** (applied to every strategy):
 1. `lazy()` + `.catch()` → fallback if remote is unreachable
 2. `<Suspense>` → skeleton while loading
 3. `<ErrorBoundary>` → catches runtime errors in the remote
+
+**Why `lazy()` even for eager modules?** You can't use a static `import` with Module Federation — the remote is a separate build on a separate server, resolved at runtime. `lazy()` + a pre-warmed `import()` cache is the standard pattern: the `import()` fires at shell init, the browser caches the resolved module, and when React later calls the same `import()` inside `lazy()`, it resolves instantly from cache. You get both code splitting *and* instant rendering.
+
+**Why different strategies?** Home is your landing page — users expect it instantly. Products is high-value content — preload it so it's ready when they click. Cart and Dashboard are secondary — stream them on demand.
 
 ---
 
@@ -243,8 +268,8 @@ const StreamingProductsCatalog = lazy(() =>
 
 ```tsx
 // lazy() with .catch() — the secret sauce
-const StreamingProductsCatalog = lazy(() =>
-  import("products/StreamingProductsCatalog").catch(() => ({
+const ProductsCatalog = lazy(() =>
+  import("products/ProductsCatalog").catch(() => ({
     default: () => (
       <ModuleFallback
         title="Products Module Unavailable"
@@ -375,26 +400,36 @@ export function useActiveTheme() {
 
 ---
 
-## Slide 13 — Prefetching
+## Slide 13 — Prefetching + Eager Loading
 
-### Load modules before the user clicks
+### Two layers: eager on mount, hover on demand
 
 ```tsx
 const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
-  home:      () => import("home/StreamingHome").catch(() => undefined),
-  products:  () => import("products/StreamingProductsCatalog").catch(() => undefined),
+  home:      () => import("home/Home").catch(() => undefined),
+  products:  () => import("products/ProductsCatalog").catch(() => undefined),
   cart:      () => import("cart/StreamingShoppingCart").catch(() => undefined),
   dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => undefined),
 };
 
-// On tab hover → prefetch
-<NavLink
-  onMouseEnter={() => PREFETCHERS[module.id]()}
->
+// EAGER — preload on shell mount (fires at module evaluation time)
+const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
+for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
+
+// HOVER — prefetch remaining modules on tab hover
+<NavLink onMouseEnter={() => PREFETCHERS[module.id]()} />
 ```
 
-> The remote entry JS is fetched on hover.  
-> When clicked, the module loads instantly.
+| Strategy | When it loads | Example |
+|----------|--------------|----------|
+| **Instant** | Chunk fetched lazily, no streaming delay | Home |
+| **Eager** | Preloaded the moment the shell mounts, no streaming delay | Products |
+| **Hover** | Prefetched when user hovers a tab | Cart, Dashboard |
+
+> Products is already cached by the time the user clicks.  
+> Cart and Dashboard start loading when the cursor touches the tab.
+
+**Audience Q: "Why `lazy()` for eager modules?"** — Module Federation remotes are separate builds on separate servers, resolved at runtime via `import()`. You can't use a static `import`. The eager pattern fires `import()` at shell init so the chunk is cached; `lazy()` later resolves from that cache instantly. This is confirmed by the test: *"renders products immediately without a skeleton (eager strategy)"*.
 
 ---
 
@@ -406,11 +441,11 @@ const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
 // vitest.config.ts — resolve MF imports to source files
 resolve: {
   alias: {
-    "home/StreamingHome": path.resolve(
-      __dirname, "packages/home/src/StreamingHome.tsx"
+    "home/Home": path.resolve(
+      __dirname, "packages/home/src/Home.tsx"
     ),
-    "products/StreamingProductsCatalog": path.resolve(
-      __dirname, "packages/products/src/StreamingProductsCatalog.tsx"
+    "products/ProductsCatalog": path.resolve(
+      __dirname, "packages/products/src/ProductsCatalog.tsx"
     ),
     "cart/StreamingShoppingCart": path.resolve(
       __dirname, "packages/cart/src/StreamingShoppingCart.tsx"
@@ -439,7 +474,7 @@ it("dispatches addToCart event on Add click", async () => {
 });
 ```
 
-**60 tests across 4 packages — all passing.**
+**137 tests across 10 files — all passing.**
 
 ---
 
@@ -467,10 +502,11 @@ it("dispatches addToCart event on Add click", async () => {
 ## Slide 16 — Live Demo Script
 
 ### 1. Full federation + DX story (2 min)
-- Open `localhost:3000` — Home landing page loads with architecture overview and navigation cards
-- Point out: "Five independent apps, five dev servers, five test suites. Each team owns their module end-to-end."
-- Click through tabs — observe skeletons and streaming delays per module
-- Explain: "That's the UX pillar — Suspense gives users instant feedback while remotes load"
+- Open `localhost:3000` — Home landing page loads **instantly** (no skeleton, no delay — it's the "instant" strategy)
+- Point out: "Home loads the moment the chunk arrives — no streaming delay. Watch the status strip: it says INSTANT."
+- Click **Products** — it loads fast because it was **eagerly preloaded** on shell mount. Status strip shows EAGER.
+- Click **Cart** — observe the skeleton streaming in. Status strip shows STREAMING. "This is the streamed strategy — loaded on demand."
+- Explain: "Three loading strategies for three content priorities. The shell decides *how* each module loads based on its importance."
 - Navigate to Products, add product to cart — toast notification + cart sync
 - Empty the cart — use the CTA to prove a remote can request host navigation without importing the router
 
@@ -494,13 +530,13 @@ it("dispatches addToCart event on Add click", async () => {
 - Show localStorage persistence — refresh and theme persists
 
 ### 5. Code walkthrough (3 min)
-- `StreamingProductsCatalog.tsx` — resource pattern (12 lines)
+- `StreamingShoppingCart.tsx` — resource pattern (12 lines)
 - `App.tsx` — lazy + catch + Suspense + ErrorBoundary + kill switch check
 - Cross-module `addToCart` event flow
 - `lib/health.ts` — useRemoteHealth hook (HEAD requests to remoteEntry.js)
 
 ### 6. Testing (1 min)
-- Run `npm test` — 60 tests, all green
+- Run `npm test` — 137 tests, all green
 - Show vitest.config.ts alias trick for MF imports
 
 ---
@@ -525,14 +561,14 @@ Remotes can ask for navigation with `navigateToModule`, but only the shell mutat
 ### 6. Rspack makes this fast
 Sub-second HMR in a monorepo with 4 applications. Module Federation is a first-class citizen.
 
-### 7. The streaming wrapper pattern
+### 7. Not every module should load the same way
 ```tsx
-const StreamingComponent = () => {
-  resource.read(); // throws for Suspense
-  return <StandaloneComponent />;
-};
+// Three strategies in one shell:
+{ id: "home",      loadStrategy: "instant"  }  // No streaming delay
+{ id: "products",  loadStrategy: "eager"    }  // Preloaded on shell mount
+{ id: "cart",      loadStrategy: "streamed" }  // On demand with skeletons
 ```
-That's it. The entire streaming pattern is 3 lines.
+The landing page is instant. High-priority content is eager. Secondary content streams on demand. The shell decides based on content importance.
 
 ---
 

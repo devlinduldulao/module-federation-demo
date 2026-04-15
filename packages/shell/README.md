@@ -74,9 +74,9 @@ new rspack.container.ModuleFederationPlugin({
 ## How Lazy Loading Works
 
 ```tsx
-const StreamingProductsCatalog = lazy(() =>
-  import("products/StreamingProductsCatalog").catch((error) => {
-    console.error("Failed to load StreamingProductsCatalog:", error);
+const ProductsCatalog = lazy(() =>
+  import("products/ProductsCatalog").catch((error) => {
+    console.error("Failed to load ProductsCatalog:", error);
     return {
       default: () => <ModuleFallback title="Products Module Unavailable" />,
     };

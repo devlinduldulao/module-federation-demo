@@ -8,13 +8,21 @@ Built for conference talks and technical demonstrations.
 
 ```
 Shell (host)           localhost:3000
-├── Home (remote)      localhost:3004   → StreamingHome
-├── Products (remote)  localhost:3001   → StreamingProductsCatalog
-├── Cart (remote)      localhost:3002   → StreamingShoppingCart
-└── Dashboard (remote) localhost:3003   → StreamingUserDashboard
+├── Home (remote)      localhost:3004   → INSTANT  (Home — no streaming delay)
+├── Products (remote)  localhost:3001   → EAGER    (ProductsCatalog — preloaded on shell mount)
+├── Cart (remote)      localhost:3002   → STREAMED (StreamingShoppingCart — on demand)
+└── Dashboard (remote) localhost:3003   → STREAMED (StreamingUserDashboard — on demand)
 ```
 
-Each remote exposes a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell lazy-loads the streaming variants and wraps them in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. The shell also owns URL-based navigation, so `/`, `/products`, `/cart`, and `/dashboard` are directly shareable routes instead of in-memory tab state.
+Each remote exposes both a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell chooses which to import based on **three loading strategies** and content priority:
+
+| Strategy | Module | Behavior |
+|----------|--------|----------|
+| **Instant** | Home | Lazy-loaded for code splitting, but imports the standalone component directly — no streaming delay. Renders the moment the chunk arrives. |
+| **Eager** | Products | Imports the standalone component directly and preloads the chunk on shell mount — already cached before the user clicks. No skeleton, no streaming delay. Still uses `lazy()` because Module Federation remotes are separate builds resolved at runtime via `import()` — you can't use a static `import`. The eager `import()` fires at shell init and warms the cache; `lazy()` resolves from it instantly. |
+| **Streamed** | Cart, Dashboard | Loaded on demand with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. |
+
+All modules are wrapped in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. The shell owns URL-based navigation, so `/`, `/products`, `/cart`, and `/dashboard` are directly shareable routes. The status strip shows the active module's loading strategy (INSTANT / EAGER / STREAMING) with a color-coded indicator.
 
 The root route `/` renders the **Home** landing page, which provides an overview of the architecture and navigation cards to each module. Unknown routes redirect to `/`.
 
@@ -64,9 +72,12 @@ cd packages/shell && npm run dev      # :3000
 
 Each remote runs standalone at its own port with its own `index.html`.
 
-### Prefetching
+### Prefetching + Eager Loading
 
-The shell prefetches remote entry points on tab hover using a `PREFETCH_MAP`. When a user hovers over a navigation tab, the corresponding remote module is fetched in the background so it loads instantly on click.
+The shell uses a **two-tier preloading strategy**:
+
+1. **Eager preload** — modules with `loadStrategy: "eager"` (Products) are preloaded the moment the shell mounts, so their chunks and streaming data are likely cached before the user navigates.
+2. **Hover prefetch** — remaining modules are prefetched when the user hovers a navigation tab, using a `PREFETCHERS` map of bare `import()` calls.
 
 ## Project Structure
 
@@ -344,7 +355,11 @@ function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
 }
 ```
 
-The shell wraps each lazy-loaded remote in `<Suspense fallback={<Skeleton />}>` and `<ErrorBoundary>`, giving each module independent loading and error states.
+The shell wraps each lazy-loaded remote in `<Suspense fallback={<Skeleton />}>` and `<ErrorBoundary>`, giving each module independent loading and error states. The shell uses three distinct loading strategies:
+
+- **Instant** (Home) — imports the standalone component via `home/Home`, no streaming delay
+- **Eager** (Products) — imports the streaming wrapper but preloads it on shell mount
+- **Streamed** (Cart, Dashboard) — loaded on demand with skeleton fallbacks
 
 ## Conference Demo Value
 
@@ -353,7 +368,8 @@ This project demonstrates these micro-frontend concepts during a live talk:
 1. **Independent deployment** — each remote starts on its own port with its own build
 2. **Fault isolation** — kill a remote server and only that module shows a fallback (or use the Federation Lab kill switch)
 3. **Shared dependencies** — React is loaded once via singleton sharing
-4. **Suspense streaming** — skeleton screens appear during module load, then content streams in
+4. **Suspense streaming** — skeleton screens appear during module load, then content streams in (for streamed and eager modules)
+5. **Loading strategy taxonomy** — instant (Home), eager (Products), streamed (Cart/Dashboard) — not every module should load the same way
 5. **Loose coupling** — modules communicate through events, not imports
 6. **Host-owned routing** — remotes can request navigation through `navigateToModule` without importing `react-router-dom`
 7. **Independent tech choices** — each package has its own `rspack.config.js`, `postcss.config.js`, and `tsconfig.json`
@@ -362,7 +378,9 @@ This project demonstrates these micro-frontend concepts during a live talk:
 
 ### What to show in a talk
 
-- Start `npm run dev`, open `:3000` — the Home landing page loads with architecture overview and navigation cards
+- Start `npm run dev`, open `:3000` — Home loads **instantly** (no skeleton delay, status strip shows INSTANT)
+- Click Products — loads fast because it was **eagerly preloaded** on shell mount (status strip shows EAGER)
+- Click Cart — observe skeleton **streaming** in (status strip shows STREAMING)
 - Navigate to `/products`, add an item, then use the cart empty-state CTA to show remote-requested host navigation
 - Open the Federation Lab (click **Lab** in the header) and kill the products remote — products shows `ModuleFallback`, cart and dashboard continue working
 - Restore the remote from the Lab panel — products comes back

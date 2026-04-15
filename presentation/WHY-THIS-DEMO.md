@@ -104,7 +104,30 @@ These are the two pillars of this demo:
 
 You could have micro-frontends with terrible loading UX — most demos do. You could have great Suspense streaming in a monolith. This demo shows both working together.
 
-### How it works
+### Not every module should load the same way
+
+The key UX insight: different content has different priority. A landing page should be instant. A product catalog should be ready before the user clicks. A dashboard can stream in on demand. This demo implements a **loading strategy taxonomy**:
+
+| Strategy | Module | Behavior | Status strip |
+|----------|--------|----------|---------------|
+| **Instant** | Home | Lazy-loaded for code splitting, but imports the standalone component directly — no streaming delay. Renders the moment the chunk arrives. | 🟢 INSTANT |
+| **Eager** | Products | Imports the standalone component directly, preloaded on shell mount. By the time the user clicks, the chunk is already cached — no skeleton, no streaming delay. | 🟡 EAGER |
+| **Streamed** | Cart, Dashboard | Loaded on demand with skeleton fallbacks. The user sees a purpose-built skeleton that streams into real content. | 🟠 STREAMING |
+
+```tsx
+// Shell App.tsx — three strategies in one file
+const Home = lazy(() => import("home/Home").catch(...));                       // INSTANT
+const ProductsCatalog = lazy(() => import("products/ProductsCatalog").catch(...)); // EAGER
+const StreamingShoppingCart = lazy(() => import("cart/...").catch(...));        // STREAMED
+
+// Eagerly preload modules marked as "eager" at shell init
+const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
+for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
+```
+
+**Why `lazy()` even for eager modules?** You can't use a static `import` with Module Federation — the remote is a separate build on a separate server, resolved at runtime. `lazy()` + a pre-warmed `import()` cache is the standard pattern: the shell fires `import()` at init, the browser caches the resolved module, and when React later calls the same `import()` inside `lazy()`, it resolves instantly from cache. You get both code splitting and instant rendering — no skeleton, no delay.
+
+### How streaming works (for streamed modules)
 
 Every other demo lazy-loads a remote and calls it a day. This one goes further: each remote **owns its loading choreography** through the Resource pattern.
 
@@ -119,12 +142,13 @@ The shell has **zero knowledge** of how long a remote takes to load. It just ren
 
 ### Why this matters for visitors
 
-- **No blank screens** — every route transition shows a skeleton immediately, even if the remote takes 2 seconds to load
-- **Per-module loading** — navigating to Cart doesn't re-load Products. Each module streams independently.
+- **No blank screens** — every route transition shows either instant content (Home, Products) or a skeleton immediately (Cart, Dashboard)
+- **Priority-based loading** — Home is instant, Products is eager, Cart/Dashboard stream on demand. Content importance drives the strategy.
+- **Per-module loading** — navigating to Cart doesn't re-load Products. Each module loads independently.
 - **Layout stability** — skeletons match the real component's layout, so there's no content shift when the module loads
 - **Progressive disclosure** — the shell, navigation, and theme are already rendered. Only the module content area streams in.
 
-That's the real insight — Suspense isn't just for code splitting, it's a micro-frontend **composition primitive** that directly improves end-user experience.
+That's the real insight — Suspense isn't just for code splitting, it's a micro-frontend **composition primitive** that directly improves end-user experience. And different modules deserve different loading strategies based on their importance to the user.
 
 ---
 
@@ -199,13 +223,19 @@ Two themes (dark and light) switch at runtime by rewriting CSS custom properties
 
 ## 8. The Test Suite Proves It Works
 
-60 tests across 4 packages. All green.
+137 tests across 10 files. All green.
 
 ```
-packages/shell/src/App.test.tsx          — 21 tests
-packages/products/src/ProductsCatalog.test.tsx — 11 tests
-packages/cart/src/ShoppingCart.test.tsx   — 17 tests
-packages/dashboard/src/UserDashboard.test.tsx — 11 tests
+packages/shell/src/App.test.tsx                    — 21 tests
+packages/shell/src/components/ErrorBoundary.test.tsx — 6 tests
+packages/shell/src/components/ModuleFallback.test.tsx — 5 tests
+packages/shell/src/components/DemoPanel.test.tsx   — 21 tests
+packages/shell/src/lib/theme.test.ts               — 21 tests
+packages/shell/src/lib/demo.test.ts                — 11 tests
+packages/products/src/ProductsCatalog.test.tsx      — 11 tests
+packages/cart/src/ShoppingCart.test.tsx             — 17 tests
+packages/dashboard/src/UserDashboard.test.tsx       — 11 tests
+packages/home/src/Home.test.tsx                    — 13 tests
 ```
 
 The tests cover:
@@ -239,13 +269,14 @@ This isn't a "what if" demo built on experimental APIs. Everything here is stabl
 
 The demo has a natural flow for a 30-minute talk:
 
-1. **Open the app** → Home landing page shows the architecture at a glance
-2. **Navigate between modules** → Suspense skeletons stream in per-module
-3. **Add a product to cart** → Cross-module event crosses boundaries
-4. **Open the Federation Lab** → Kill a remote live, watch it fail gracefully
-5. **Toggle A/B deployment** → Show independent versioning
-6. **Switch themes** → CSS variables cascade across all remotes
-7. **Run the test suite** → 60 tests, all green, no dev servers needed
+1. **Open the app** → Home loads **instantly** (no skeleton, no delay — status strip shows INSTANT)
+2. **Click Products** → loads fast because it was **eagerly preloaded** (status strip shows EAGER)
+3. **Click Cart** → skeleton **streams** in on demand (status strip shows STREAMING)
+4. **Add a product to cart** → Cross-module event crosses boundaries
+5. **Open the Federation Lab** → Kill a remote live, watch it fail gracefully
+6. **Toggle A/B deployment** → Show independent versioning
+7. **Switch themes** → CSS variables cascade across all remotes
+8. **Run the test suite** → 137 tests, all green, no dev servers needed
 
 Each step demonstrates a different micro-frontend concept. The audience sees real behavior, not diagrams.
 
@@ -272,7 +303,7 @@ This isn't "cool tech you'll never ship." Every pattern demonstrated maps direct
 |---|---|
 | **Multiple teams shipping one SPA** and stepping on each other's releases | Module Federation — each team owns a remote with its own build pipeline, deploy cycle, and dev server |
 | **A monolith that's too big to refactor** all at once | Extract one feature (like a dashboard) into a remote. Keep the rest in the shell. Prove the pattern, then expand. |
-| **Users staring at a blank screen** while your 2MB bundle loads | Suspense streaming — render skeletons instantly, stream content progressively per module |
+| **Users staring at a blank screen** while your 2MB bundle loads | Loading strategy taxonomy — instant for the landing page, eager preloading for high-priority content, Suspense streaming with skeletons for secondary modules |
 | **One crashed feature taking down the whole app** | ErrorBoundary + `lazy().catch()` per module. This demo proves it live — kill a remote, everything else keeps running. |
 | **Shared Redux/Zustand stores** creating invisible coupling between features | Replace with CustomEvents on `window`. Zero imports between modules. Survives independent deploys. |
 | **A/B tests or canary releases** that require redeploying the entire frontend | Deploy one remote at a canary version. The shell consumes whatever version is live. Other remotes don't know or care. |

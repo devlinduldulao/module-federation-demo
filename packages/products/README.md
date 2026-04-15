@@ -13,7 +13,7 @@ exposes: {
 }
 ```
 
-The shell imports `StreamingProductsCatalog` — when the Resource resolves after the simulated delay, the full catalog renders inside the shell's `<Suspense>` boundary.
+The shell imports `ProductsCatalog` directly (the eager loading strategy) — the chunk is preloaded on shell mount so it's cached before the user navigates to Products.
 
 ## File Structure
 

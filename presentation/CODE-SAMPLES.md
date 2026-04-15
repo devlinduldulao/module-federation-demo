@@ -65,27 +65,62 @@ export default StreamingProductsCatalog;
 
 ---
 
-## 2. Shell Composition — Three Layers of Resilience + Kill Switch (DX + UX)
+## 2. Shell Composition — Loading Strategies + Three Layers of Resilience (DX + UX)
 
 ```tsx
 // packages/shell/src/App.tsx
 
-// Layer 1: lazy() + .catch() — handles unreachable remotes
-const StreamingProductsCatalog = lazy(() =>
-  import("products/StreamingProductsCatalog").catch((error) => {
+// ---------------------------------------------------------------------------
+// Loading strategies — not every module should load the same way:
+//   INSTANT:  Home     — lazy for code splitting, no streaming delay
+//   EAGER:    Products — standalone component, preloaded on shell mount
+//   STREAMED: Cart, Dashboard — loaded on demand with skeletons
+// ---------------------------------------------------------------------------
+
+// INSTANT — Home renders the moment the chunk arrives
+const Home = lazy(() =>
+  import("home/Home").catch((error) => {
     console.error("Failed to load:", error);
     return {
       default: () => (
         <ModuleFallback
-          title="Products Module Unavailable"
-          message="The products service is currently unavailable."
+          title="Home Module Unavailable"
+          message="The home service is currently unavailable."
         />
       ),
     };
   })
 );
 
-// Layer 2 + 3 + Kill switch: Suspense + ErrorBoundary + demo controls
+// EAGER — preloaded on shell mount via EAGER_PRELOAD, no streaming delay
+const ProductsCatalog = lazy(() =>
+  import("products/ProductsCatalog").catch((error) => {
+    /* ... fallback ... */
+  })
+);
+
+// STREAMED — loaded on demand with skeleton fallbacks
+const StreamingShoppingCart = lazy(() =>
+  import("cart/StreamingShoppingCart").catch((error) => {
+    /* ... fallback ... */
+  })
+);
+
+// Each module declares its loading strategy
+type LoadStrategy = "instant" | "eager" | "streamed";
+
+const MODULES = [
+  { id: "home",      component: Home,                     loadStrategy: "instant"  },
+  { id: "products",  component: ProductsCatalog,           loadStrategy: "eager"    },
+  { id: "cart",      component: StreamingShoppingCart,      loadStrategy: "streamed" },
+  { id: "dashboard", component: StreamingUserDashboard,     loadStrategy: "streamed" },
+];
+
+// Eagerly preload modules marked as "eager" at shell init time
+const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
+for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
+
+// All modules still get three layers of resilience:
 function ModuleView({ module, isKilled }: { module: ModuleConfig; isKilled: boolean }) {
   const Component = module.component;
 
@@ -327,14 +362,11 @@ Each team tests their module in complete isolation — no dev servers needed, no
 resolve: {
   alias: {
     // Resolve MF remote imports to actual source files
-    "home/StreamingHome": path.resolve(
-      __dirname, "packages/home/src/StreamingHome.tsx"
-    ),
     "home/Home": path.resolve(
       __dirname, "packages/home/src/Home.tsx"
     ),
-    "products/StreamingProductsCatalog": path.resolve(
-      __dirname, "packages/products/src/StreamingProductsCatalog.tsx"
+    "products/ProductsCatalog": path.resolve(
+      __dirname, "packages/products/src/ProductsCatalog.tsx"
     ),
     "cart/StreamingShoppingCart": path.resolve(
       __dirname, "packages/cart/src/StreamingShoppingCart.tsx"
@@ -375,18 +407,22 @@ it("dispatches addToCart event on Add click", async () => {
 
 ---
 
-## 8. Prefetching
+## 8. Prefetching + Eager Loading
 
 ```tsx
-// Prefetch map — bare import() calls cached by the bundler
+// Two-tier preloading: eager on mount + hover on demand
 const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
-  home:      () => import("home/StreamingHome").catch(() => undefined),
-  products:  () => import("products/StreamingProductsCatalog").catch(() => undefined),
+  home:      () => import("home/Home").catch(() => undefined),
+  products:  () => import("products/ProductsCatalog").catch(() => undefined),
   cart:      () => import("cart/StreamingShoppingCart").catch(() => undefined),
   dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => undefined),
 };
 
-// Trigger on hover — no router library required
+// EAGER — preload on shell mount (fires at module evaluation time)
+const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
+for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
+
+// HOVER — trigger on hover for remaining modules
 <NavLink
   to={module.path}
   onMouseEnter={() => PREFETCHERS[module.id]()}
@@ -394,3 +430,11 @@ const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
   {module.label}
 </NavLink>
 ```
+
+| Strategy | When it loads | Example |
+|----------|--------------|----------|
+| **Instant** | Chunk fetched lazily, no streaming delay | Home |
+| **Eager** | Preloaded the moment the shell mounts, no streaming delay | Products |
+
+> **Why `lazy()` for eager modules?** Module Federation remotes are separate builds on separate servers — you can't use a static `import`. The eager pattern fires `import()` at shell init to warm the browser's module cache; when `lazy()` later calls the same `import()`, it resolves instantly. This is confirmed by the test: *"renders products immediately without a skeleton (eager strategy)"*.
+| **Hover** | Prefetched when user hovers a tab | Cart, Dashboard |

@@ -50,7 +50,7 @@ const ProductsSkeleton = memo(() => (
       ))}
     </div>
 
-    {/* Streaming indicator */}
+    {/* Loading indicator */}
     <div className="mt-12 pt-6 border-t border-edge">
       <div className="flex items-center gap-3">
         <div className="flex gap-1.5">
@@ -63,7 +63,7 @@ const ProductsSkeleton = memo(() => (
           ))}
         </div>
         <span className="font-mono text-[11px] text-dim tracking-wider">
-          STREAMING PRODUCTS :3001
+          LOADING PRODUCTS :3001
         </span>
       </div>
     </div>

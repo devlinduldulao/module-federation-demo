@@ -76,7 +76,7 @@ const HomeSkeleton = memo(() => (
             </div>
         </div>
 
-        {/* Streaming indicator */}
+        {/* Loading indicator */}
         <div className="mt-12 pt-6 border-t border-edge">
             <div className="flex items-center gap-3">
                 <div className="flex gap-1.5">
@@ -89,7 +89,7 @@ const HomeSkeleton = memo(() => (
                     ))}
                 </div>
                 <span className="font-mono text-[11px] text-dim tracking-wider">
-                    STREAMING HOME :3004
+                    LOADING HOME :3004
                 </span>
             </div>
         </div>

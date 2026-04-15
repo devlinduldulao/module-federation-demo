@@ -35,9 +35,21 @@ import DashboardSkeleton from "./components/DashboardSkeleton";
 import { useRemoteHealth } from "./lib/health";
 import { useKillSwitch, useVersionRegistry } from "./lib/demo";
 
-const StreamingHome = lazy(() =>
-  import("home/StreamingHome").catch((error) => {
-    console.error("Failed to load StreamingHome:", error);
+// ---------------------------------------------------------------------------
+// Loading strategies — not every module should load the same way:
+//   INSTANT:  Home     — lazy-loaded for code splitting, no streaming delay.
+//                        Renders the moment the chunk arrives.
+//   EAGER:    Products — standalone component, preloaded on shell mount.
+//                        Chunk is already cached before the user clicks.
+//   STREAMED: Cart, Dashboard — loaded on demand with skeleton streaming.
+// ---------------------------------------------------------------------------
+
+// INSTANT — Home loads without a streaming delay. We import the standalone
+// component (home/Home) instead of the streaming wrapper. Still lazy for code
+// splitting, but the user sees real content the moment the chunk arrives.
+const Home = lazy(() =>
+  import("home/Home").catch((error) => {
+    console.error("Failed to load Home:", error);
     return {
       default: () => (
         <ModuleFallback
@@ -49,9 +61,12 @@ const StreamingHome = lazy(() =>
   })
 );
 
-const StreamingProductsCatalog = lazy(() =>
-  import("products/StreamingProductsCatalog").catch((error) => {
-    console.error("Failed to load StreamingProductsCatalog:", error);
+// EAGER — Products is preloaded immediately (see EAGER_PRELOAD below) and
+// imports the standalone component directly — no streaming delay. By the time
+// the user navigates here, the chunk is already cached.
+const ProductsCatalog = lazy(() =>
+  import("products/ProductsCatalog").catch((error) => {
+    console.error("Failed to load ProductsCatalog:", error);
     return {
       default: () => (
         <ModuleFallback
@@ -63,6 +78,7 @@ const StreamingProductsCatalog = lazy(() =>
   })
 );
 
+// STREAMED — Cart and Dashboard load on demand with skeleton fallbacks.
 const StreamingShoppingCart = lazy(() =>
   import("cart/StreamingShoppingCart").catch((error) => {
     console.error("Failed to load StreamingShoppingCart:", error);
@@ -102,12 +118,15 @@ type CommandAction = {
   run: () => void;
 };
 
+type LoadStrategy = "instant" | "eager" | "streamed";
+
 type ModuleConfig = {
   id: ModuleType;
   label: string;
   path: string;
   port: string;
   component: React.LazyExoticComponent<React.ComponentType>;
+  loadStrategy: LoadStrategy;
 };
 
 const MODULES = [
@@ -116,14 +135,16 @@ const MODULES = [
     label: "Home",
     path: "/",
     port: "3004",
-    component: StreamingHome,
+    component: Home,
+    loadStrategy: "instant",
   },
   {
     id: "products",
     label: "Products",
     path: "/products",
     port: "3001",
-    component: StreamingProductsCatalog,
+    component: ProductsCatalog,
+    loadStrategy: "eager",
   },
   {
     id: "cart",
@@ -131,6 +152,7 @@ const MODULES = [
     path: "/cart",
     port: "3002",
     component: StreamingShoppingCart,
+    loadStrategy: "streamed",
   },
   {
     id: "dashboard",
@@ -138,6 +160,7 @@ const MODULES = [
     path: "/dashboard",
     port: "3003",
     component: StreamingUserDashboard,
+    loadStrategy: "streamed",
   },
 ] as const satisfies readonly ModuleConfig[];
 
@@ -151,11 +174,19 @@ const THEME_OPTIONS: readonly ThemeName[] = ["dark", "light"] as const;
 const KEYBOARD_SHORTCUT_LABEL = "Ctrl/Cmd + K";
 
 const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
-  home: () => import("home/StreamingHome").catch(() => undefined),
-  products: () => import("products/StreamingProductsCatalog").catch(() => undefined),
+  home: () => import("home/Home").catch(() => undefined),
+  products: () => import("products/ProductsCatalog").catch(() => undefined),
   cart: () => import("cart/StreamingShoppingCart").catch(() => undefined),
   dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => undefined),
 };
+
+// Eagerly preload modules marked as "eager" so their chunks (and streaming
+// delays) resolve before the user navigates. This fires once at module
+// evaluation time — the very first thing the shell does after importing.
+const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
+for (const m of EAGER_MODULES) {
+  PREFETCHERS[m.id]();
+}
 
 function getModuleForPath(pathname: string): ModuleConfig {
   if (pathname === "/") {
@@ -761,8 +792,23 @@ function ShellFrame(): React.JSX.Element {
             <div className="flex h-12 items-center justify-between">
               <div className="flex items-center gap-6 font-mono text-[11px] text-dim">
                 <div className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-citrine" />
-                  <span>STREAMING</span>
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full",
+                      activeModule.loadStrategy === "instant"
+                        ? "bg-mint"
+                        : activeModule.loadStrategy === "eager"
+                          ? "bg-citrine"
+                          : "bg-burnt"
+                    )}
+                  />
+                  <span>
+                    {activeModule.loadStrategy === "instant"
+                      ? "INSTANT"
+                      : activeModule.loadStrategy === "eager"
+                        ? "EAGER"
+                        : "STREAMING"}
+                  </span>
                 </div>
                 <span className="text-edge">|</span>
                 <span>{activeModule.id}</span>

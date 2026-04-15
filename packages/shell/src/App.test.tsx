@@ -3,10 +3,8 @@ import { render, screen, act, cleanup, fireEvent, waitFor } from "@testing-libra
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 import { THEME_STORAGE_KEY } from "./lib/theme";
-import { __resetProductsStreamingResourceCache } from "products/StreamingProductsCatalog";
 import { __resetCartStreamingResourceCache } from "cart/StreamingShoppingCart";
 import { __resetDashboardStreamingResourceCache } from "dashboard/StreamingUserDashboard";
-import { __resetHomeStreamingResourceCache } from "home/StreamingHome";
 
 vi.mock("./index.css", () => ({}));
 
@@ -50,10 +48,8 @@ describe("Shell App", () => {
   afterEach(() => {
     vi.useRealTimers();
     cleanup();
-    __resetProductsStreamingResourceCache();
     __resetCartStreamingResourceCache();
     __resetDashboardStreamingResourceCache();
-    __resetHomeStreamingResourceCache();
     localStorageMock.clear();
     document.documentElement.removeAttribute("data-theme");
     document.documentElement.removeAttribute("style");
@@ -88,7 +84,7 @@ describe("Shell App", () => {
 
   it("shows the status strip with active module info", async () => {
     render(<App />);
-    expect(screen.getByText("STREAMING")).toBeInTheDocument();
+    expect(screen.getByText("EAGER")).toBeInTheDocument();
     expect(screen.getByText("products")).toBeInTheDocument();
     expect(screen.getByText(":3001")).toBeInTheDocument();
   });
@@ -253,10 +249,16 @@ describe("Shell App", () => {
     expect(screen.getByText("Fault Isolation")).toBeInTheDocument();
   });
 
-  it("shows products skeleton while loading the products module", async () => {
+  it("renders products immediately without a skeleton (eager strategy)", async () => {
     render(<App />);
-    expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByText(/loading products/i)).toBeInTheDocument();
+    // Products uses the standalone component (no streaming delay), so content
+    // renders right away instead of showing a skeleton.
+    await waitFor(() => {
+      expect(
+        screen.getByText("Curated products for developers, designers, and tech enthusiasts.")
+      ).toBeInTheDocument();
+    });
+    expect(screen.queryByText(/loading products/i)).not.toBeInTheDocument();
   });
 
   it("shows cart skeleton while loading the cart module", async () => {
@@ -269,18 +271,15 @@ describe("Shell App", () => {
     expect(screen.getByText(/loading cart/i)).toBeInTheDocument();
   });
 
-  it("commits cart navigation immediately and replaces the previous page with the cart skeleton", async () => {
-    vi.useFakeTimers();
-
+  it("commits cart navigation immediately and replaces the products page with the cart skeleton", async () => {
     render(<App />);
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(2600);
+    // Products renders instantly (eager, no streaming delay)
+    await waitFor(() => {
+      expect(
+        screen.getByText("Curated products for developers, designers, and tech enthusiasts.")
+      ).toBeInTheDocument();
     });
-
-    expect(
-      screen.getByText("Curated products for developers, designers, and tech enthusiasts.")
-    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("link", { name: /navigate to cart/i }));
 

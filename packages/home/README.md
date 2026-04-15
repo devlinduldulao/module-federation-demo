@@ -13,7 +13,7 @@ exposes: {
 }
 ```
 
-The shell imports `StreamingHome` — when the Resource resolves after the simulated delay, the full landing page renders inside the shell's `<Suspense>` boundary.
+The shell imports `Home` directly (the instant loading strategy) — no streaming delay, the landing page renders the moment the chunk arrives.
 
 ## File Structure
 

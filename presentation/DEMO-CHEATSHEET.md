@@ -22,15 +22,25 @@ npm run dev
 
 ---
 
-## 2. Show streaming in action (UX pillar)
+## 2. Show loading strategies in action (UX pillar)
 
 1. Open `http://localhost:3000`
-2. See the **Home** landing page with architecture stats and navigation cards
-3. Click **Products** → observe the **products skeleton** (2.5s delay)
-4. Click **Cart** tab → cart skeleton (3.5s delay)
-5. Click **Dashboard** tab → dashboard skeleton (5s delay)
-6. Explain: "This is the UX pillar. Each remote controls its own loading time. The shell renders a skeleton instantly — users never see a blank screen. The shell has zero knowledge of how long any remote takes."
+2. See the **Home** landing page — loads **instantly** (no skeleton delay). Status strip shows **INSTANT** with a green dot.
+3. Click **Products** → loads fast because it was **eagerly preloaded** on shell mount. Status strip shows **EAGER** with a yellow dot.
+4. Click **Cart** tab → observe the **cart skeleton** streaming in (3.5s delay). Status strip shows **STREAMING** with an orange dot.
+5. Click **Dashboard** tab → dashboard skeleton streams in (5s delay)
+6. Explain: "Three loading strategies for three content priorities. Home is instant — no streaming delay, the landing page renders the moment the chunk arrives. Products is eager — preloaded on shell mount so it’s cached before you click. Cart and Dashboard are streamed — loaded on demand with skeleton fallbacks."
 7. Mention: "The DX pillar is what you can't see — each of these modules is a separate app, built and deployed by a separate team, running on its own dev server."
+
+### Loading strategy taxonomy
+
+| Strategy | Module | When it loads | Status strip |
+|----------|--------|--------------|---------------|
+| **Instant** | Home | Chunk fetched lazily, no streaming delay | 🟢 INSTANT |
+| **Eager** | Products | Preloaded on shell mount via `EAGER_PRELOAD`, no streaming delay | 🟡 EAGER |
+| **Streamed** | Cart, Dashboard | On demand with skeleton streaming | 🟠 STREAMING |
+
+> **Anticipate the question: "Why `lazy()` if it's eager?"** — Module Federation remotes are separate builds on separate servers, resolved at runtime via `import()`. You can't use a static `import`. The eager pattern fires `import()` at shell init to cache the chunk; `lazy()` later resolves from that cache instantly — no skeleton, no delay. The test *"renders products immediately without a skeleton"* proves it.
 
 ---
 
@@ -117,17 +127,23 @@ packages/products/
 ```
 Explain: "Every module is a self-contained app. A new team copies a package, picks a port, and ships independently."
 
-### UX story: the streaming pattern (12 lines)
-```
-packages/products/src/StreamingProductsCatalog.tsx
-```
-Show: `resource.read()` throws a Promise → Suspense catches it → skeleton displays instantly
-
-### Shell composition (3 layers of resilience + kill switch)
+### UX story: loading strategy taxonomy
 ```
 packages/shell/src/App.tsx
 ```
-Show: `lazy()` + `.catch()` → `<Suspense>` → `<ErrorBoundary>` → kill switch check in `ModuleView`
+Show: Three strategies — `Home` imports `home/Home` directly (instant), `Products` imports `products/ProductsCatalog` directly and is eagerly preloaded at shell init, `Cart`/`Dashboard` are streamed on demand
+
+### UX story: the streaming pattern (12 lines)
+```
+packages/cart/src/StreamingShoppingCart.tsx
+```
+Show: `resource.read()` throws a Promise → Suspense catches it → skeleton displays instantly
+
+### Shell composition (3 layers of resilience + kill switch + load strategy)
+```
+packages/shell/src/App.tsx
+```
+Show: `lazy()` + `.catch()` → `<Suspense>` → `<ErrorBoundary>` → kill switch check in `ModuleView`. Also show `loadStrategy` field on `ModuleConfig` and the status strip that shows INSTANT/EAGER/STREAMING per module.
 
 ### Event contract
 ```
@@ -153,17 +169,17 @@ Show: `useActiveTheme()` hook — reads from host bridge, listens for `themeChan
 
 ```bash
 npm test
-# 60 tests across 4 packages — all green
+# 137 tests across 10 files — all green
 ```
 
 Show the vitest.config.ts alias trick:
 ```ts
 // Resolve MF remote imports to actual source files
-"home/StreamingHome": path.resolve(
-  __dirname, "packages/home/src/StreamingHome.tsx"
+"home/Home": path.resolve(
+  __dirname, "packages/home/src/Home.tsx"
 ),
-"products/StreamingProductsCatalog": path.resolve(
-  __dirname, "packages/products/src/StreamingProductsCatalog.tsx"
+"products/ProductsCatalog": path.resolve(
+  __dirname, "packages/products/src/ProductsCatalog.tsx"
 ),
 ```
 
