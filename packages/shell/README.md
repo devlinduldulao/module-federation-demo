@@ -1,17 +1,17 @@
 # Shell — Host Application
 
-The shell is the **host** in the Module Federation topology. It defines three remotes (`products`, `cart`, `dashboard`), renders navigation and shell chrome, owns the shared theme state, and wraps each lazily-loaded remote module in `<Suspense>` + `<ErrorBoundary>` for independent loading and fault isolation.
+The shell is the **host** in the Module Federation topology. It defines four remotes (`home`, `products`, `cart`, `dashboard`), renders navigation and shell chrome, owns the shared theme state, and wraps each lazily-loaded remote module in `<Suspense>` + `<ErrorBoundary>` for independent loading and fault isolation.
 
 Runs on **localhost:3000**.
 
-The root route `/` redirects to `/products` so the live demo starts on the catalog flow by default.
+The root route `/` renders the **Home** landing page. Unknown routes redirect to `/`.
 
 ## Responsibilities
 
 - Lazy-load remote streaming components via `React.lazy` + dynamic `import()`
-- Provide per-module skeleton fallbacks (`ProductsSkeleton`, `CartSkeleton`, `DashboardSkeleton`)
+- Provide per-module skeleton fallbacks (`HomeSkeleton`, `ProductsSkeleton`, `CartSkeleton`, `DashboardSkeleton`)
 - Catch module-level errors with `ErrorBoundary` — a crashed remote never takes down the shell
-- Show `ModuleFallback` when a remote server is offline
+- Show `ModuleFallback` when a remote server is offline or killed via the demo panel
 - Render the route-driven navigation, status strip, notification toasts, and page layout
 - Listen for `showNotification` events from any module and display dark toasts
 - Dispatch `moduleChange` events when switching tabs so other modules can react
@@ -19,12 +19,13 @@ The root route `/` redirects to `/products` so the live demo starts on the catal
 - Prefetch remote entry points on tab hover via a `PREFETCH_MAP`
 - Persist the selected theme in `localStorage`
 - Broadcast `themeChange` events and expose `window.__MF_THEME__` to remotes
+- Provide the **Federation Lab** demo panel with remote health monitoring, kill switches, and A/B deployment controls
 
 ## File Structure
 
 ```
 shell/
-├── rspack.config.js           # MF host — remotes: products, cart, dashboard
+├── rspack.config.js           # MF host — remotes: home, products, cart, dashboard
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html
@@ -34,16 +35,20 @@ shell/
     ├── App.tsx                # Navigation, Suspense, ErrorBoundary orchestration
     ├── App.test.tsx           # Shell behavior, events, theme persistence
     ├── index.css              # @theme tokens, animations, noise grain, scrollbar
-    ├── types.d.ts             # declare module "products/..." etc.
+    ├── types.d.ts             # declare module "home/...", "products/..." etc.
     ├── components/
     │   ├── ErrorBoundary.tsx      # Class component, catches JS errors per module
     │   ├── ModuleFallback.tsx     # Module unavailable card with retry
+    │   ├── DemoPanel.tsx          # Federation Lab — health, kill switches, A/B deployment
     │   ├── LoadingSpinner.tsx     # Three citrine dots with staggered pulse
+    │   ├── HomeSkeleton.tsx       # Home landing page skeleton
     │   ├── ProductsSkeleton.tsx   # Products grid skeleton with shimmer
     │   ├── CartSkeleton.tsx       # Cart table skeleton
     │   └── DashboardSkeleton.tsx  # Dashboard stats + activity skeleton
     └── lib/
         ├── theme.ts               # Theme definitions, persistence, event bridge
+        ├── health.ts              # useRemoteHealth — polls remoteEntry.js endpoints
+        ├── demo.ts                # useKillSwitch + useVersionRegistry hooks
         └── utils.ts               # cn() — clsx + tailwind-merge
 ```
 
@@ -53,6 +58,7 @@ shell/
 new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {
+    home:      "home@http://localhost:3004/remoteEntry.js",
     products:  "products@http://localhost:3001/remoteEntry.js",
     cart:      "cart@http://localhost:3002/remoteEntry.js",
     dashboard: "dashboard@http://localhost:3003/remoteEntry.js",
@@ -96,6 +102,7 @@ The `key={activeModule}` prop forces React to unmount/remount when switching tab
 
 The shell now uses `react-router-dom` for client-side routing. Each remote is mounted behind a shareable URL:
 
+- `/` (Home)
 - `/products`
 - `/cart`
 - `/dashboard`
@@ -103,7 +110,7 @@ The shell now uses `react-router-dom` for client-side routing. Each remote is mo
 Routing is still driven from the shell-level `ModuleConfig[]` array:
 
 ```ts
-type ModuleType = "products" | "cart" | "dashboard";
+type ModuleType = "home" | "products" | "cart" | "dashboard";
 
 interface ModuleConfig {
   readonly id: ModuleType;
@@ -142,18 +149,17 @@ The shell defines a `PREFETCH_MAP` that maps each module to a bare `import()` ca
 
 ## Theme System
 
-The shell owns three themes:
+The shell owns two themes:
 
 - `dark` — the default noir palette
-- `dim` — a softer low-glare dark palette
-- `light` — a warm paper-inspired light palette
+- `light` — a clean white theme with crisp high-contrast text
 
 `bootstrap.tsx` calls `initializeTheme()` before mounting React, so the correct CSS variables are present on first paint. Theme changes are stored under `mf-demo-theme`, applied to `document.documentElement.dataset.theme`, and broadcast globally:
 
 ```ts
 window.dispatchEvent(
   new CustomEvent("themeChange", {
-    detail: { theme: "dim", colorScheme: "dark" },
+    detail: { theme: "light", colorScheme: "light" },
   })
 );
 ```
@@ -183,6 +189,17 @@ Any remote can trigger notifications by dispatching this event.
 
 Defined in `index.css` under `@theme { ... }` — see the root README for the full token table. The shell also defines all shared animations: `fadeInUp`, `slideInRight`, `shimmer`, `subtlePulse`, etc.
 
+## Federation Lab (Demo Panel)
+
+The shell includes a slide-out **Federation Lab** panel (`DemoPanel.tsx`) for live conference demos:
+
+- **Remote Health Monitor** (`lib/health.ts`) — `useRemoteHealth` polls each remote's `remoteEntry.js` via HEAD requests every 5 seconds. Shows status dots (online/offline/checking) and latency per module.
+- **Fault Isolation Kill Switches** (`lib/demo.ts`) — `useKillSwitch` toggles modules as "killed". When a module is killed, `ModuleView` renders `ModuleFallback` instead of loading the remote. Other modules keep running independently.
+- **A/B Deployment Ring** (`lib/demo.ts`) — `useVersionRegistry` provides mock stable/canary version info per module. Toggle between rings to simulate independent version deployment.
+- **Hot Reload Guide** — Step-by-step instructions embedded in the panel.
+
+Open with the **Lab** button in the header or via the command palette (`Ctrl+K` → "Open Federation Lab"). Kill/restore commands and variant toggles are also available as command palette actions.
+
 ## Development
 
 ```bash
@@ -193,7 +210,7 @@ npm run typecheck
 npm run test
 ```
 
-Requires all three remotes to be running for full functionality, but the shell starts fine on its own — offline remotes show `ModuleFallback`.
+Requires all four remotes to be running for full functionality, but the shell starts fine on its own — offline remotes show `ModuleFallback`.
 
 From the repo root, `npm run ports:check` verifies that `3000`–`3003` are free before you start the full conference demo.
 

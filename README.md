@@ -1,6 +1,6 @@
 # Module Federation Demo
 
-A micro-frontend architecture demo built with **Rspack Module Federation**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. Four independent applications compose into a single shell — each deployable, scalable, and maintainable on its own.
+A micro-frontend architecture demo built with **Rspack Module Federation**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. Five independent applications compose into a single shell — each deployable, scalable, and maintainable on its own.
 
 Built for conference talks and technical demonstrations.
 
@@ -8,14 +8,15 @@ Built for conference talks and technical demonstrations.
 
 ```
 Shell (host)           localhost:3000
+├── Home (remote)      localhost:3004   → StreamingHome
 ├── Products (remote)  localhost:3001   → StreamingProductsCatalog
 ├── Cart (remote)      localhost:3002   → StreamingShoppingCart
 └── Dashboard (remote) localhost:3003   → StreamingUserDashboard
 ```
 
-Each remote exposes a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell lazy-loads the streaming variants and wraps them in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. The shell also owns URL-based navigation, so `/products`, `/cart`, and `/dashboard` are directly shareable routes instead of in-memory tab state.
+Each remote exposes a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell lazy-loads the streaming variants and wraps them in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. The shell also owns URL-based navigation, so `/`, `/products`, `/cart`, and `/dashboard` are directly shareable routes instead of in-memory tab state.
 
-The root route `/` redirects to `/products`, which makes the live demo land on the most audience-friendly flow first: stream the catalog, add an item, then prove the cart and dashboard are independent remotes.
+The root route `/` renders the **Home** landing page, which provides an overview of the architecture and navigation cards to each module. Unknown routes redirect to `/`.
 
 ## Quick Start
 
@@ -30,7 +31,7 @@ npm run ports:check
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The shell will redirect to `/products` and pull remote entry points from ports 3001–3003.
+Open [http://localhost:3000](http://localhost:3000). The shell renders the Home landing page at `/` and pulls remote entry points from ports 3001–3004.
 
 If `npm run dev` fails, the most common cause is that one of the demo ports is already occupied. `npm run ports:check` now reports that clearly before you start the full stack.
 
@@ -54,6 +55,7 @@ npm run test:dashboard
 ### Run a single package
 
 ```bash
+cd packages/home && npm run dev       # :3004
 cd packages/products && npm run dev   # :3001
 cd packages/cart && npm run dev       # :3002
 cd packages/dashboard && npm run dev  # :3003
@@ -84,13 +86,24 @@ module-federation-demo/
     │   │   └── components/
     │   │       ├── ErrorBoundary.tsx   # Per-module error isolation
     │   │       ├── ModuleFallback.tsx  # Offline module placeholder
+    │   │       ├── DemoPanel.tsx       # Federation Lab demo controls
     │   │       ├── LoadingSpinner.tsx  # Generic loading dots
+    │   │       ├── HomeSkeleton.tsx
     │   │       ├── ProductsSkeleton.tsx
     │   │       ├── CartSkeleton.tsx
     │   │       └── DashboardSkeleton.tsx
     │   └── lib/
     │       ├── theme.ts               # Theme registry, persistence, window bridge
+    │       ├── health.ts              # Remote health monitoring (useRemoteHealth)
+    │       ├── demo.ts                # Kill switch + version registry hooks
     │       └── utils.ts               # cn() — clsx + tailwind-merge
+    ├── home/                          # Remote — landing page
+    │   ├── rspack.config.js           # MF exposes config
+    │   └── src/
+    │       ├── Home.tsx               # Landing page with architecture overview
+    │       ├── StreamingHome.tsx      # Suspense-wrapped
+    │       ├── types.ts
+    │       └── lib/utils.ts           # cn() utility
     ├── products/                      # Remote — product catalog
     │   ├── rspack.config.js           # MF exposes config
     │   └── src/
@@ -131,7 +144,7 @@ module-federation-demo/
 
 ## Design System — "Noir Editorial"
 
-A typographic editorial design language that avoids generic pastel AI aesthetics. The default presentation is dark, but the shell can switch between `dark`, `dim`, and `light` palettes by updating shared CSS custom properties at runtime.
+A typographic editorial design language that avoids generic pastel AI aesthetics. The default presentation is dark, and the shell can switch between `dark` and `light` palettes by updating shared CSS custom properties at runtime.
 
 ### Typography
 
@@ -178,6 +191,7 @@ The values below are the default dark theme tokens. The shell persists the activ
 new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {
+    home:     "home@http://localhost:3004/remoteEntry.js",
     products: "products@http://localhost:3001/remoteEntry.js",
     cart:     "cart@http://localhost:3002/remoteEntry.js",
     dashboard:"dashboard@http://localhost:3003/remoteEntry.js",
@@ -257,7 +271,7 @@ export interface AddToCartEvent extends CustomEvent {
 declare global {
   interface WindowEventMap {
     addToCart: AddToCartEvent;
-    navigateToModule: CustomEvent<{ module: "products" | "cart" | "dashboard" }>;
+    navigateToModule: CustomEvent<{ module: "home" | "products" | "cart" | "dashboard" }>;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
   }
@@ -265,6 +279,27 @@ declare global {
 ```
 
 The shell also exposes `window.__MF_THEME__` so remotes can read or update the active theme without importing host-only shell code.
+
+## Federation Lab (Demo Controls)
+
+The shell includes a **Federation Lab** panel for live demonstrations. Click the **Lab** button in the header (or use the command palette: `Ctrl+K` → "Open Federation Lab") to access:
+
+- **Remote Health Monitor** — polls each remote's `remoteEntry.js` every 5 seconds with live status indicators and latency
+- **Fault Isolation Kill Switches** — toggle any module to simulate a remote going down. The shell renders a `ModuleFallback` while other modules keep running independently
+- **A/B Deployment Ring** — switch between stable and canary deployment variants with per-module version info
+- **Hot Reload Guide** — step-by-step instructions for demonstrating independent deployment during a live talk
+
+The status bar shows a live count of killed remotes and the active deployment ring.
+
+### Individual kill scripts
+
+```bash
+npm run kill:products    # Stop products on :3001
+npm run kill:cart         # Stop cart on :3002
+npm run kill:dashboard    # Stop dashboard on :3003
+npm run kill:home         # Stop home on :3004
+npm run kill:ports        # Stop all demo ports (3000–3004)
+```
 
 ## Testing
 
@@ -316,34 +351,42 @@ The shell wraps each lazy-loaded remote in `<Suspense fallback={<Skeleton />}>` 
 This project demonstrates these micro-frontend concepts during a live talk:
 
 1. **Independent deployment** — each remote starts on its own port with its own build
-2. **Fault isolation** — kill a remote server and only that module shows a fallback
+2. **Fault isolation** — kill a remote server and only that module shows a fallback (or use the Federation Lab kill switch)
 3. **Shared dependencies** — React is loaded once via singleton sharing
 4. **Suspense streaming** — skeleton screens appear during module load, then content streams in
 5. **Loose coupling** — modules communicate through events, not imports
 6. **Host-owned routing** — remotes can request navigation through `navigateToModule` without importing `react-router-dom`
 7. **Independent tech choices** — each package has its own `rspack.config.js`, `postcss.config.js`, and `tsconfig.json`
 8. **Design system consistency** — shared `@theme` tokens across all packages keep the UI cohesive without a shared CSS build step
+9. **Live demo controls** — the Federation Lab panel lets you kill/restore remotes, monitor health, and toggle A/B deployment during a presentation
 
 ### What to show in a talk
 
-- Start `npm run dev`, open `:3000` — all three modules load with streaming skeletons
-- Start at `/products`, add an item, then use the cart empty-state CTA to show remote-requested host navigation
-- Kill the products server (`Ctrl+C` on `:3001`) — products module shows `ModuleFallback`, cart and dashboard continue working
+- Start `npm run dev`, open `:3000` — the Home landing page loads with architecture overview and navigation cards
+- Navigate to `/products`, add an item, then use the cart empty-state CTA to show remote-requested host navigation
+- Open the Federation Lab (click **Lab** in the header) and kill the products remote — products shows `ModuleFallback`, cart and dashboard continue working
+- Restore the remote from the Lab panel — products comes back
+- Toggle the A/B deployment ring from stable to canary — version info updates per module
+- Kill a real remote server (`Ctrl+C` on `:3001`) — the health monitor detects it offline
 - Restart it — products comes back without refreshing the shell
-- Add a product to cart — the `addToCart` event crosses module boundaries
 - Inspect the network tab — each module loads its own `remoteEntry.js` chunk
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start all four dev servers concurrently |
-| `npm run ports:check` | Verify that ports `3000`–`3003` are available before the demo starts |
-| `npm run build` | Build all four packages for production |
+| `npm run dev` | Start all five dev servers concurrently |
+| `npm run build` | Build all five packages for production |
 | `npm run dev:shell` | Start only the shell (`:3000`) |
+| `npm run dev:home` | Start only home (`:3004`) |
 | `npm run dev:products` | Start only products (`:3001`) |
 | `npm run dev:cart` | Start only cart (`:3002`) |
 | `npm run dev:dashboard` | Start only dashboard (`:3003`) |
+| `npm run kill:ports` | Kill all demo ports (`3000`–`3004`) |
+| `npm run kill:products` | Kill only the products port (`:3001`) |
+| `npm run kill:cart` | Kill only the cart port (`:3002`) |
+| `npm run kill:dashboard` | Kill only the dashboard port (`:3003`) |
+| `npm run kill:home` | Kill only the home port (`:3004`) |
 
 ## Prerequisites
 

@@ -2,9 +2,13 @@
 
 Annotated code snippets for projection during the talk. Each block is self-contained and presentation-ready.
 
+> **Two pillars in this demo:**
+> - **DX (Developer Experience)** — Module Federation gives growing teams independent builds, deploys, and onboarding. Sections 2, 4, 6, 7 show this.
+> - **UX (User Experience)** — Suspense streaming + skeletons give visitors instant perceived load. Sections 1, 2 (layers), 8 show this.
+
 ---
 
-## 1. The Streaming Resource Pattern
+## 1. The Streaming Resource Pattern (UX Pillar)
 
 The entire pattern that makes Suspense work inside federated remotes:
 
@@ -61,7 +65,7 @@ export default StreamingProductsCatalog;
 
 ---
 
-## 2. Shell Composition — Three Layers of Resilience
+## 2. Shell Composition — Three Layers of Resilience + Kill Switch (DX + UX)
 
 ```tsx
 // packages/shell/src/App.tsx
@@ -81,9 +85,20 @@ const StreamingProductsCatalog = lazy(() =>
   })
 );
 
-// Layer 2 + 3: Suspense + ErrorBoundary
-function ModuleView({ module }: { module: ModuleConfig }) {
+// Layer 2 + 3 + Kill switch: Suspense + ErrorBoundary + demo controls
+function ModuleView({ module, isKilled }: { module: ModuleConfig; isKilled: boolean }) {
   const Component = module.component;
+
+  // Kill switch — Federation Lab can simulate a remote going down
+  if (isKilled) {
+    return (
+      <ModuleFallback
+        title={`${module.label} Module Killed`}
+        message={`This remote has been intentionally taken down via the demo kill switch.`}
+      />
+    );
+  }
+
   return (
     <ErrorBoundary>                           {/* Layer 3: catches runtime errors */}
       <Suspense fallback={<ProductsSkeleton />}> {/* Layer 2: shows skeleton */}
@@ -96,7 +111,9 @@ function ModuleView({ module }: { module: ModuleConfig }) {
 
 ---
 
-## 3. Cross-Module Communication
+## 3. Cross-Module Communication (DX Pillar)
+
+Zero imports between modules — teams never depend on each other's code.
 
 ### Producer (Products module)
 
@@ -163,7 +180,9 @@ const handleBrowseProducts = () => {
 
 ---
 
-## 4. Module Federation Config
+## 4. Module Federation Config (DX Pillar)
+
+This is the infrastructure that lets each team own their own build, deploy, and dev server.
 
 ### Remote (exposes modules)
 
@@ -190,6 +209,7 @@ new rspack.container.ModuleFederationPlugin({
 new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {
+    home:      "home@http://localhost:3004/remoteEntry.js",
     products:  "products@http://localhost:3001/remoteEntry.js",
     cart:      "cart@http://localhost:3002/remoteEntry.js",
     dashboard: "dashboard@http://localhost:3003/remoteEntry.js",
@@ -278,7 +298,7 @@ export interface AddToCartEvent extends CustomEvent {
 
 export interface ThemeChangeEvent extends CustomEvent {
   detail: {
-    theme: "dark" | "dim" | "light";
+    theme: "dark" | "light";
     colorScheme: "dark" | "light";
   };
 }
@@ -287,7 +307,7 @@ export interface ThemeChangeEvent extends CustomEvent {
 declare global {
   interface WindowEventMap {
     addToCart: AddToCartEvent;
-    navigateToModule: CustomEvent<{ module: "products" | "cart" | "dashboard" }>;
+    navigateToModule: CustomEvent<{ module: "home" | "products" | "cart" | "dashboard" }>;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
   }
@@ -296,7 +316,9 @@ declare global {
 
 ---
 
-## 7. Testing Federated Components
+## 7. Testing Federated Components (DX Pillar)
+
+Each team tests their module in complete isolation — no dev servers needed, no cross-team dependencies.
 
 ### Vitest config — the alias trick
 
@@ -305,6 +327,12 @@ declare global {
 resolve: {
   alias: {
     // Resolve MF remote imports to actual source files
+    "home/StreamingHome": path.resolve(
+      __dirname, "packages/home/src/StreamingHome.tsx"
+    ),
+    "home/Home": path.resolve(
+      __dirname, "packages/home/src/Home.tsx"
+    ),
     "products/StreamingProductsCatalog": path.resolve(
       __dirname, "packages/products/src/StreamingProductsCatalog.tsx"
     ),
@@ -352,6 +380,7 @@ it("dispatches addToCart event on Add click", async () => {
 ```tsx
 // Prefetch map — bare import() calls cached by the bundler
 const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
+  home:      () => import("home/StreamingHome").catch(() => undefined),
   products:  () => import("products/StreamingProductsCatalog").catch(() => undefined),
   cart:      () => import("cart/StreamingShoppingCart").catch(() => undefined),
   dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => undefined),

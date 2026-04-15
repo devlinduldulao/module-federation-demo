@@ -13,6 +13,7 @@
 
 ```
 Shell (host)    :3000
+├── Home        :3004
 ├── Products    :3001
 ├── Cart        :3002
 └── Dashboard   :3003
@@ -24,34 +25,54 @@ Shell (host)    :3000
 
 ## Slide 2 — The Problem
 
-### Monolith → Micro-Frontends
+### The Real Bottleneck Isn't Your Framework — It's Your Team Size
 
-| Monolith Pain | MF Solution |
+Most frontend architecture talks start with bundle sizes or code splitting. But the actual pain that drives companies to micro-frontends is **developer experience at scale**.
+
+```
+  5 devs → everyone knows the codebase → fast, fun, productive
+ 15 devs → merge conflicts daily, CI takes 20 min → slowing down
+ 50 devs → deploys blocked by unrelated failures → frustrating
+100 devs → teams waiting on other teams to release → DX is broken
+200 devs → nobody understands the full app → onboarding takes months
+```
+
+| Monolith Pain (DX) | MF Solution |
 |---|---|
-| One broken deploy takes down everything | Fault isolation per module |
-| Teams blocked by shared release cycles | Independent deployment |
-| Massive bundle shipped to every user | Load only what's needed |
-| "Works on my machine" integration hell | Each module runs standalone |
+| Teams blocked by shared release cycles | Independent deployment per module |
+| One broken test blocks everyone's pipeline | Each team owns their own test suite |
+| Onboarding means learning the entire app | New devs learn one module, contribute day one |
+| Shared `package.json` — upgrade together or not at all | Each remote pins its own dependencies |
+| 15-minute CI builds for a one-line change | Each remote builds in seconds |
 
-**But micro-frontends have their own problem:**  
-How do you make independently deployed modules feel like a single, seamless app?
+**But solving DX isn't enough.**  
+Visitors don't care about your team structure. They care that the app feels fast.
+
+> **This demo shows both pillars:**  
+> Module Federation → excellent **DX** for growing teams  
+> Suspense streaming → excellent **UX** for end users
 
 ---
 
 ## Slide 3 — The Insight
 
-### Suspense Is a Micro-Frontend Primitive
+### Two Pillars: DX for Your Team, UX for Your Users
+
+| Pillar | Who Benefits | What It Solves |
+|--------|-------------|---------------|
+| **Module Federation** | Developers & teams | Independent builds, deploys, onboarding — DX at scale |
+| **Suspense + Skeletons** | End users & visitors | Instant perceived load, no blank screens — UX at runtime |
 
 ```
-Before: Shell manages loading state for every remote
-         ↓ isLoading props ↓ loading spinners ↓ orchestration logic
+Without Suspense:  User clicks a tab → blank screen → spinner → content
+                   (terrible UX, even with great DX)
 
-After:  Each remote owns its own loading choreography
-         ↓ Suspense boundary ↓ skeleton fallback ↓ zero coupling
+With Suspense:     User clicks a tab → skeleton instantly → content streams in
+                   (each remote owns its loading choreography)
 ```
 
 > **The shell doesn't know or care how long a remote takes to load.**  
-> It just renders `<Suspense>` and moves on.
+> It just renders `<Suspense>` and moves on. The user sees a skeleton immediately.
 
 ---
 
@@ -78,11 +99,11 @@ After:  Each remote owns its own loading choreography
 │  │ Footer: Independent Deploy / Zero Coupling      │ │
 │  └─────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────┘
-         │              │              │
-    ┌────┴────┐   ┌────┴────┐   ┌────┴────┐
-    │Products │   │  Cart   │   │Dashboard│
-    │ :3001   │   │ :3002   │   │  :3003  │
-    └─────────┘   └─────────┘   └─────────┘
+         │         │         │         │
+    ┌────┴───┐ ┌───┴────┐ ┌──┴───┐ ┌──┴──────┐
+    │  Home  │ │Products│ │ Cart │ │Dashboard│
+    │ :3004  │ │ :3001  │ │:3002 │ │  :3003  │
+    └────────┘ └────────┘ └──────┘ └─────────┘
 ```
 
 ---
@@ -126,6 +147,7 @@ new rspack.container.ModuleFederationPlugin({
 new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {
+    home:      "home@http://localhost:3004/remoteEntry.js",
     products:  "products@http://localhost:3001/remoteEntry.js",
     cart:      "cart@http://localhost:3002/remoteEntry.js",
     dashboard: "dashboard@http://localhost:3003/remoteEntry.js",
@@ -210,12 +232,13 @@ const StreamingProductsCatalog = lazy(() =>
 
 ## Slide 9 — Fault Isolation
 
-### DEMO: Kill a remote server
+### DEMO: Kill a remote with the Federation Lab
 
 ```bash
-# Stop the products dev server
-# The shell keeps running — shows ModuleFallback
+# Open the Federation Lab panel (click "Lab" button or Ctrl+K → "Open Federation Lab")
+# Toggle the products kill switch — the shell renders ModuleFallback
 # Cart and Dashboard are unaffected
+# Or: stop the actual products dev server for a real fault demo
 ```
 
 ```tsx
@@ -299,7 +322,7 @@ interface AddToCartEvent extends CustomEvent {
 declare global {
   interface WindowEventMap {
     addToCart: AddToCartEvent;
-    navigateToModule: CustomEvent<{ module: "products" | "cart" | "dashboard" }>;
+    navigateToModule: CustomEvent<{ module: "home" | "products" | "cart" | "dashboard" }>;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
     moduleChange: CustomEvent<{ newModule: string }>;
@@ -348,7 +371,7 @@ export function useActiveTheme() {
 }
 ```
 
-**Three themes:** Dark (editorial noir) · Dim (low-glare) · Light (warm paper)
+**Three themes:** Dark (editorial noir) · Light (clean white)
 
 ---
 
@@ -358,6 +381,7 @@ export function useActiveTheme() {
 
 ```tsx
 const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
+  home:      () => import("home/StreamingHome").catch(() => undefined),
   products:  () => import("products/StreamingProductsCatalog").catch(() => undefined),
   cart:      () => import("cart/StreamingShoppingCart").catch(() => undefined),
   dashboard: () => import("dashboard/StreamingUserDashboard").catch(() => undefined),
@@ -382,11 +406,17 @@ const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
 // vitest.config.ts — resolve MF imports to source files
 resolve: {
   alias: {
+    "home/StreamingHome": path.resolve(
+      __dirname, "packages/home/src/StreamingHome.tsx"
+    ),
     "products/StreamingProductsCatalog": path.resolve(
       __dirname, "packages/products/src/StreamingProductsCatalog.tsx"
     ),
     "cart/StreamingShoppingCart": path.resolve(
       __dirname, "packages/cart/src/StreamingShoppingCart.tsx"
+    ),
+    "dashboard/StreamingUserDashboard": path.resolve(
+      __dirname, "packages/dashboard/src/StreamingUserDashboard.tsx"
     ),
     // ...
   },
@@ -409,7 +439,7 @@ it("dispatches addToCart event on Add click", async () => {
 });
 ```
 
-**57 tests across 4 packages — all passing.**
+**60 tests across 4 packages — all passing.**
 
 ---
 
@@ -427,60 +457,75 @@ it("dispatches addToCart event on Add click", async () => {
 
 ### Three palettes
 
-| Dark | Dim | Light |
-|---|---|---|
-| `#0C0C0C` noir | `#181412` warm dark | `#F3EEE3` paper |
-| High contrast | Reduced glare | Editorial warmth |
+| Dark | Light |
+|---|---|
+| `#0C0C0C` noir | `#FFFFFF` clean white |
+| High contrast | Crisp readability |
 
 ---
 
 ## Slide 16 — Live Demo Script
 
-### 1. Full federation (2 min)
-- Open `localhost:3000` — shell redirects to `/products`, then products stream in with skeleton
-- Click between tabs — observe skeletons and streaming delays
-- Add product to cart — toast notification + cart sync
+### 1. Full federation + DX story (2 min)
+- Open `localhost:3000` — Home landing page loads with architecture overview and navigation cards
+- Point out: "Five independent apps, five dev servers, five test suites. Each team owns their module end-to-end."
+- Click through tabs — observe skeletons and streaming delays per module
+- Explain: "That's the UX pillar — Suspense gives users instant feedback while remotes load"
+- Navigate to Products, add product to cart — toast notification + cart sync
 - Empty the cart — use the CTA to prove a remote can request host navigation without importing the router
 
-### 2. Fault isolation (1 min)
-- Kill the products dev server (`Ctrl+C`)
-- Shell shows `ModuleFallback` — cart and dashboard still work
-- Restart products — module comes back
+### 2. Federation Lab — fault isolation (2 min)
+- Click **Lab** button in the header (or Ctrl+K → "Open Federation Lab")
+- Show the **Remote Health Monitor** — all 4 remotes showing green with latency
+- Toggle the **Kill Switch** for products — products shows `ModuleFallback`, other modules keep running
+- Navigate between cart and dashboard to prove they’re unaffected
+- Restore products from the Lab panel
+- Optionally kill the real products server (`Ctrl+C`) and show the health monitor detect it going offline
 
-### 3. Theme switching (1 min)
-- Toggle Dark → Dim → Light in the shell header
+### 3. A/B deployment (1 min)
+- In the Federation Lab, toggle from **Stable** to **Canary** ring
+- Show version info changing per module (e.g., products 2.1.0 → 2.2.0-canary.1)
+- Note the status bar showing "CANARY" indicator
+- Explain: "In production, each remote could be deployed at a different version independently"
+
+### 4. Theme switching (30 sec)
+- Toggle Dark → Light in the shell header
 - Watch CSS variables update across all remotes
 - Show localStorage persistence — refresh and theme persists
 
-### 4. Code walkthrough (3 min)
+### 5. Code walkthrough (3 min)
 - `StreamingProductsCatalog.tsx` — resource pattern (12 lines)
-- `App.tsx` — lazy + catch + Suspense + ErrorBoundary
+- `App.tsx` — lazy + catch + Suspense + ErrorBoundary + kill switch check
 - Cross-module `addToCart` event flow
+- `lib/health.ts` — useRemoteHealth hook (HEAD requests to remoteEntry.js)
 
-### 5. Testing (1 min)
-- Run `npm test` — 57 tests, all green
+### 6. Testing (1 min)
+- Run `npm test` — 60 tests, all green
 - Show vitest.config.ts alias trick for MF imports
 
 ---
 
 ## Slide 17 — Key Takeaways
 
-### 1. Suspense is a micro-frontend primitive
-Each remote owns its loading state. The shell just renders `<Suspense>` — no loading spinners, no `isLoading` props.
+### 1. Micro-frontends solve a people problem, not just a code problem
+The #1 reason to adopt this architecture: your team is growing and your monolith can't keep up. Independent modules = independent teams = DX that scales to hundreds of developers.
 
-### 2. Events > Shared state
+### 2. Suspense streaming solves the UX side
+DX and UX are two separate pillars. Module Federation gives your team independence. Suspense + skeletons give your users instant perceived load. This demo shows both working together.
+
+### 3. Events > Shared state
 `CustomEvent` on `window` gives you decoupled communication that survives independent deploys.
 
-### 3. Host owns routing
+### 4. Host owns routing
 Remotes can ask for navigation with `navigateToModule`, but only the shell mutates router state.
 
-### 3. Fault isolation is a feature, not a side effect
+### 5. Fault isolation is a feature, not a side effect
 `.catch()` on lazy imports + `ErrorBoundary` per module = one broken remote never kills the app.
 
-### 4. Rspack makes this fast
+### 6. Rspack makes this fast
 Sub-second HMR in a monorepo with 4 applications. Module Federation is a first-class citizen.
 
-### 5. The streaming wrapper pattern
+### 7. The streaming wrapper pattern
 ```tsx
 const StreamingComponent = () => {
   resource.read(); // throws for Suspense
@@ -491,13 +536,42 @@ That's it. The entire streaming pattern is 3 lines.
 
 ---
 
-## Slide 18 — What We Didn't Cover (But You Should Explore)
+## Slide 18 — When to Apply This
+
+### You're ready for this architecture when…
+
+| Signal | Pattern to Adopt |
+|---|---|
+| Multiple teams ship the same SPA and block each other on releases | **Module Federation** — independent builds, independent deploys |
+| Your app has distinct domains (catalog, checkout, account, admin) | **Federated remotes** — one per domain, each owns its own data |
+| Users wait for a full bundle before they see anything | **Suspense streaming** — skeletons render instantly, content streams in |
+| One broken feature takes down the whole page | **ErrorBoundary + lazy().catch()** — fault isolation per module |
+| Shared state libraries create invisible coupling between features | **CustomEvents on window** — zero-import communication |
+| You need A/B testing or canary releases at the feature level | **Independent versioning** — deploy one remote without touching others |
+| Designers struggle to keep UI consistent across team-owned features | **CSS variable theming** — shell owns tokens, remotes inherit |
+| Your test suite requires the full app running to test one feature | **Vitest alias trick** — test any remote in isolation, no servers |
+
+### Where this runs in production today
+
+- **E-commerce platforms** — product pages, cart, checkout, account each as federated remotes
+- **SaaS dashboards** — billing, analytics, settings, admin panels from different teams
+- **Enterprise portals** — HR, IT, finance modules stitched into one shell
+- **Media platforms** — content feeds, player, recommendations, user profiles
+- **Internal tools** — each ops team owns their module, shared shell provides auth and nav
+
+> **Start small.** Extract one slow-moving feature into a remote. Keep the rest in the shell. Prove the pattern. Then expand.
+
+---
+
+## Slide 19 — What We Didn't Cover (But You Should Explore)
 
 - **Server-side rendering** with streaming Suspense + Module Federation
 - **Shared design tokens** via a federated CSS module
 - **Version negotiation** when remotes have different React versions
 - **Deployment pipelines** — independent CI/CD per remote
 - **Dynamic remote URLs** — loading remotes from a manifest at runtime
+- **Real health checks** — replacing the demo's HEAD-request polling with production-grade liveness probes
+- **Feature flags** — extending the A/B ring concept with runtime feature toggles per module
 - **Nx/Turborepo** for build orchestration in larger monorepos
 
 ---
@@ -535,7 +609,8 @@ Open `localhost:3000` and start exploring.
 - **10:00–18:00** — Live demo (slide 16 script)
 - **18:00–22:00** — Cross-module communication + theme system (slides 10–13)
 - **22:00–25:00** — Testing + design system (slides 14–15)
-- **25:00–28:00** — Key takeaways (slide 17)
+- **25:00–27:00** — When to apply this (slide 18)
+- **27:00–28:00** — Key takeaways (slide 17)
 - **28:00–30:00** — Questions
 
 ### Demo Prep Checklist

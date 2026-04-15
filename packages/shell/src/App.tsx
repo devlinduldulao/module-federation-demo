@@ -27,10 +27,13 @@ import {
 } from "./lib/theme";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ModuleFallback from "./components/ModuleFallback";
+import DemoPanel from "./components/DemoPanel";
 import HomeSkeleton from "./components/HomeSkeleton";
 import ProductsSkeleton from "./components/ProductsSkeleton";
 import CartSkeleton from "./components/CartSkeleton";
 import DashboardSkeleton from "./components/DashboardSkeleton";
+import { useRemoteHealth } from "./lib/health";
+import { useKillSwitch, useVersionRegistry } from "./lib/demo";
 
 const StreamingHome = lazy(() =>
   import("home/StreamingHome").catch((error) => {
@@ -425,7 +428,7 @@ const CommandPalette = memo(function CommandPalette({
   );
 });
 
-function ModuleView({ module }: { module: ModuleConfig }): React.JSX.Element {
+function ModuleView({ module, isKilled }: { module: ModuleConfig; isKilled: boolean }): React.JSX.Element {
   const Component = module.component;
 
   const fallback = useMemo(() => {
@@ -443,6 +446,15 @@ function ModuleView({ module }: { module: ModuleConfig }): React.JSX.Element {
     }
   }, [module.id]);
 
+  if (isKilled) {
+    return (
+      <ModuleFallback
+        title={`${module.label} Module Killed`}
+        message={`This remote (port ${module.port}) has been intentionally taken down via the demo kill switch. Other modules continue to function independently — this is fault isolation in action.`}
+      />
+    );
+  }
+
   return (
     <ErrorBoundary key={module.id}>
       <Suspense key={module.id} fallback={fallback}>
@@ -458,7 +470,14 @@ function ShellFrame(): React.JSX.Element {
   const [theme, setTheme] = useState<ThemeName>(() => getInitialTheme());
   const [isThemeDrawerOpen, setIsThemeDrawerOpen] = useState(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isDemoPanelOpen, setIsDemoPanelOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
+
+  const moduleIds = useMemo(() => MODULES.map((m) => m.id as string), []);
+  const remoteSpecs = useMemo(() => MODULES.map((m) => ({ id: m.id, port: m.port })), []);
+  const health = useRemoteHealth(remoteSpecs, isDemoPanelOpen);
+  const { killed, toggle: toggleKill, killAll, restoreAll } = useKillSwitch(moduleIds);
+  const { variant, versions, toggleVariant } = useVersionRegistry(moduleIds);
 
   const activeModule = useMemo(() => getModuleForPath(location.pathname), [location.pathname]);
 
@@ -532,7 +551,7 @@ function ShellFrame(): React.JSX.Element {
 
       if (event.key === "Escape") {
         setIsThemeDrawerOpen(false);
-        setIsCommandPaletteOpen(false);
+        setIsCommandPaletteOpen(false); setIsDemoPanelOpen(false);
       }
     };
 
@@ -575,8 +594,41 @@ function ShellFrame(): React.JSX.Element {
       },
     }));
 
-    return [...navigationCommands, ...themeCommands];
-  }, [navigate]);
+    const demoCommands: CommandAction[] = [
+      {
+        id: "demo-panel",
+        title: "Open Federation Lab",
+        subtitle: "Health monitor, kill switches, A/B deployment controls",
+        keywords: "demo lab federation health kill fault isolation version canary",
+        run: () => {
+          setIsDemoPanelOpen(true);
+          setIsCommandPaletteOpen(false);
+        },
+      },
+      ...MODULES.map((module) => ({
+        id: `kill-${module.id}`,
+        title: `${killed[module.id] ? "Restore" : "Kill"} ${module.label} Remote`,
+        subtitle: `${killed[module.id] ? "Bring back" : "Simulate failure of"} the ${module.label.toLowerCase()} service on port ${module.port}`,
+        keywords: `kill restore fault isolation ${module.id} ${module.label.toLowerCase()} down`,
+        run: () => {
+          toggleKill(module.id);
+          setIsCommandPaletteOpen(false);
+        },
+      })),
+      {
+        id: "toggle-variant",
+        title: `Switch to ${variant === "stable" ? "Canary" : "Stable"} Ring`,
+        subtitle: `Toggle A/B deployment from ${variant} to ${variant === "stable" ? "canary" : "stable"} builds`,
+        keywords: "variant canary stable deployment ab version",
+        run: () => {
+          toggleVariant();
+          setIsCommandPaletteOpen(false);
+        },
+      },
+    ];
+
+    return [...navigationCommands, ...themeCommands, ...demoCommands];
+  }, [navigate, killed, variant]);
 
   const filteredCommands = useMemo(() => {
     const normalizedQuery = commandQuery.trim().toLowerCase();
@@ -640,6 +692,18 @@ function ShellFrame(): React.JSX.Element {
         commands={filteredCommands}
         onClose={() => setIsCommandPaletteOpen(false)}
       />
+      <DemoPanel
+        isOpen={isDemoPanelOpen}
+        onClose={() => setIsDemoPanelOpen(false)}
+        health={health}
+        killed={killed}
+        onToggleKill={toggleKill}
+        onKillAll={killAll}
+        onRestoreAll={restoreAll}
+        versions={versions}
+        variant={variant}
+        onToggleVariant={toggleVariant}
+      />
 
       <div className="relative z-10 flex min-h-screen flex-col">
         <header className="border-b border-edge">
@@ -675,6 +739,14 @@ function ShellFrame(): React.JSX.Element {
                   >
                     Commands
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsDemoPanelOpen(true)}
+                    className="border border-burnt/40 px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-burnt uppercase transition-all duration-300 hover:border-burnt hover:bg-burnt/10 focus:outline-hidden"
+                    aria-label="Open federation lab demo panel"
+                  >
+                    Lab
+                  </button>
                   <span className="hidden font-mono text-[10px] text-dim uppercase sm:inline">
                     {KEYBOARD_SHORTCUT_LABEL}
                   </span>
@@ -705,6 +777,20 @@ function ShellFrame(): React.JSX.Element {
                 <span className="hidden sm:inline">Module Federation</span>
                 <span className="text-edge">|</span>
                 <span>{THEME_DEFINITIONS[theme].label}</span>
+                {Object.values(killed).some(Boolean) && (
+                  <>
+                    <span className="text-edge">|</span>
+                    <span className="text-rose">
+                      {Object.values(killed).filter(Boolean).length} KILLED
+                    </span>
+                  </>
+                )}
+                {variant === "canary" && (
+                  <>
+                    <span className="text-edge">|</span>
+                    <span className="text-burnt">CANARY</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -717,7 +803,7 @@ function ShellFrame(): React.JSX.Element {
                 <Route
                   key={module.id}
                   path={module.path}
-                  element={<ModuleView module={module} />}
+                  element={<ModuleView module={module} isKilled={!!killed[module.id]} />}
                 />
               ))}
               <Route path="*" element={<Navigate to={DEFAULT_MODULE.path} replace />} />

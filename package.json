@@ -21,7 +21,11 @@
     "test:coverage": "vitest run --coverage",
     "postinstall": "npm run install:packages",
     "install:packages": "cd packages/shell && npm install --force && cd ../products && npm install --force && cd ../cart && npm install --force && cd ../dashboard && npm install --force && cd ../home && npm install --force",
-    "kill:ports": "npx kill-port 3000 3001 3002 3003 3004"
+    "kill:ports": "npx kill-port 3000 3001 3002 3003 3004",
+    "kill:products": "npx kill-port 3001",
+    "kill:cart": "npx kill-port 3002",
+    "kill:dashboard": "npx kill-port 3003",
+    "kill:home": "npx kill-port 3004"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.1",
