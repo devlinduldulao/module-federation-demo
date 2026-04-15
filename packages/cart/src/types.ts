@@ -32,6 +32,12 @@ export interface ThemeChangeEvent extends CustomEvent {
   };
 }
 
+export interface NavigateToModuleEvent extends CustomEvent {
+  detail: {
+    module: "products" | "cart" | "dashboard";
+  };
+}
+
 declare global {
   interface Window {
     __MF_THEME__?: {
@@ -44,5 +50,6 @@ declare global {
     addToCart: AddToCartEvent;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
+    navigateToModule: NavigateToModuleEvent;
   }
 }

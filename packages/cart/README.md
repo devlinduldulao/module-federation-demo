@@ -20,16 +20,16 @@ cart/
 ├── rspack.config.js           # MF remote — name: "cart", port: 3002
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
-├── public/index.html           # Standalone dev page
+├── public/index.html          # Standalone dev page
 └── src/
-    ├── index.tsx               # Standalone bootstrap
-    ├── ShoppingCart.tsx        # Full cart with management
-  ├── ShoppingCart.test.tsx   # Cart behavior tests
+    ├── index.tsx              # Standalone bootstrap
+    ├── ShoppingCart.tsx       # Full cart with management
+    ├── ShoppingCart.test.tsx  # Cart behavior tests
     ├── StreamingShoppingCart.tsx # Resource + Suspense wrapper
-    ├── index.css               # @theme tokens, animations
-    ├── types.ts                # CartItem, events
+    ├── index.css              # @theme tokens, animations
+    ├── types.ts               # CartItem, events
     └── lib/
-        └── utils.ts            # cn() utility
+        └── utils.ts           # cn() utility
 ```
 
 ## Key Types
@@ -53,7 +53,7 @@ interface AddToCartEvent extends CustomEvent {
 - **Inline quantity controls** — connected `−` / count / `+` cells with border dividers
 - **Order summary sidebar** — sticky panel with subtotal, shipping (free), tax, total in large serif italic
 - **Citrine checkout button** — `bg-citrine text-ink` with full-width emphasis
-- **Empty cart state** — serif italic heading with "Browse Products →" CTA
+- **Empty cart state** — serif italic heading with a working "Browse Products →" CTA that requests host-owned navigation
 - **Cross-module event listening** — adds items when `addToCart` fires from products
 
 ## Event Handling
@@ -83,6 +83,18 @@ useEffect(() => {
 
 If the product already exists in the cart, its quantity is incremented. Otherwise it's appended.
 
+When the cart becomes empty, the CTA dispatches a navigation request instead of trying to import the shell router directly:
+
+```typescript
+window.dispatchEvent(
+  new CustomEvent("navigateToModule", {
+    detail: { module: "products" },
+  })
+);
+```
+
+That keeps routing host-owned while still letting the remote drive the user back into the main shopping flow.
+
 ## Initial Mock Data
 
 The cart starts with two pre-loaded items for demo purposes:
@@ -108,7 +120,7 @@ npm run test
 
 ## Testing
 
-`ShoppingCart.test.tsx` covers initial cart rendering, quantity controls, item removal, order summary calculations, `addToCart` event listener, and checkout notification. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
+`ShoppingCart.test.tsx` covers initial cart rendering, quantity controls, item removal, order summary calculations, `addToCart` event listener, checkout notification, and the empty-state navigation request. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
 
 ```bash
 npm test

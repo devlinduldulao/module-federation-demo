@@ -24,7 +24,7 @@ const ProductsSkeleton = memo(() => (
     </div>
 
     {/* Products Grid Skeleton */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[1px] bg-edge">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-edge">
       {Array.from({ length: 8 }).map((_, index) => (
         <div
           key={index}
@@ -32,7 +32,7 @@ const ProductsSkeleton = memo(() => (
         >
           {/* Image placeholder */}
           <div className="aspect-square bg-surface mb-5 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-muted/30 to-transparent animate-shimmer" style={{ backgroundSize: "200% 100%" }} />
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-muted/30 to-transparent animate-shimmer" style={{ backgroundSize: "200% 100%" }} />
           </div>
           {/* Category */}
           <div className="h-2.5 w-16 bg-elevated mb-3" />

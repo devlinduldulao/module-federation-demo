@@ -7,6 +7,7 @@ Quick reference for the live coding portion of the talk.
 ## 1. Start the demo
 
 ```bash
+npm run ports:check
 npm run dev
 # Opens 4 dev servers concurrently:
 #   Shell      → http://localhost:3000
@@ -20,10 +21,11 @@ npm run dev
 ## 2. Show streaming in action
 
 1. Open `http://localhost:3000`
-2. Observe the **products skeleton** (2.5s delay)
-3. Click **Cart** tab → cart skeleton (3.5s delay)
-4. Click **Dashboard** tab → dashboard skeleton (5s delay)
-5. Explain: "Each remote controls its own loading time. The shell has zero knowledge of it."
+2. Call out the redirect to `/products`
+3. Observe the **products skeleton** (2.5s delay)
+4. Click **Cart** tab → cart skeleton (3.5s delay)
+5. Click **Dashboard** tab → dashboard skeleton (5s delay)
+6. Explain: "Each remote controls its own loading time. The shell has zero knowledge of it."
 
 ---
 
@@ -34,7 +36,9 @@ npm run dev
 3. Observe toast notification: "MacBook Pro M3 added to cart"
 4. Navigate to **Cart**
 5. Show that MacBook Pro M3 was added (via `addToCart` CustomEvent)
-6. Explain: "Products and Cart don't import each other. They communicate through window events."
+6. Remove both items from the cart
+7. Click **Browse Products →**
+8. Explain: "The cart remote requested navigation through a typed window event. The shell still owns the router."
 
 ---
 
@@ -91,6 +95,12 @@ packages/products/src/types.ts
 ```
 Show: `WindowEventMap` with typed `addToCart` and `showNotification` events
 
+### Host-owned navigation request
+```
+packages/cart/src/ShoppingCart.tsx
+```
+Show: empty-state CTA dispatches `navigateToModule` instead of importing the shell router
+
 ### Theme bridge
 ```
 packages/products/src/lib/theme.ts
@@ -132,6 +142,7 @@ If wifi/demo gods fail, have screenshots of:
 
 | Action | Command |
 |---|---|
+| Check demo ports | `npm run ports:check` |
 | Start all servers | `npm run dev` |
 | Run all tests | `npm test` |
 | Test with coverage | `npm run test:coverage` |

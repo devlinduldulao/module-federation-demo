@@ -20,16 +20,16 @@ dashboard/
 ├── rspack.config.js           # MF remote — name: "dashboard", port: 3003
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
-├── public/index.html           # Standalone dev page
+├── public/index.html          # Standalone dev page
 └── src/
-    ├── index.tsx               # Standalone bootstrap
+    ├── index.tsx              # Standalone bootstrap
     ├── UserDashboard.tsx      # Full dashboard with stats + activity
-  ├── UserDashboard.test.tsx # Dashboard rendering tests
+    ├── UserDashboard.test.tsx # Dashboard rendering tests
     ├── StreamingUserDashboard.tsx # Resource + Suspense wrapper
-    ├── index.css               # @theme tokens, count-up animation, activity timeline
-    ├── types.ts                # DashboardStat, ActivityItem
+    ├── index.css              # @theme tokens, count-up animation, activity timeline
+    ├── types.ts               # DashboardStat, ActivityItem
     └── lib/
-        └── utils.ts            # cn() utility
+        └── utils.ts           # cn() utility
 ```
 
 ## Key Types

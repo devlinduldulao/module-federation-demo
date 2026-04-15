@@ -41,12 +41,15 @@ interface WindowEventMap {
   moduleChange: CustomEvent<{
     newModule: "products" | "cart" | "dashboard";
   }>;
+  navigateToModule: CustomEvent<{
+    module: "products" | "cart" | "dashboard";
+  }>;
   themeChange: CustomEvent<{
     theme: "dark" | "dim" | "light";
     colorScheme: "dark" | "light";
   }>;
   showNotification: CustomEvent<{
-    type: "success" | "error" | "info";
+    type: "success" | "error" | "info" | "warning";
     message: string;
   }>;
   addToCart: CustomEvent<{

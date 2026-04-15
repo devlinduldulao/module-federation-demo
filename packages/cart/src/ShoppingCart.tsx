@@ -15,7 +15,7 @@ const CartItemRow = memo<{
     aria-label={`Cart item: ${item.name}`}
   >
     {/* Image placeholder */}
-    <div className="w-16 h-16 bg-elevated flex-shrink-0 flex items-center justify-center">
+    <div className="w-16 h-16 bg-elevated shrink-0 flex items-center justify-center">
       <span className="font-mono text-[10px] text-dim">IMG</span>
     </div>
 
@@ -72,7 +72,7 @@ const CartItemRow = memo<{
 CartItemRow.displayName = "CartItemRow";
 
 // Empty cart state
-const EmptyCart = memo(() => (
+const EmptyCart = memo<{ onBrowseProducts: () => void }>(({ onBrowseProducts }) => (
   <div className="text-center py-24 border border-edge" role="region" aria-label="Empty cart">
     <span className="font-mono text-sm text-dim block mb-4">
       No items in cart
@@ -83,9 +83,14 @@ const EmptyCart = memo(() => (
     <p className="text-stone text-sm mb-8 max-w-md mx-auto">
       Browse the collection to add items to your cart.
     </p>
-    <span className="font-mono text-xs tracking-wider text-citrine border border-edge px-6 py-3 inline-block hover:bg-citrine hover:text-ink transition-all duration-300 cursor-pointer">
+    <button
+      type="button"
+      onClick={onBrowseProducts}
+      className="font-mono text-xs tracking-wider text-citrine border border-edge px-6 py-3 inline-block hover:bg-citrine hover:text-ink transition-all duration-300"
+      aria-label="Browse products from the shell"
+    >
       Browse Products &rarr;
-    </span>
+    </button>
   </div>
 ));
 
@@ -199,6 +204,14 @@ function ShoppingCart() {
     );
   }, []);
 
+  const handleBrowseProducts = useCallback(() => {
+    window.dispatchEvent(
+      new CustomEvent("navigateToModule", {
+        detail: { module: "products" },
+      })
+    );
+  }, []);
+
   const { total, itemCount } = useMemo(() => {
     const calculatedTotal = cartItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
@@ -241,16 +254,16 @@ function ShoppingCart() {
       </header>
 
       {cartItems.length === 0 ? (
-        <EmptyCart />
+        <EmptyCart onBrowseProducts={handleBrowseProducts} />
       ) : (
         <div className="flex flex-col lg:flex-row gap-12 items-start">
           {/* Items list */}
           <section className="flex-1 w-full" aria-label="Cart items">
             {/* Column headers */}
             <div className="hidden sm:flex items-center gap-4 pb-3 border-b border-edge mb-2 font-mono text-[10px] tracking-[0.2em] text-dim uppercase">
-              <span className="w-16 flex-shrink-0" />
+              <span className="w-16 shrink-0" />
               <span className="flex-1">Product</span>
-              <span className="w-[106px]">Qty</span>
+              <span className="w-26.5">Qty</span>
               <span className="w-28 text-right">Total</span>
               <span className="w-4" />
             </div>

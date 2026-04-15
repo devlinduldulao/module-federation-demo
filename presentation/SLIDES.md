@@ -244,6 +244,7 @@ const StreamingProductsCatalog = lazy(() =>
 Products                Shell               Cart
    │                      │                   │
    ├─ addToCart ──────────►│                   │
+  ├─ navigateToModule ───►│                   │
    │                      ├─ showNotification─►│ (toast)
    │                      │                   ├── updates cart state
    │                      │                   │
@@ -263,10 +264,16 @@ useEffect(() => {
   window.addEventListener("addToCart", handler);
   return () => window.removeEventListener("addToCart", handler);
 }, []);
+
+// Cart can also request host-owned navigation
+window.dispatchEvent(new CustomEvent("navigateToModule", {
+  detail: { module: "products" },
+}));
 ```
 
 **Why CustomEvents?**
 - Zero coupling — modules don't import each other
+- The shell stays the only router owner
 - Survives independent deployments and version mismatches
 - Works across any framework (React, Vue, Svelte)
 - Easy to type with TypeScript's `WindowEventMap`
@@ -292,6 +299,7 @@ interface AddToCartEvent extends CustomEvent {
 declare global {
   interface WindowEventMap {
     addToCart: AddToCartEvent;
+    navigateToModule: CustomEvent<{ module: "products" | "cart" | "dashboard" }>;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
     moduleChange: CustomEvent<{ newModule: string }>;
@@ -429,9 +437,10 @@ it("dispatches addToCart event on Add click", async () => {
 ## Slide 16 — Live Demo Script
 
 ### 1. Full federation (2 min)
-- Open `localhost:3000` — shell loads, products stream in with skeleton
+- Open `localhost:3000` — shell redirects to `/products`, then products stream in with skeleton
 - Click between tabs — observe skeletons and streaming delays
 - Add product to cart — toast notification + cart sync
+- Empty the cart — use the CTA to prove a remote can request host navigation without importing the router
 
 ### 2. Fault isolation (1 min)
 - Kill the products dev server (`Ctrl+C`)
@@ -461,6 +470,9 @@ Each remote owns its loading state. The shell just renders `<Suspense>` — no l
 
 ### 2. Events > Shared state
 `CustomEvent` on `window` gives you decoupled communication that survives independent deploys.
+
+### 3. Host owns routing
+Remotes can ask for navigation with `navigateToModule`, but only the shell mutates router state.
 
 ### 3. Fault isolation is a feature, not a side effect
 `.catch()` on lazy imports + `ErrorBoundary` per module = one broken remote never kills the app.
@@ -507,7 +519,7 @@ That's it. The entire streaming pattern is 3 lines.
 # Questions?
 
 ```
-npm install && npm run dev
+npm install && npm run ports:check && npm run dev
 ```
 
 Open `localhost:3000` and start exploring.
@@ -527,6 +539,7 @@ Open `localhost:3000` and start exploring.
 - **28:00–30:00** — Questions
 
 ### Demo Prep Checklist
+- [ ] `npm run ports:check` passes
 - [ ] All 4 dev servers running (`npm run dev`)
 - [ ] Browser at `localhost:3000`
 - [ ] DevTools Network tab open (to show remoteEntry.js loads)

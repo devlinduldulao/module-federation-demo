@@ -4,6 +4,8 @@ The shell is the **host** in the Module Federation topology. It defines three re
 
 Runs on **localhost:3000**.
 
+The root route `/` redirects to `/products` so the live demo starts on the catalog flow by default.
+
 ## Responsibilities
 
 - Lazy-load remote streaming components via `React.lazy` + dynamic `import()`
@@ -13,6 +15,7 @@ Runs on **localhost:3000**.
 - Render the route-driven navigation, status strip, notification toasts, and page layout
 - Listen for `showNotification` events from any module and display dark toasts
 - Dispatch `moduleChange` events when switching tabs so other modules can react
+- Listen for `navigateToModule` events so remotes can request host-owned navigation without importing the shell router
 - Prefetch remote entry points on tab hover via a `PREFETCH_MAP`
 - Persist the selected theme in `localStorage`
 - Broadcast `themeChange` events and expose `window.__MF_THEME__` to remotes
@@ -121,9 +124,21 @@ window.dispatchEvent(
 );
 ```
 
+Remotes can request navigation by dispatching:
+
+```ts
+window.dispatchEvent(
+  new CustomEvent("navigateToModule", {
+    detail: { module: "products" },
+  })
+);
+```
+
+The shell remains the only owner of router state, but remotes can still trigger intentional flows such as “Browse Products” from the cart empty state.
+
 ## Prefetching
 
-The shell defines a `PREFETCH_MAP` that maps each module to a bare `import()` call. On hover, the corresponding remote entry point is fetched in the background so the module loads instantly when clicked — no router library required.
+The shell defines a `PREFETCH_MAP` that maps each module to a bare `import()` call. On hover, the corresponding remote entry point is fetched in the background so the module loads instantly when clicked.
 
 ## Theme System
 
@@ -157,7 +172,8 @@ The shell listens for `showNotification` events globally:
 ```ts
 window.addEventListener("showNotification", (event) => {
   const { type, message } = event.detail;
-  // Adds a dark toast with auto-dismiss after 3s
+  // Adds a dark toast with auto-dismiss after 3s.
+  // Supports success, error, info, and warning.
 });
 ```
 
@@ -178,6 +194,8 @@ npm run test
 ```
 
 Requires all three remotes to be running for full functionality, but the shell starts fine on its own — offline remotes show `ModuleFallback`.
+
+From the repo root, `npm run ports:check` verifies that `3000`–`3003` are free before you start the full conference demo.
 
 ## Testing
 

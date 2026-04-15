@@ -115,6 +115,25 @@ describe("ShoppingCart", () => {
     expect(screen.getByText(/browse products/i)).toBeInTheDocument();
   });
 
+  it("requests navigation back to products from the empty state", async () => {
+    const user = userEvent.setup();
+    const handler = vi.fn();
+    window.addEventListener("navigateToModule", handler);
+
+    render(<ShoppingCart />);
+
+    await user.click(screen.getByRole("button", { name: /remove MacBook Pro M3 from cart/i }));
+    await user.click(screen.getByRole("button", { name: /remove AirPods Pro from cart/i }));
+    await user.click(screen.getByRole("button", { name: /browse products from the shell/i }));
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect((handler.mock.calls[0]![0] as CustomEvent).detail).toEqual({
+      module: "products",
+    });
+
+    window.removeEventListener("navigateToModule", handler);
+  });
+
   it("adds items via addToCart event", () => {
     render(<ShoppingCart />);
 

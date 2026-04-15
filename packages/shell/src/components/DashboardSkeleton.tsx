@@ -9,7 +9,7 @@ const DashboardSkeleton = memo(() => (
     <div className="mb-12">
       <div className="h-3 w-24 bg-elevated mb-4" />
       <div className="h-10 w-80 bg-elevated mb-3" />
-      <div className="h-4 w-[500px] max-w-full bg-muted" />
+      <div className="h-4 w-125 max-w-full bg-muted" />
     </div>
 
     {/* Welcome Card Skeleton */}
@@ -25,7 +25,7 @@ const DashboardSkeleton = memo(() => (
         </div>
         <div>
           <div className="w-20 h-20 bg-surface relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-muted/30 to-transparent animate-shimmer" style={{ backgroundSize: "200% 100%" }} />
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-muted/30 to-transparent animate-shimmer" style={{ backgroundSize: "200% 100%" }} />
           </div>
         </div>
       </div>
@@ -34,7 +34,7 @@ const DashboardSkeleton = memo(() => (
     {/* Stats Grid Skeleton */}
     <div className="mb-12">
       <div className="h-3 w-32 bg-muted mb-8" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-edge">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-edge">
         {Array.from({ length: 4 }).map((_, index) => (
           <div key={index} className="bg-noir p-6">
             <div className="h-2.5 w-20 bg-muted mb-4" />
@@ -52,7 +52,7 @@ const DashboardSkeleton = memo(() => (
       <div className="space-y-0 divide-y divide-edge">
         {Array.from({ length: 5 }).map((_, index) => (
           <div key={index} className="flex items-start gap-4 py-4">
-            <div className="w-2 h-2 rounded-full bg-elevated flex-shrink-0 mt-1.5" />
+            <div className="w-2 h-2 rounded-full bg-elevated shrink-0 mt-1.5" />
             <div className="flex-1">
               <div className="h-4 bg-elevated mb-2 w-full" />
               <div className="h-3 bg-muted w-20" />

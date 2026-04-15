@@ -15,17 +15,24 @@ Shell (host)           localhost:3000
 
 Each remote exposes a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell lazy-loads the streaming variants and wraps them in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. The shell also owns URL-based navigation, so `/products`, `/cart`, and `/dashboard` are directly shareable routes instead of in-memory tab state.
 
+The root route `/` redirects to `/products`, which makes the live demo land on the most audience-friendly flow first: stream the catalog, add an item, then prove the cart and dashboard are independent remotes.
+
 ## Quick Start
 
 ```bash
 # Install everything (root + all 4 packages)
 npm install
 
+# Confirm the demo ports are available before starting the federation
+npm run ports:check
+
 # Start all four dev servers concurrently
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The shell will pull remote entry points from ports 3001–3003.
+Open [http://localhost:3000](http://localhost:3000). The shell will redirect to `/products` and pull remote entry points from ports 3001–3003.
+
+If `npm run dev` fails, the most common cause is that one of the demo ports is already occupied. `npm run ports:check` now reports that clearly before you start the full stack.
 
 ### Quality Checks
 
@@ -225,6 +232,13 @@ window.dispatchEvent(
   })
 );
 
+// Remote -> Shell: request host-owned navigation without importing the router
+window.dispatchEvent(
+  new CustomEvent("navigateToModule", {
+    detail: { module: "products" },
+  })
+);
+
 // Shell: broadcast a theme change to remotes
 window.dispatchEvent(
   new CustomEvent("themeChange", {
@@ -243,6 +257,7 @@ export interface AddToCartEvent extends CustomEvent {
 declare global {
   interface WindowEventMap {
     addToCart: AddToCartEvent;
+    navigateToModule: CustomEvent<{ module: "products" | "cart" | "dashboard" }>;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
   }
@@ -305,12 +320,14 @@ This project demonstrates these micro-frontend concepts during a live talk:
 3. **Shared dependencies** — React is loaded once via singleton sharing
 4. **Suspense streaming** — skeleton screens appear during module load, then content streams in
 5. **Loose coupling** — modules communicate through events, not imports
-6. **Independent tech choices** — each package has its own `rspack.config.js`, `postcss.config.js`, and `tsconfig.json`
-7. **Design system consistency** — shared `@theme` tokens across all packages keep the UI cohesive without a shared CSS build step
+6. **Host-owned routing** — remotes can request navigation through `navigateToModule` without importing `react-router-dom`
+7. **Independent tech choices** — each package has its own `rspack.config.js`, `postcss.config.js`, and `tsconfig.json`
+8. **Design system consistency** — shared `@theme` tokens across all packages keep the UI cohesive without a shared CSS build step
 
 ### What to show in a talk
 
 - Start `npm run dev`, open `:3000` — all three modules load with streaming skeletons
+- Start at `/products`, add an item, then use the cart empty-state CTA to show remote-requested host navigation
 - Kill the products server (`Ctrl+C` on `:3001`) — products module shows `ModuleFallback`, cart and dashboard continue working
 - Restart it — products comes back without refreshing the shell
 - Add a product to cart — the `addToCart` event crosses module boundaries
@@ -321,6 +338,7 @@ This project demonstrates these micro-frontend concepts during a live talk:
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start all four dev servers concurrently |
+| `npm run ports:check` | Verify that ports `3000`–`3003` are available before the demo starts |
 | `npm run build` | Build all four packages for production |
 | `npm run dev:shell` | Start only the shell (`:3000`) |
 | `npm run dev:products` | Start only products (`:3001`) |

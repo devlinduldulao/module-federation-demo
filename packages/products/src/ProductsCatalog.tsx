@@ -97,7 +97,7 @@ const ProductCard = memo<{
         </span>
       </div>
       {/* Citrine reveal line */}
-      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-citrine scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-citrine scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
     </div>
 
     <div className="p-5 flex flex-col flex-1">
@@ -221,7 +221,7 @@ function ProductsCatalog() {
           >
             {category}
             {selectedCategory === category && (
-              <span className="absolute bottom-0 left-0 w-full h-[2px] bg-citrine" />
+              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-citrine" />
             )}
           </button>
         ))}
@@ -233,7 +233,7 @@ function ProductsCatalog() {
       {/* Product grid */}
       <section aria-label="Products grid">
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[1px] bg-edge">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-edge">
             {filteredProducts.map((product, index) => (
               <ProductCard
                 key={product.id}

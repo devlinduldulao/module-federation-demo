@@ -30,8 +30,8 @@ const CartSkeleton = memo(() => (
             className="flex items-center gap-6 py-6 border-b border-edge"
           >
             {/* Image */}
-            <div className="w-16 h-16 bg-surface flex-shrink-0 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-muted/30 to-transparent animate-shimmer" style={{ backgroundSize: "200% 100%" }} />
+            <div className="w-16 h-16 bg-surface shrink-0 relative overflow-hidden">
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-muted/30 to-transparent animate-shimmer" style={{ backgroundSize: "200% 100%" }} />
             </div>
             {/* Info */}
             <div className="flex-1 min-w-0">

@@ -125,7 +125,7 @@ const ActivityRow = memo<{ activity: ActivityItem }>(
       >
         <div
           className={cn(
-            "w-2 h-2 rounded-full flex-shrink-0 mt-1.5 transition-transform duration-200 group-hover:scale-150",
+            "w-2 h-2 rounded-full shrink-0 mt-1.5 transition-transform duration-200 group-hover:scale-150",
             dotColors[activity.type]
           )}
           aria-hidden="true"
@@ -180,7 +180,7 @@ function UserDashboard() {
       {/* Welcome banner */}
       <section className="mb-12 border border-edge">
         <div className="p-8 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-ice via-citrine to-mint" />
+          <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-ice via-citrine to-mint" />
           <div className="flex flex-col md:flex-row items-start justify-between gap-6">
             <div>
               <h3 className="font-display text-2xl italic text-cream mb-2">
@@ -217,7 +217,7 @@ function UserDashboard() {
             Performance Metrics
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-edge">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-edge">
           {MOCK_STATS.map((stat, index) => (
             <StatCard key={stat.id} stat={stat} index={index} />
           ))}

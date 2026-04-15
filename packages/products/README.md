@@ -22,16 +22,16 @@ products/
 ├── rspack.config.js           # MF remote — name: "products", port: 3001
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
-├── public/index.html           # Standalone dev page
+├── public/index.html          # Standalone dev page
 └── src/
-    ├── index.tsx               # Standalone bootstrap (renders ProductsCatalog)
-    ├── ProductsCatalog.tsx     # Full catalog with filters + grid
-  ├── ProductsCatalog.test.tsx # Product catalog tests
-    ├── StreamingProductsCatalog.tsx  # Resource + Suspense wrapper
-    ├── index.css               # @theme tokens, animations
-    ├── types.ts                # Product, CartItem, FilterCategory, events
+    ├── index.tsx              # Standalone bootstrap (renders ProductsCatalog)
+    ├── ProductsCatalog.tsx    # Full catalog with filters + grid
+    ├── ProductsCatalog.test.tsx # Product catalog tests
+    ├── StreamingProductsCatalog.tsx # Resource + Suspense wrapper
+    ├── index.css              # @theme tokens, animations
+    ├── types.ts               # Product, CartItem, FilterCategory, events
     └── lib/
-        └── utils.ts            # cn() utility
+        └── utils.ts           # cn() utility
 ```
 
 ## Key Types

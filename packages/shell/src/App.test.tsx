@@ -65,17 +65,17 @@ describe("Shell App", () => {
     expect(screen.getByRole("link", { name: /navigate to dashboard/i })).toBeInTheDocument();
   });
 
-  it("redirects the root route to dashboard", async () => {
+  it("redirects the root route to products", async () => {
     window.history.pushState({}, "", "/");
 
     render(<App />);
 
     await waitFor(() => {
-      expect(window.location.pathname).toBe("/dashboard");
+      expect(window.location.pathname).toBe("/products");
     });
 
-    const dashboardLink = screen.getByRole("link", { name: /navigate to dashboard/i });
-    expect(dashboardLink).toHaveAttribute("aria-current", "page");
+    const productsLink = screen.getByRole("link", { name: /navigate to products/i });
+    expect(productsLink).toHaveAttribute("aria-current", "page");
   });
 
   it("shows the status strip with active module info", async () => {
@@ -166,6 +166,27 @@ describe("Shell App", () => {
     });
 
     window.removeEventListener("moduleChange", handler);
+  });
+
+  it("navigates when a remote requests a module change", async () => {
+    render(<App />);
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent("navigateToModule", {
+          detail: { module: "dashboard" },
+        })
+      );
+    });
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/dashboard");
+    });
+
+    expect(screen.getByRole("link", { name: /navigate to dashboard/i })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
   });
 
   it("does not show a page loaded notification on route change", async () => {

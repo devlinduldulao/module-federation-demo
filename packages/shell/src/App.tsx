@@ -74,7 +74,7 @@ const StreamingUserDashboard = lazy(() =>
 );
 
 type ModuleType = "products" | "cart" | "dashboard";
-type NotificationType = "success" | "error" | "info";
+type NotificationType = "success" | "error" | "info" | "warning";
 
 type CommandAction = {
   id: string;
@@ -117,7 +117,7 @@ const MODULES = [
 ] as const satisfies readonly ModuleConfig[];
 
 const DEFAULT_MODULE = MODULES[0]!;
-const ROOT_MODULE = MODULES.find((module) => module.id === "dashboard")!;
+const ROOT_MODULE = DEFAULT_MODULE;
 const MODULE_BY_PATH = new Map<string, ModuleConfig>(
   MODULES.map((module) => [module.path, module])
 );
@@ -147,6 +147,11 @@ function showToast(type: NotificationType, message: string): void {
 
   if (type === "error") {
     toast.error(message);
+    return;
+  }
+
+  if (type === "warning") {
+    toast.warning(message);
     return;
   }
 
@@ -473,6 +478,21 @@ function ShellFrame(): React.JSX.Element {
   }, []);
 
   useEffect(() => {
+    const handleNavigateToModule = (event: WindowEventMap["navigateToModule"]) => {
+      const requestedModule = MODULES.find(
+        (module) => module.id === event.detail.module
+      );
+
+      if (requestedModule && requestedModule.path !== location.pathname) {
+        navigate(requestedModule.path);
+      }
+    };
+
+    window.addEventListener("navigateToModule", handleNavigateToModule);
+    return () => window.removeEventListener("navigateToModule", handleNavigateToModule);
+  }, [location.pathname, navigate]);
+
+  useEffect(() => {
     window.dispatchEvent(
       new CustomEvent("moduleChange", {
         detail: { newModule: activeModule.id },
@@ -536,7 +556,7 @@ function ShellFrame(): React.JSX.Element {
     }));
 
     return [...navigationCommands, ...themeCommands];
-  }, [navigate, theme]);
+  }, [navigate]);
 
   const filteredCommands = useMemo(() => {
     const normalizedQuery = commandQuery.trim().toLowerCase();
@@ -707,7 +727,12 @@ function ShellFrame(): React.JSX.Element {
 
 function App(): React.JSX.Element {
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_relativeSplatPath: true,
+        v7_startTransition: true,
+      }}
+    >
       <ShellFrame />
     </BrowserRouter>
   );

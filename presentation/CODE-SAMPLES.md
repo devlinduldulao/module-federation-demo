@@ -148,6 +148,19 @@ useEffect(() => {
 }, []);
 ```
 
+### Host-owned navigation request (Cart module)
+
+```tsx
+// Empty cart CTA asks the shell to navigate instead of importing react-router-dom
+const handleBrowseProducts = () => {
+  window.dispatchEvent(
+    new CustomEvent("navigateToModule", {
+      detail: { module: "products" },
+    })
+  );
+};
+```
+
 ---
 
 ## 4. Module Federation Config
@@ -274,6 +287,7 @@ export interface ThemeChangeEvent extends CustomEvent {
 declare global {
   interface WindowEventMap {
     addToCart: AddToCartEvent;
+    navigateToModule: CustomEvent<{ module: "products" | "cart" | "dashboard" }>;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
   }
