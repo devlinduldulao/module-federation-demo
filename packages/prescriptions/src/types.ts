@@ -1,23 +1,22 @@
-export interface Product {
+export interface MedicalRecord {
   readonly id: number;
-  readonly name: string;
-  readonly price: number;
-  readonly image?: string;
-  readonly category: string;
-  readonly description: string;
+  readonly patientName: string;
+  readonly recordType: string;
+  readonly date: string;
+  readonly status: string;
+  readonly summary: string;
+  readonly provider: string;
 }
 
-export interface CartItem {
+export interface PrescriptionItem {
   readonly id: number;
-  readonly name: string;
-  readonly price: number;
+  readonly patientName: string;
+  readonly provider: string;
   readonly quantity: number;
 }
 
-export type FilterCategory = "all" | "electronics" | "clothing" | "books";
-
-export interface AddToCartEvent extends CustomEvent {
-  detail: CartItem;
+export interface AddPrescriptionEvent extends CustomEvent {
+  detail: PrescriptionItem;
 }
 
 export interface NotificationEvent extends CustomEvent {
@@ -34,6 +33,12 @@ export interface ThemeChangeEvent extends CustomEvent {
   };
 }
 
+export interface NavigateToModuleEvent extends CustomEvent {
+  detail: {
+    module: "records" | "prescriptions" | "analytics";
+  };
+}
+
 declare global {
   interface Window {
     __MF_THEME__?: {
@@ -43,8 +48,9 @@ declare global {
   }
 
   interface WindowEventMap {
-    addToCart: AddToCartEvent;
+    addPrescription: AddPrescriptionEvent;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
+    navigateToModule: NavigateToModuleEvent;
   }
 }

@@ -1,13 +1,13 @@
 {
-  "name": "cart",
+  "name": "records",
   "version": "1.0.0",
   "scripts": {
     "dev": "rspack serve",
     "build": "rspack build",
     "lint": "npm --prefix ../.. exec eslint -- src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "npm --prefix ../.. run test -- packages/cart/src",
-    "test:watch": "npm --prefix ../.. run test:watch -- packages/cart/src"
+    "test": "npm --prefix ../.. run test -- packages/records/src",
+    "test:watch": "npm --prefix ../.. run test:watch -- packages/records/src"
   },
   "dependencies": {
     "react": "^19.2.5",

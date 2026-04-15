@@ -34,29 +34,29 @@ export default defineConfig({
       sonner: path.join(rootNodeModules, "sonner"),
 
       // Resolve MF remote imports to actual source files for transform
-      "products/StreamingProductsCatalog": path.resolve(
+      "records/StreamingMedicalRecords": path.resolve(
         __dirname,
-        "packages/products/src/StreamingProductsCatalog.tsx"
+        "packages/records/src/StreamingMedicalRecords.tsx"
       ),
-      "products/ProductsCatalog": path.resolve(
+      "records/MedicalRecords": path.resolve(
         __dirname,
-        "packages/products/src/ProductsCatalog.tsx"
+        "packages/records/src/MedicalRecords.tsx"
       ),
-      "cart/StreamingShoppingCart": path.resolve(
+      "prescriptions/StreamingPrescriptionOrders": path.resolve(
         __dirname,
-        "packages/cart/src/StreamingShoppingCart.tsx"
+        "packages/prescriptions/src/StreamingPrescriptionOrders.tsx"
       ),
-      "cart/ShoppingCart": path.resolve(
+      "prescriptions/PrescriptionOrders": path.resolve(
         __dirname,
-        "packages/cart/src/ShoppingCart.tsx"
+        "packages/prescriptions/src/PrescriptionOrders.tsx"
       ),
-      "dashboard/StreamingUserDashboard": path.resolve(
+      "analytics/StreamingClinicalAnalytics": path.resolve(
         __dirname,
-        "packages/dashboard/src/StreamingUserDashboard.tsx"
+        "packages/analytics/src/StreamingClinicalAnalytics.tsx"
       ),
-      "dashboard/UserDashboard": path.resolve(
+      "analytics/ClinicalAnalytics": path.resolve(
         __dirname,
-        "packages/dashboard/src/UserDashboard.tsx"
+        "packages/analytics/src/ClinicalAnalytics.tsx"
       ),
       "home/StreamingHome": path.resolve(
         __dirname,

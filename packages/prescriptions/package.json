@@ -1,13 +1,13 @@
 {
-  "name": "dashboard",
+  "name": "prescriptions",
   "version": "1.0.0",
   "scripts": {
     "dev": "rspack serve",
     "build": "rspack build",
     "lint": "npm --prefix ../.. exec eslint -- src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "npm --prefix ../.. run test -- packages/dashboard/src",
-    "test:watch": "npm --prefix ../.. run test:watch -- packages/dashboard/src"
+    "test": "npm --prefix ../.. run test -- packages/prescriptions/src",
+    "test:watch": "npm --prefix ../.. run test:watch -- packages/prescriptions/src"
   },
   "dependencies": {
     "react": "^19.2.5",

@@ -4,28 +4,28 @@ import { ModuleDestination } from "./types";
 
 const MODULE_DESTINATIONS: readonly ModuleDestination[] = [
   {
-    id: "products",
-    label: "Products",
-    description: "Browse our curated collection of tech, clothing, and books for developers and creators.",
+    id: "records",
+    label: "Records",
+    description: "Access patient medical records including lab results, imaging reports, and clinical consultations.",
     port: "3001",
-    path: "/products",
-    icon: "SHOP",
+    path: "/records",
+    icon: "REC",
   },
   {
-    id: "cart",
-    label: "Cart",
-    description: "Review your selections, adjust quantities, and prepare your order for checkout.",
+    id: "prescriptions",
+    label: "Prescriptions",
+    description: "Manage active prescription orders, adjust refill counts, and submit for pharmacy review.",
     port: "3002",
-    path: "/cart",
-    icon: "CART",
+    path: "/prescriptions",
+    icon: "Rx",
   },
   {
-    id: "dashboard",
-    label: "Dashboard",
-    description: "Track your activity, view order history, and manage your account overview.",
+    id: "analytics",
+    label: "Analytics",
+    description: "Monitor real-time clinical metrics, patient activity feed, and operational insights.",
     port: "3003",
-    path: "/dashboard",
-    icon: "DASH",
+    path: "/analytics",
+    icon: "STAT",
   },
 ] as const;
 

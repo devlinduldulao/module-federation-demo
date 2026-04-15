@@ -63,11 +63,11 @@ module.exports = {
 
   plugins: [
     new rspack.container.ModuleFederationPlugin({
-      name: "dashboard",
+      name: "analytics",
       filename: "remoteEntry.js",
       exposes: {
-        "./UserDashboard": "./src/UserDashboard.tsx",
-        "./StreamingUserDashboard": "./src/StreamingUserDashboard.tsx",
+        "./ClinicalAnalytics": "./src/ClinicalAnalytics.tsx",
+        "./StreamingClinicalAnalytics": "./src/StreamingClinicalAnalytics.tsx",
       },
       shared: {
         react: {

@@ -63,11 +63,11 @@ module.exports = {
 
   plugins: [
     new rspack.container.ModuleFederationPlugin({
-      name: "cart",
+      name: "prescriptions",
       filename: "remoteEntry.js",
       exposes: {
-        "./ShoppingCart": "./src/ShoppingCart.tsx",
-        "./StreamingShoppingCart": "./src/StreamingShoppingCart.tsx",
+        "./PrescriptionOrders": "./src/PrescriptionOrders.tsx",
+        "./StreamingPrescriptionOrders": "./src/StreamingPrescriptionOrders.tsx",
       },
       shared: {
         react: {

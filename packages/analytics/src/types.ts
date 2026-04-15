@@ -1,21 +1,15 @@
-export interface Product {
+export interface AnalyticsStat {
+  readonly label: string;
+  readonly value: string | number;
+  readonly trend: "up" | "down" | "stable";
+  readonly trendValue: string;
+}
+
+export interface ClinicalActivity {
   readonly id: number;
-  readonly name: string;
-  readonly price: number;
-  readonly image: string;
-  readonly category: string;
   readonly description: string;
-}
-
-export interface CartItem {
-  readonly id: number;
-  readonly name: string;
-  readonly price: number;
-  readonly quantity: number;
-}
-
-export interface AddToCartEvent extends CustomEvent {
-  detail: CartItem;
+  readonly timestamp: string;
+  readonly type: "admission" | "discharge" | "alert" | "prescription" | "lab";
 }
 
 export interface NotificationEvent extends CustomEvent {
@@ -32,12 +26,6 @@ export interface ThemeChangeEvent extends CustomEvent {
   };
 }
 
-export interface NavigateToModuleEvent extends CustomEvent {
-  detail: {
-    module: "products" | "cart" | "dashboard";
-  };
-}
-
 declare global {
   interface Window {
     __MF_THEME__?: {
@@ -47,9 +35,7 @@ declare global {
   }
 
   interface WindowEventMap {
-    addToCart: AddToCartEvent;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;
-    navigateToModule: NavigateToModuleEvent;
   }
 }

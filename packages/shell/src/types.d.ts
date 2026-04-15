@@ -11,37 +11,37 @@ declare module "home/StreamingHome" {
   export default StreamingHome;
 }
 
-declare module "products/ProductsCatalog" {
-  const ProductsCatalog: import("react").ComponentType;
-  export default ProductsCatalog;
+declare module "records/MedicalRecords" {
+  const MedicalRecords: import("react").ComponentType;
+  export default MedicalRecords;
 }
 
-declare module "products/StreamingProductsCatalog" {
-  const StreamingProductsCatalog: import("react").ComponentType;
-  export function __resetProductsStreamingResourceCache(): void;
-  export default StreamingProductsCatalog;
+declare module "records/StreamingMedicalRecords" {
+  const StreamingMedicalRecords: import("react").ComponentType;
+  export function __resetRecordsStreamingResourceCache(): void;
+  export default StreamingMedicalRecords;
 }
 
-declare module "cart/ShoppingCart" {
-  const ShoppingCart: import("react").ComponentType;
-  export default ShoppingCart;
+declare module "prescriptions/PrescriptionOrders" {
+  const PrescriptionOrders: import("react").ComponentType;
+  export default PrescriptionOrders;
 }
 
-declare module "cart/StreamingShoppingCart" {
-  const StreamingShoppingCart: import("react").ComponentType;
-  export function __resetCartStreamingResourceCache(): void;
-  export default StreamingShoppingCart;
+declare module "prescriptions/StreamingPrescriptionOrders" {
+  const StreamingPrescriptionOrders: import("react").ComponentType;
+  export function __resetPrescriptionsStreamingResourceCache(): void;
+  export default StreamingPrescriptionOrders;
 }
 
-declare module "dashboard/UserDashboard" {
-  const UserDashboard: import("react").ComponentType;
-  export default UserDashboard;
+declare module "analytics/ClinicalAnalytics" {
+  const ClinicalAnalytics: import("react").ComponentType;
+  export default ClinicalAnalytics;
 }
 
-declare module "dashboard/StreamingUserDashboard" {
-  const StreamingUserDashboard: import("react").ComponentType;
-  export function __resetDashboardStreamingResourceCache(): void;
-  export default StreamingUserDashboard;
+declare module "analytics/StreamingClinicalAnalytics" {
+  const StreamingClinicalAnalytics: import("react").ComponentType;
+  export function __resetAnalyticsStreamingResourceCache(): void;
+  export default StreamingClinicalAnalytics;
 }
 
 interface Window {
@@ -53,10 +53,10 @@ interface Window {
 
 interface WindowEventMap {
   moduleChange: CustomEvent<{
-    newModule: "home" | "products" | "cart" | "dashboard";
+    newModule: "home" | "records" | "prescriptions" | "analytics";
   }>;
   navigateToModule: CustomEvent<{
-    module: "home" | "products" | "cart" | "dashboard";
+    module: "home" | "records" | "prescriptions" | "analytics";
   }>;
   themeChange: CustomEvent<{
     theme: "dark" | "light";
@@ -66,10 +66,10 @@ interface WindowEventMap {
     type: "success" | "error" | "info" | "warning";
     message: string;
   }>;
-  addToCart: CustomEvent<{
+  addPrescription: CustomEvent<{
     id: number;
-    name: string;
-    price: number;
+    patientName: string;
+    provider: string;
     quantity: number;
   }>;
 }

@@ -86,9 +86,9 @@ module.exports = {
       filename: "remoteEntry.js",
       remotes: {
         home: "home@http://localhost:3004/remoteEntry.js",
-        products: "products@http://localhost:3001/remoteEntry.js",
-        cart: "cart@http://localhost:3002/remoteEntry.js",
-        dashboard: "dashboard@http://localhost:3003/remoteEntry.js",
+        records: "records@http://localhost:3001/remoteEntry.js",
+        prescriptions: "prescriptions@http://localhost:3002/remoteEntry.js",
+        analytics: "analytics@http://localhost:3003/remoteEntry.js",
       },
       shared: {
         react: {
