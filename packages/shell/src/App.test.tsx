@@ -65,11 +65,17 @@ describe("Shell App", () => {
     expect(screen.getByRole("link", { name: /navigate to dashboard/i })).toBeInTheDocument();
   });
 
-  it("uses the products route by default", async () => {
+  it("redirects the root route to dashboard", async () => {
+    window.history.pushState({}, "", "/");
+
     render(<App />);
-    const productsLink = screen.getByRole("link", { name: /navigate to products/i });
-    expect(productsLink).toHaveAttribute("aria-current", "page");
-    expect(window.location.pathname).toBe("/products");
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/dashboard");
+    });
+
+    const dashboardLink = screen.getByRole("link", { name: /navigate to dashboard/i });
+    expect(dashboardLink).toHaveAttribute("aria-current", "page");
   });
 
   it("shows the status strip with active module info", async () => {

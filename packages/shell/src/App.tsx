@@ -118,6 +118,7 @@ const MODULES: readonly ModuleConfig[] = [
 ] as const;
 
 const DEFAULT_MODULE = MODULES[0]!;
+const ROOT_MODULE = MODULES.find((module) => module.id === "dashboard")!;
 const MODULE_BY_PATH = new Map(MODULES.map((module) => [module.path, module]));
 const THEMES = Object.entries(THEME_DEFINITIONS) as Array<[
   ThemeName,
@@ -391,7 +392,7 @@ function ShellLayout(): React.JSX.Element {
         <main className="flex-1">
           <div className="max-w-[1400px] mx-auto px-6 lg:px-10 py-10">
             <Routes>
-              <Route path="/" element={<Navigate to={DEFAULT_MODULE.path} replace />} />
+              <Route path="/" element={<Navigate to={ROOT_MODULE.path} replace />} />
               {MODULES.map((module) => (
                 <Route
                   key={module.id}
