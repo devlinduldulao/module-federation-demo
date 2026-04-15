@@ -68,7 +68,7 @@ describe("DemoPanel", () => {
         render(<DemoPanel {...defaults} />);
 
         const closeButtons = screen.getAllByLabelText(/close demo panel/i);
-        await user.click(closeButtons[1]); // the × button inside the panel
+        await user.click(closeButtons[1]!); // the × button inside the panel
 
         expect(defaults.onClose).toHaveBeenCalledTimes(1);
     });
@@ -78,7 +78,7 @@ describe("DemoPanel", () => {
         render(<DemoPanel {...defaults} />);
 
         const closeButtons = screen.getAllByLabelText(/close demo panel/i);
-        await user.click(closeButtons[0]); // the backdrop button
+        await user.click(closeButtons[0]!); // the backdrop button
 
         expect(defaults.onClose).toHaveBeenCalledTimes(1);
     });

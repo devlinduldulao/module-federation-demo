@@ -121,7 +121,7 @@ describe("applyTheme", () => {
     applyTheme("light");
 
     expect(handler).toHaveBeenCalledTimes(1);
-    const detail = (handler.mock.calls[0][0] as CustomEvent).detail;
+    const detail = (handler.mock.calls[0]![0] as CustomEvent).detail;
     expect(detail).toEqual({
       theme: "light",
       colorScheme: "light",

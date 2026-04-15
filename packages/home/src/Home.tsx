@@ -1,5 +1,4 @@
 import { useCallback, memo } from "react";
-import { cn } from "./lib/utils";
 import { useActiveTheme } from "./lib/theme";
 import { ModuleDestination } from "./types";
 

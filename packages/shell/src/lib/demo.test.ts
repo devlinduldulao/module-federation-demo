@@ -101,7 +101,7 @@ describe("useVersionRegistry", () => {
     act(() => result.current.toggleVariant());
     act(() => result.current.toggleVariant());
     expect(result.current.variant).toBe("stable");
-    expect(result.current.versions[0].variant).toBe("stable");
+    expect(result.current.versions[0]!.variant).toBe("stable");
   });
 
   it("each version has a build hash", () => {
