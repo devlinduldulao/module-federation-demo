@@ -25,9 +25,17 @@ export interface NotificationEvent extends CustomEvent {
   };
 }
 
+export interface ThemeChangeEvent extends CustomEvent {
+  detail: {
+    theme: "dark" | "dim" | "light";
+    colorScheme: "dark" | "light";
+  };
+}
+
 declare global {
   interface WindowEventMap {
     addToCart: AddToCartEvent;
     showNotification: NotificationEvent;
+    themeChange: ThemeChangeEvent;
   }
 }

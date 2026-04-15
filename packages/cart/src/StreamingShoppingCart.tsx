@@ -273,13 +273,13 @@ function ShoppingCart() {
 
               <button
                 onClick={handleCheckout}
-                className="group w-full bg-citrine text-noir py-3 font-mono text-sm tracking-wider uppercase hover:bg-citrine-dim transition-all duration-300 focus:outline-hidden relative overflow-hidden"
-                style={{ color: "#0C0C0C" }}
+                className="group w-full bg-citrine text-ink py-3 font-mono text-sm tracking-wider uppercase hover:bg-citrine-dim transition-all duration-300 focus:outline-hidden relative overflow-hidden"
+                style={{ color: "var(--color-ink)" }}
                 aria-label={`Checkout ${itemCount} items for $${total.toFixed(2)}`}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  <span style={{ color: "#0C0C0C" }}>Checkout</span>
-                  <span className="transition-transform duration-300 group-hover:translate-x-1" style={{ color: "#0C0C0C" }}>&rarr;</span>
+                  <span style={{ color: "var(--color-ink)" }}>Checkout</span>
+                  <span className="transition-transform duration-300 group-hover:translate-x-1" style={{ color: "var(--color-ink)" }}>&rarr;</span>
                 </span>
               </button>
 

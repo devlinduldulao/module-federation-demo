@@ -100,7 +100,7 @@ const ProductCard = memo<{
         </span>
         <button
           onClick={() => onAddToCart(product)}
-          className="font-mono text-xs tracking-wider text-citrine border border-edge px-4 py-2 hover:bg-citrine hover:text-noir transition-all duration-300"
+          className="font-mono text-xs tracking-wider text-citrine border border-edge px-4 py-2 hover:bg-citrine hover:text-ink transition-all duration-300"
           aria-label={`Add ${product.name} to cart`}
         >
           Add &rarr;

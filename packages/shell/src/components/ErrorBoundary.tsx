@@ -40,7 +40,7 @@ class ErrorBoundary extends Component<Props, State> {
               onClick={() =>
                 this.setState({ hasError: false, error: undefined })
               }
-              className="px-6 py-2.5 bg-transparent border border-citrine text-citrine font-mono text-xs tracking-wider uppercase hover:bg-citrine hover:text-noir transition-all duration-300 focus:outline-hidden"
+              className="px-6 py-2.5 bg-transparent border border-citrine text-citrine font-mono text-xs tracking-wider uppercase hover:bg-citrine hover:text-ink transition-all duration-300 focus:outline-hidden"
             >
               Retry
             </button>

@@ -83,7 +83,7 @@ const EmptyCart = memo(() => (
     <p className="text-stone text-sm mb-8 max-w-md mx-auto">
       Browse the collection to add items to your cart.
     </p>
-    <span className="font-mono text-xs tracking-wider text-citrine border border-edge px-6 py-3 inline-block hover:bg-citrine hover:text-noir transition-all duration-300 cursor-pointer">
+    <span className="font-mono text-xs tracking-wider text-citrine border border-edge px-6 py-3 inline-block hover:bg-citrine hover:text-ink transition-all duration-300 cursor-pointer">
       Browse Products &rarr;
     </span>
   </div>
@@ -131,8 +131,8 @@ const OrderSummary = memo<{
 
       <button
         onClick={onCheckout}
-        className="w-full bg-citrine text-noir font-mono text-sm tracking-wider py-4 hover:bg-citrine-dim transition-colors duration-300"
-        style={{ color: "#0C0C0C" }}
+        className="w-full bg-citrine text-ink font-mono text-sm tracking-wider py-4 hover:bg-citrine-dim transition-colors duration-300"
+        style={{ color: "var(--color-ink)" }}
         aria-label={`Checkout ${itemCount} items for $${total.toFixed(2)}`}
       >
         Checkout &rarr;

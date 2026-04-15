@@ -27,3 +27,21 @@ declare module "dashboard/StreamingUserDashboard" {
   const StreamingUserDashboard: React.ComponentType;
   export default StreamingUserDashboard;
 }
+
+declare global {
+  interface Window {
+    __MF_THEME__?: {
+      getTheme: () => "dark" | "dim" | "light";
+      setTheme: (theme: "dark" | "dim" | "light") => void;
+    };
+  }
+
+  interface WindowEventMap {
+    themeChange: CustomEvent<{
+      theme: "dark" | "dim" | "light";
+      colorScheme: "dark" | "light";
+    }>;
+  }
+}
+
+export {};

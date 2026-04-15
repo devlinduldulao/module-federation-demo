@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, act, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
+import { THEME_STORAGE_KEY } from "./lib/theme";
 
 // Mock CSS import
 vi.mock("./index.css", () => ({}));
@@ -15,10 +16,42 @@ vi.mock("./lib/utils", () => ({
       .join(" "),
 }));
 
+function createStorageMock() {
+  const store = new Map<string, string>();
+
+  return {
+    getItem: vi.fn((key: string) => store.get(key) ?? null),
+    setItem: vi.fn((key: string, value: string) => {
+      store.set(key, value);
+    }),
+    removeItem: vi.fn((key: string) => {
+      store.delete(key);
+    }),
+    clear: vi.fn(() => {
+      store.clear();
+    }),
+  };
+}
+
 describe("Shell App", () => {
+  let localStorageMock: ReturnType<typeof createStorageMock>;
+
+  beforeEach(() => {
+    localStorageMock = createStorageMock();
+    Object.defineProperty(window, "localStorage", {
+      value: localStorageMock,
+      configurable: true,
+    });
+  });
+
   // Ensure real timers are always restored between tests
   afterEach(() => {
     vi.useRealTimers();
+    cleanup();
+    localStorageMock.clear();
+    document.documentElement.removeAttribute("data-theme");
+    document.documentElement.removeAttribute("style");
+    delete window.__MF_THEME__;
   });
 
   it("renders the MF logo and Demo label", async () => {
@@ -50,8 +83,23 @@ describe("Shell App", () => {
   it("shows tech stack labels in status strip", async () => {
     render(<App />);
     expect(screen.getByText("React 19")).toBeInTheDocument();
-    expect(screen.getByText("Suspense")).toBeInTheDocument();
-    expect(screen.getByText("Module Federation")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /switch theme to dark/i })
+    ).toBeInTheDocument();
+  });
+
+  it("restores the saved theme from localStorage on load", async () => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, "light");
+
+    render(<App />);
+
+    expect(
+      screen.getByRole("button", { name: /switch theme to light/i })
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(document.documentElement.style.getPropertyValue("--color-noir")).toBe(
+      "#F3EEE3"
+    );
   });
 
   it("switches to Cart tab on click", async () => {
@@ -101,6 +149,28 @@ describe("Shell App", () => {
     await user.click(screen.getByRole("button", { name: /switch to cart/i }));
 
     expect(screen.getByText("Cart module loaded")).toBeInTheDocument();
+  });
+
+  it("persists and broadcasts theme changes from the shell", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const handler = vi.fn();
+    window.addEventListener("themeChange", handler);
+
+    await user.click(screen.getByRole("button", { name: /switch theme to dim/i }));
+
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("dim");
+    expect(document.documentElement.dataset.theme).toBe("dim");
+    expect(
+      screen.getByRole("button", { name: /switch theme to dim/i })
+    ).toHaveAttribute("aria-pressed", "true");
+    expect((handler.mock.calls[0]![0] as CustomEvent).detail).toEqual({
+      theme: "dim",
+      colorScheme: "dark",
+    });
+
+    window.removeEventListener("themeChange", handler);
   });
 
   it("shows notification from global showNotification event", async () => {

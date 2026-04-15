@@ -25,3 +25,16 @@ export interface DashboardData {
   readonly recentActivity: ActivityItem[];
   readonly lastUpdated: string;
 }
+
+export interface ThemeChangeEvent extends CustomEvent {
+  detail: {
+    theme: "dark" | "dim" | "light";
+    colorScheme: "dark" | "light";
+  };
+}
+
+declare global {
+  interface WindowEventMap {
+    themeChange: ThemeChangeEvent;
+  }
+}
