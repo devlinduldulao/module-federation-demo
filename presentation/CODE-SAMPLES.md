@@ -73,7 +73,7 @@ export default StreamingMedicalRecords;
 // ---------------------------------------------------------------------------
 // Loading strategies — not every module should load the same way:
 //   INSTANT:  Home     — lazy for code splitting, no streaming delay
-//   EAGER:    Products — standalone component, preloaded on shell mount
+//   EAGER:    Records — standalone component, preloaded on shell mount
 //   STREAMED: Prescriptions, Analytics — loaded on demand with skeletons
 // ---------------------------------------------------------------------------
 

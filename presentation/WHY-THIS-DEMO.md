@@ -106,7 +106,7 @@ You could have micro-frontends with terrible loading UX — most demos do. You c
 
 ### Not every module should load the same way
 
-The key UX insight: different content has different priority. A landing page should be instant. A medical records viewer should be ready before the user clicks. A dashboard can stream in on demand. This demo implements a **loading strategy taxonomy**:
+The key UX insight: different content has different priority. A landing page should be instant. A medical records viewer should be ready before the user clicks. A analytics can stream in on demand. This demo implements a **loading strategy taxonomy**:
 
 | Strategy | Module | Behavior | Status strip |
 |----------|--------|----------|---------------|

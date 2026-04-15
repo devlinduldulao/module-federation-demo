@@ -305,9 +305,9 @@ The status bar shows a live count of killed remotes and the active deployment ri
 ### Individual kill scripts
 
 ```bash
-npm run kill:records    # Stop products on :3001
-npm run kill:prescriptions         # Stop cart on :3002
-npm run kill:analytics    # Stop dashboard on :3003
+npm run kill:records    # Stop records on :3001
+npm run kill:prescriptions         # Stop prescriptions on :3002
+npm run kill:analytics    # Stop analytics on :3003
 npm run kill:home         # Stop home on :3004
 npm run kill:ports        # Stop all demo ports (3000–3004)
 ```
@@ -358,7 +358,7 @@ function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
 The shell wraps each lazy-loaded remote in `<Suspense fallback={<Skeleton />}>` and `<ErrorBoundary>`, giving each module independent loading and error states. The shell uses three distinct loading strategies:
 
 - **Instant** (Home) — imports the standalone component via `home/Home`, no streaming delay
-- **Eager** (Products) — imports the streaming wrapper but preloads it on shell mount
+- **Eager** (Records) — imports the streaming wrapper but preloads it on shell mount
 - **Streamed** (Prescriptions, Analytics) — loaded on demand with skeleton fallbacks
 
 ## Conference Demo Value
@@ -369,7 +369,7 @@ This project demonstrates these micro-frontend concepts during a live talk:
 2. **Fault isolation** — kill a remote server and only that module shows a fallback (or use the Federation Lab kill switch)
 3. **Shared dependencies** — React is loaded once via singleton sharing
 4. **Suspense streaming** — skeleton screens appear during module load, then content streams in (for streamed and eager modules)
-5. **Loading strategy taxonomy** — instant (Home), eager (Products), streamed (Cart/Dashboard) — not every module should load the same way
+5. **Loading strategy taxonomy** — instant (Home), eager (Records), streamed (Prescriptions/Analytics) — not every module should load the same way
 5. **Loose coupling** — modules communicate through events, not imports
 6. **Host-owned routing** — remotes can request navigation through `navigateToModule` without importing `react-router-dom`
 7. **Independent tech choices** — each package has its own `rspack.config.js`, `postcss.config.js`, and `tsconfig.json`
@@ -397,13 +397,13 @@ This project demonstrates these micro-frontend concepts during a live talk:
 | `npm run build` | Build all five packages for production |
 | `npm run dev:shell` | Start only the shell (`:3000`) |
 | `npm run dev:home` | Start only home (`:3004`) |
-| `npm run dev:records` | Start only products (`:3001`) |
-| `npm run dev:prescriptions` | Start only cart (`:3002`) |
-| `npm run dev:analytics` | Start only dashboard (`:3003`) |
+| `npm run dev:records` | Start only records (`:3001`) |
+| `npm run dev:prescriptions` | Start only prescriptions (`:3002`) |
+| `npm run dev:analytics` | Start only analytics (`:3003`) |
 | `npm run kill:ports` | Kill all demo ports (`3000`–`3004`) |
-| `npm run kill:records` | Kill only the products port (`:3001`) |
-| `npm run kill:prescriptions` | Kill only the cart port (`:3002`) |
-| `npm run kill:analytics` | Kill only the dashboard port (`:3003`) |
+| `npm run kill:records` | Kill only the records port (`:3001`) |
+| `npm run kill:prescriptions` | Kill only the prescriptions port (`:3002`) |
+| `npm run kill:analytics` | Kill only the analytics port (`:3003`) |
 | `npm run kill:home` | Kill only the home port (`:3004`) |
 
 ## Prerequisites
