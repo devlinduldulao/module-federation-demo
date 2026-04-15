@@ -45,4 +45,14 @@ interface WindowEventMap {
     theme: "dark" | "dim" | "light";
     colorScheme: "dark" | "light";
   }>;
+  showNotification: CustomEvent<{
+    type: "success" | "error" | "info";
+    message: string;
+  }>;
+  addToCart: CustomEvent<{
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+  }>;
 }

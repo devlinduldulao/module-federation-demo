@@ -23,19 +23,21 @@ describe("ProductsCatalog", () => {
     expect(screen.getByText("Browse Collection")).toBeInTheDocument();
   });
 
-  it("renders all 6 mock products by default", () => {
+  it("renders all 8 mock products by default", () => {
     render(<ProductsCatalog />);
-    expect(screen.getByText("Laptop")).toBeInTheDocument();
-    expect(screen.getByText("T-Shirt")).toBeInTheDocument();
-    expect(screen.getByText("Book")).toBeInTheDocument();
-    expect(screen.getByText("Phone")).toBeInTheDocument();
-    expect(screen.getByText("Jeans")).toBeInTheDocument();
-    expect(screen.getByText("Cookbook")).toBeInTheDocument();
+    expect(screen.getByText("MacBook Pro M3")).toBeInTheDocument();
+    expect(screen.getByText("Designer Hoodie")).toBeInTheDocument();
+    expect(screen.getByText("Clean Code")).toBeInTheDocument();
+    expect(screen.getByText("iPhone 15 Pro")).toBeInTheDocument();
+    expect(screen.getByText("Denim Jacket")).toBeInTheDocument();
+    expect(screen.getByText("System Design")).toBeInTheDocument();
+    expect(screen.getByText("AirPods Pro")).toBeInTheDocument();
+    expect(screen.getByText("Cargo Pants")).toBeInTheDocument();
   });
 
   it("shows item count", () => {
     render(<ProductsCatalog />);
-    expect(screen.getByText("6 items")).toBeInTheDocument();
+    expect(screen.getByText("8 items")).toBeInTheDocument();
   });
 
   it("renders all category filter buttons", () => {
@@ -46,40 +48,42 @@ describe("ProductsCatalog", () => {
     expect(screen.getByRole("button", { name: /books/i })).toBeInTheDocument();
   });
 
-  it("filters to electronics", async () => {
+  it("filters to electronics (3 items)", async () => {
     const user = userEvent.setup();
     render(<ProductsCatalog />);
 
     await user.click(screen.getByRole("button", { name: /electronics/i }));
 
-    expect(screen.getByText("Laptop")).toBeInTheDocument();
-    expect(screen.getByText("Phone")).toBeInTheDocument();
-    expect(screen.queryByText("T-Shirt")).not.toBeInTheDocument();
-    expect(screen.queryByText("Book")).not.toBeInTheDocument();
-    expect(screen.getByText("2 items")).toBeInTheDocument();
+    expect(screen.getByText("MacBook Pro M3")).toBeInTheDocument();
+    expect(screen.getByText("iPhone 15 Pro")).toBeInTheDocument();
+    expect(screen.getByText("AirPods Pro")).toBeInTheDocument();
+    expect(screen.queryByText("Designer Hoodie")).not.toBeInTheDocument();
+    expect(screen.queryByText("Clean Code")).not.toBeInTheDocument();
+    expect(screen.getByText("3 items")).toBeInTheDocument();
   });
 
-  it("filters to clothing", async () => {
+  it("filters to clothing (3 items)", async () => {
     const user = userEvent.setup();
     render(<ProductsCatalog />);
 
     await user.click(screen.getByRole("button", { name: /clothing/i }));
 
-    expect(screen.getByText("T-Shirt")).toBeInTheDocument();
-    expect(screen.getByText("Jeans")).toBeInTheDocument();
-    expect(screen.queryByText("Laptop")).not.toBeInTheDocument();
-    expect(screen.getByText("2 items")).toBeInTheDocument();
+    expect(screen.getByText("Designer Hoodie")).toBeInTheDocument();
+    expect(screen.getByText("Denim Jacket")).toBeInTheDocument();
+    expect(screen.getByText("Cargo Pants")).toBeInTheDocument();
+    expect(screen.queryByText("MacBook Pro M3")).not.toBeInTheDocument();
+    expect(screen.getByText("3 items")).toBeInTheDocument();
   });
 
-  it("filters to books", async () => {
+  it("filters to books (2 items)", async () => {
     const user = userEvent.setup();
     render(<ProductsCatalog />);
 
     await user.click(screen.getByRole("button", { name: /books/i }));
 
-    expect(screen.getByText("Book")).toBeInTheDocument();
-    expect(screen.getByText("Cookbook")).toBeInTheDocument();
-    expect(screen.queryByText("Laptop")).not.toBeInTheDocument();
+    expect(screen.getByText("Clean Code")).toBeInTheDocument();
+    expect(screen.getByText("System Design")).toBeInTheDocument();
+    expect(screen.queryByText("MacBook Pro M3")).not.toBeInTheDocument();
     expect(screen.getByText("2 items")).toBeInTheDocument();
   });
 
@@ -88,10 +92,10 @@ describe("ProductsCatalog", () => {
     render(<ProductsCatalog />);
 
     await user.click(screen.getByRole("button", { name: /electronics/i }));
-    expect(screen.getByText("2 items")).toBeInTheDocument();
+    expect(screen.getByText("3 items")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /all/i }));
-    expect(screen.getByText("6 items")).toBeInTheDocument();
+    expect(screen.getByText("8 items")).toBeInTheDocument();
   });
 
   it("dispatches addToCart and showNotification events on Add click", async () => {
@@ -104,14 +108,14 @@ describe("ProductsCatalog", () => {
 
     render(<ProductsCatalog />);
 
-    await user.click(screen.getByRole("button", { name: /add laptop to cart/i }));
+    await user.click(screen.getByRole("button", { name: /add MacBook Pro M3 to cart/i }));
 
     expect(addToCartHandler).toHaveBeenCalledTimes(1);
     const cartEvent = addToCartHandler.mock.calls[0]![0] as CustomEvent;
     expect(cartEvent.detail).toEqual({
       id: 1,
-      name: "Laptop",
-      price: 999.99,
+      name: "MacBook Pro M3",
+      price: 2499.99,
       quantity: 1,
     });
 
@@ -119,7 +123,7 @@ describe("ProductsCatalog", () => {
     const notifEvent = notificationHandler.mock.calls[0]![0] as CustomEvent;
     expect(notifEvent.detail).toEqual({
       type: "success",
-      message: "Laptop added to cart",
+      message: "MacBook Pro M3 added to cart",
     });
 
     window.removeEventListener("addToCart", addToCartHandler);
@@ -128,9 +132,9 @@ describe("ProductsCatalog", () => {
 
   it("displays product prices", () => {
     render(<ProductsCatalog />);
-    expect(screen.getByText("$999.99")).toBeInTheDocument();
-    expect(screen.getByText("$19.99")).toBeInTheDocument();
-    expect(screen.getByText("$12.99")).toBeInTheDocument();
+    expect(screen.getByText("$2,499.99")).toBeInTheDocument();
+    expect(screen.getByText("$89.99")).toBeInTheDocument();
+    expect(screen.getByText("$45.99")).toBeInTheDocument();
   });
 
   it("has proper accessibility roles", () => {
@@ -138,13 +142,5 @@ describe("ProductsCatalog", () => {
     expect(screen.getByRole("main")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: /product category filters/i })).toBeInTheDocument();
     expect(screen.getByLabelText("Products grid")).toBeInTheDocument();
-  });
-
-  it("uses singular 'item' when filtered to 1 result is possible", async () => {
-    // All categories have 2 items, so this specifically tests the plural "items"
-    const user = userEvent.setup();
-    render(<ProductsCatalog />);
-    await user.click(screen.getByRole("button", { name: /electronics/i }));
-    expect(screen.getByText("2 items")).toBeInTheDocument();
   });
 });

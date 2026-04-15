@@ -93,19 +93,19 @@ module.exports = {
         react: {
           singleton: true,
           strictVersion: false,
-          requiredVersion: "^19.2.4",
+          requiredVersion: "^19.2.5",
           eager: false,
         },
         "react-dom": {
           singleton: true,
           strictVersion: false,
-          requiredVersion: "^19.2.4",
+          requiredVersion: "^19.2.5",
           eager: false,
         },
         "react-dom/client": {
           singleton: true,
           strictVersion: false,
-          requiredVersion: "^19.2.4",
+          requiredVersion: "^19.2.5",
           eager: false,
         },
       },

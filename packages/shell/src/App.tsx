@@ -195,27 +195,30 @@ const ThemeSelector = memo(function ThemeSelector({
   onSelect: (theme: ThemeName) => void;
 }) {
   return (
-    <label className="inline-flex items-center gap-2 border border-edge bg-surface/70 px-3 py-2">
-      <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase">
-        Theme
-      </span>
-      <select
-        value={theme}
-        onChange={(event) => onSelect(event.target.value as ThemeName)}
-        className="min-w-24 bg-transparent font-mono text-[10px] tracking-[0.2em] text-cream uppercase focus:outline-hidden"
-        aria-label="Choose theme"
-      >
-        {THEME_OPTIONS.map((themeOption) => {
-          const definition = THEME_DEFINITIONS[themeOption];
+    <div className="inline-flex items-center border border-edge" role="group" aria-label="Theme">
+      {THEME_OPTIONS.map((themeOption) => {
+        const definition = THEME_DEFINITIONS[themeOption];
+        const isActive = themeOption === theme;
 
-          return (
-            <option key={themeOption} value={themeOption}>
-              {definition.label}
-            </option>
-          );
-        })}
-      </select>
-    </label>
+        return (
+          <button
+            key={themeOption}
+            type="button"
+            onClick={() => onSelect(themeOption)}
+            className={cn(
+              "px-3 py-2 font-mono text-[10px] tracking-[0.2em] uppercase transition-all duration-300 focus:outline-hidden",
+              isActive
+                ? "bg-citrine/15 text-citrine"
+                : "text-dim hover:text-cream"
+            )}
+            aria-label={`Switch theme to ${definition.label}`}
+            aria-pressed={isActive}
+          >
+            {definition.label}
+          </button>
+        );
+      })}
+    </div>
   );
 });
 
