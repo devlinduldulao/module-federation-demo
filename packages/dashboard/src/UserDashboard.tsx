@@ -1,6 +1,7 @@
 import { useMemo, memo } from "react";
 import { cn } from "./lib/utils";
 import type { DashboardStat, ActivityItem } from "./types";
+import { useActiveTheme } from "./lib/theme";
 
 const MOCK_STATS: readonly DashboardStat[] = [
   {
@@ -147,20 +148,33 @@ ActivityRow.displayName = "ActivityRow";
 // Main component
 function UserDashboard() {
   const lastUpdated = useMemo(() => new Date().toLocaleString(), []);
+  const { label: themeLabel } = useActiveTheme();
 
   return (
     <div className="w-full max-w-7xl mx-auto animate-fade-in" role="main">
       {/* Header */}
       <header className="mb-12">
-        <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
-          Analytics Overview
-        </span>
-        <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
-          Dashboard
-        </h2>
-        <p className="text-stone text-sm max-w-xl">
-          Welcome back. Here's your account overview with real-time insights and activity tracking across all modules.
-        </p>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
+              Analytics Overview
+            </span>
+            <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
+              Dashboard
+            </h2>
+            <p className="text-stone text-sm max-w-xl">
+              Welcome back. Here's your account overview with real-time insights and activity tracking across all modules.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 self-start lg:self-auto">
+            <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
+              Theme
+            </span>
+            <span className="border border-edge bg-surface/70 px-3 py-1.5 font-mono text-[10px] tracking-[0.2em] text-stone uppercase">
+              {themeLabel}
+            </span>
+          </div>
+        </div>
       </header>
 
       {/* Welcome banner */}

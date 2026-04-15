@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import type { CartItem, AddToCartEvent } from "./types";
+import { useActiveTheme } from "./lib/theme";
 
 // Cart item row
 const CartItemRow = memo<{
@@ -154,6 +155,7 @@ function ShoppingCart() {
     { id: 1, name: "MacBook Pro M3", price: 2499.99, quantity: 1 },
     { id: 7, name: "AirPods Pro", price: 249.99, quantity: 2 },
   ]);
+  const { label: themeLabel } = useActiveTheme();
 
   // Listen for addToCart events
   useEffect(() => {
@@ -213,17 +215,29 @@ function ShoppingCart() {
     <div className="w-full max-w-6xl mx-auto animate-fade-in" role="main">
       {/* Header */}
       <header className="mb-12 animate-fade-in-up">
-        <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
-          Your Order
-        </span>
-        <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
-          Cart
-        </h2>
-        {cartItems.length > 0 && (
-          <p className="text-stone text-sm">
-            {itemCount} item{itemCount !== 1 ? "s" : ""} ready for checkout
-          </p>
-        )}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
+              Your Order
+            </span>
+            <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
+              Cart
+            </h2>
+            {cartItems.length > 0 && (
+              <p className="text-stone text-sm">
+                {itemCount} item{itemCount !== 1 ? "s" : ""} ready for checkout
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-3 self-start lg:self-auto">
+            <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
+              Theme
+            </span>
+            <span className="border border-edge bg-surface/70 px-3 py-1.5 font-mono text-[10px] tracking-[0.2em] text-stone uppercase">
+              {themeLabel}
+            </span>
+          </div>
+        </div>
       </header>
 
       {cartItems.length === 0 ? (

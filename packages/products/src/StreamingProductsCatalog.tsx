@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { cn } from "./lib/utils";
 import { Product, CartItem, FilterCategory } from "./types";
+import { useActiveTheme } from "./lib/theme";
 
 // Simulate network delay for demonstration
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -144,6 +145,7 @@ const StreamingProductsCatalog = () => {
 function ProductsCatalog() {
   const [selectedCategory, setSelectedCategory] =
     useState<FilterCategory>("all");
+  const { label: themeLabel } = useActiveTheme();
 
   const filteredProducts = useMemo(() => {
     return MOCK_PRODUCTS.filter(
@@ -198,9 +200,14 @@ function ProductsCatalog() {
               Premium Collection
             </h2>
           </div>
-          <span className="font-mono text-sm text-dim hidden lg:block">
-            {filteredProducts.length} items
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-sm text-dim hidden lg:block">
+              {filteredProducts.length} items
+            </span>
+            <span className="border border-edge bg-surface/70 px-3 py-1.5 font-mono text-[10px] tracking-[0.2em] text-stone uppercase">
+              Theme {themeLabel}
+            </span>
+          </div>
         </div>
 
         {/* Filter divider bar */}

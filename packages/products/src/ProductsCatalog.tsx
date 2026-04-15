@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, memo } from "react";
 import { cn } from "./lib/utils";
 import { Product, CartItem, FilterCategory } from "./types";
+import { useActiveTheme } from "./lib/theme";
 
 const MOCK_PRODUCTS: readonly Product[] = [
   {
@@ -115,6 +116,7 @@ ProductCard.displayName = "ProductCard";
 function ProductsCatalog() {
   const [selectedCategory, setSelectedCategory] =
     useState<FilterCategory>("all");
+  const { label: themeLabel } = useActiveTheme();
 
   const filteredProducts = useMemo(() => {
     return MOCK_PRODUCTS.filter(
@@ -159,15 +161,27 @@ function ProductsCatalog() {
     <div className="w-full max-w-7xl mx-auto animate-fade-in" role="main">
       {/* Header */}
       <header className="mb-12 animate-fade-in-up">
-        <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
-          Browse Collection
-        </span>
-        <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
-          Products
-        </h2>
-        <p className="text-stone text-sm max-w-xl">
-          Curated products for developers, designers, and tech enthusiasts.
-        </p>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
+              Browse Collection
+            </span>
+            <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
+              Products
+            </h2>
+            <p className="text-stone text-sm max-w-xl">
+              Curated products for developers, designers, and tech enthusiasts.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 self-start lg:self-auto">
+            <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
+              Theme
+            </span>
+            <span className="border border-edge bg-surface/70 px-3 py-1.5 font-mono text-[10px] tracking-[0.2em] text-stone uppercase">
+              {themeLabel}
+            </span>
+          </div>
+        </div>
       </header>
 
       {/* Filters */}

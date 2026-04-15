@@ -434,115 +434,37 @@ function App(): React.JSX.Element {
 
 App.displayName = "App";
 
-export default App; import React, {
-  Suspense,
-  lazy,
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { cn } from "./lib/utils";
-import {
-  DEFAULT_THEME,
-
-const MODULES: readonly ModuleConfig[] = [
-    {
-      id: "products",
-      label: "Products",
-      port: "3001",
-      component: StreamingProductsCatalog,
-    },
-    {
-      id: "cart",
-      label: "Cart",
-      port: "3002",
-      component: StreamingShoppingCart,
-    },
-    {
-      id: "dashboard",
-      label: "Dashboard",
-      port: "3003",
-      component: StreamingUserDashboard,
-    },
-  ] as const;
-
-const THEME_OPTIONS: readonly ThemeName[] = ["dark", "dim", "light"] as const;
-const KEYBOARD_SHORTCUT_LABEL = "Ctrl/Cmd + K";
-
-const NavigationButton = memo<{
-  module: ModuleConfig;
-  isActive: boolean;
-  onClick: (moduleId: ModuleType) => void;
-}>(({ module, isActive, onClick }) => {
-  const handleMouseEnter = useCallback(() => {
-    if (!isActive) {
-      PREFETCH_MAP[module.id]();
-    }
-  }, [isActive, module.id]);
-
-  return (
-    <button
-      type="button"
-      onClick={() => onClick(module.id)}
-      onMouseEnter={handleMouseEnter}
-      className={cn(
-        "relative px-5 py-2.5 font-mono text-sm tracking-wide transition-all duration-500 focus:outline-hidden",
-        isActive ? "text-citrine" : "text-stone hover:text-cream"
-      )}
-      aria-pressed={isActive}
-      aria-label={`Switch to ${module.label}`}
-    >
-      <span className="relative z-10">{module.label.toUpperCase()}</span>
-      <span
-        className={cn(
-          "absolute bottom-0 left-0 h-0.5 bg-citrine transition-all duration-500",
-          isActive ? "w-full" : "w-0"
-        )}
-      />
-    </button>
-  );
-});
-
-NavigationButton.displayName = "NavigationButton";
-
-const ThemeSelector = memo<{
-  theme: ThemeName;
-  onSelect: (theme: ThemeName) => void;
-  compact?: boolean;
-}>(({ theme, onSelect, compact = false }) => (
-  <div
-    className={cn(
-      "inline-flex items-center gap-1 rounded-full border border-edge bg-surface/70 p-1",
-      compact && "scale-95 origin-right"
+export default App;
+"inline-flex items-center gap-1 rounded-full border border-edge bg-surface/70 p-1",
+  compact && "scale-95 origin-right"
     )}
-    role="group"
-    aria-label="Theme switcher"
+role = "group"
+aria - label="Theme switcher"
   >
-    {THEME_OPTIONS.map((themeOption) => {
-      const definition = THEME_DEFINITIONS[themeOption];
-      const isActive = theme === themeOption;
+{
+  THEME_OPTIONS.map((themeOption) => {
+    const definition = THEME_DEFINITIONS[themeOption];
+    const isActive = theme === themeOption;
 
-      return (
-        <button
-          key={themeOption}
-          type="button"
-          onClick={() => onSelect(themeOption)}
-          className={cn(
-            "rounded-full px-3 py-1.5 font-mono text-[10px] tracking-[0.2em] uppercase transition-all duration-300 focus:outline-hidden",
-            isActive ? "bg-citrine text-ink" : "text-dim hover:text-cream"
-          )}
-          aria-pressed={isActive}
-          aria-label={`Switch theme to ${definition.label}`}
-          title={definition.description}
-        >
-          {definition.label}
-        </button>
-      );
-    })}
-  </div>
+    return (
+      <button
+        key={themeOption}
+        type="button"
+        onClick={() => onSelect(themeOption)}
+        className={cn(
+          "rounded-full px-3 py-1.5 font-mono text-[10px] tracking-[0.2em] uppercase transition-all duration-300 focus:outline-hidden",
+          isActive ? "bg-citrine text-ink" : "text-dim hover:text-cream"
+        )}
+        aria-pressed={isActive}
+        aria-label={`Switch theme to ${definition.label}`}
+        title={definition.description}
+      >
+        {definition.label}
+      </button>
+    );
+  })
+}
+  </div >
 ));
 
 ThemeSelector.displayName = "ThemeSelector";

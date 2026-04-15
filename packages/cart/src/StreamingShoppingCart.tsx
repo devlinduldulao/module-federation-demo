@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type { CartItem, AddToCartEvent } from "./types";
+import { useActiveTheme } from "./lib/theme";
 
 // Simulate network delay for demonstration
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -75,6 +76,7 @@ const StreamingShoppingCart = () => {
 // Main component
 function ShoppingCart() {
   const [cartItems, setCartItems] = useState<CartItem[]>(INITIAL_CART_ITEMS);
+  const { label: themeLabel } = useActiveTheme();
 
   // Event listener for adding items to cart
   useEffect(() => {
@@ -141,17 +143,29 @@ function ShoppingCart() {
     <div className="w-full max-w-5xl mx-auto" role="main">
       {/* Header */}
       <header className="mb-12 animate-fade-in-up">
-        <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
-          Your Order
-        </span>
-        <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
-          Shopping Cart
-        </h2>
-        {cartItems.length > 0 && (
-          <span className="font-mono text-sm text-stone">
-            {itemCount} item{itemCount !== 1 ? "s" : ""} &middot; ${total.toFixed(2)}
-          </span>
-        )}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
+              Your Order
+            </span>
+            <h2 className="font-display text-5xl lg:text-6xl italic text-cream tracking-tight leading-none mb-3">
+              Shopping Cart
+            </h2>
+            {cartItems.length > 0 && (
+              <span className="font-mono text-sm text-stone">
+                {itemCount} item{itemCount !== 1 ? "s" : ""} &middot; ${total.toFixed(2)}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3 self-start lg:self-auto">
+            <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
+              Theme
+            </span>
+            <span className="border border-edge bg-surface/70 px-3 py-1.5 font-mono text-[10px] tracking-[0.2em] text-stone uppercase">
+              {themeLabel}
+            </span>
+          </div>
+        </div>
       </header>
 
       {cartItems.length === 0 ? (
