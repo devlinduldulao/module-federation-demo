@@ -1,9 +1,9 @@
 # Deploys the micro-frontend app to GitHub Pages.
 #
-# SETUP (one-time):
-#   1. Go to repo Settings → Pages
-#   2. Set "Source" to "GitHub Actions"
-#   3. Push to main — this workflow handles the rest
+# SETUP (one-time, only if Pages has never been enabled here):
+#   Option A: Go to repo Settings → Pages and set "Source" to "GitHub Actions"
+#   Option B: Add a PAGES_ADMIN_TOKEN secret so this workflow can create the site
+#   After that, pushes to main handle the rest
 #
 # HOW IT WORKS:
 #   - Remotes (home, records, prescriptions, analytics) are built first
@@ -40,18 +40,87 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
 
       - name: Install dependencies
         run: npm install --force
 
-      - name: Configure GitHub Pages
+      - name: Ensure GitHub Pages site exists
         id: pages
-        uses: actions/configure-pages@v5
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.PAGES_ADMIN_TOKEN != '' && secrets.PAGES_ADMIN_TOKEN || github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const isUserOrOrgSite = repo.toLowerCase() === `${owner.toLowerCase()}.github.io`;
+            const fallbackPageUrl = isUserOrOrgSite
+              ? `https://${owner}.github.io`
+              : `https://${owner}.github.io/${repo}`;
+
+            async function getPagesSite() {
+              try {
+                const response = await github.request("GET /repos/{owner}/{repo}/pages", {
+                  owner,
+                  repo,
+                });
+                return response.data;
+              } catch (error) {
+                if (error.status === 404) {
+                  return null;
+                }
+                throw error;
+              }
+            }
+
+            let site = await getPagesSite();
+
+            if (!site) {
+              if (process.env.HAS_PAGES_ADMIN_TOKEN !== "true") {
+                core.setFailed(
+                  "GitHub Pages is not enabled for this repository and the workflow token cannot create it. Enable Pages once in repository settings with Source set to GitHub Actions, or add a PAGES_ADMIN_TOKEN secret with Pages:write and Administration:write permissions."
+                );
+                return;
+              }
+
+              core.info("No Pages site found. Creating one with build_type=workflow.");
+
+              try {
+                await github.request("POST /repos/{owner}/{repo}/pages", {
+                  owner,
+                  repo,
+                  build_type: "workflow",
+                });
+              } catch (error) {
+                if (error.status !== 409) {
+                  throw error;
+                }
+              }
+
+              site = await getPagesSite();
+            }
+
+            if (!site) {
+              core.setFailed(
+                "Unable to confirm a GitHub Pages site after bootstrap. Check repository Pages availability and token permissions."
+              );
+              return;
+            }
+
+            const pageUrl = site.html_url || fallbackPageUrl;
+            const normalizedPageUrl = pageUrl.replace(/\/$/, "");
+            const { pathname, origin } = new URL(`${normalizedPageUrl}/`);
+            const normalizedPath = pathname === "/" ? "" : pathname.replace(/\/$/, "");
+
+            core.setOutput("page_url", normalizedPageUrl);
+            core.setOutput("base_url", `${origin}${normalizedPath}`);
+            core.setOutput("base_path", normalizedPath);
+        env:
+          HAS_PAGES_ADMIN_TOKEN: ${{ secrets.PAGES_ADMIN_TOKEN != '' }}
 
       # Build all four remotes (no special env vars — publicPath: "auto" works)
       - name: Build remotes
@@ -93,8 +162,8 @@ jobs:
           echo "Site assembled:"
           find _site -maxdepth 3 -type f | head -40
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

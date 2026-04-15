@@ -333,6 +333,17 @@ Remote module imports are aliased in `vitest.config.ts` so federated components 
 
 The shell test suite also covers theme restoration from `localStorage`, theme persistence, and `themeChange` event broadcasting.
 
+## GitHub Pages Deployment
+
+This repo includes [.github/workflows/deploy.yml](.github/workflows/deploy.yml), which builds all remotes, assembles a single static site, and deploys it with the GitHub Pages artifact workflow.
+
+The workflow now checks whether a Pages site already exists before building. If the repository has never had Pages enabled, there are two supported bootstrap paths:
+
+- Enable Pages once in the repository settings and set **Source** to **GitHub Actions**.
+- Or add a `PAGES_ADMIN_TOKEN` repository secret with **Pages: write** and **Administration: write** permissions so the workflow can create the Pages site automatically.
+
+After that first bootstrap, normal deploys can continue with the default workflow token.
+
 ## React Suspense Streaming Pattern
 
 Each remote uses a Resource-based Suspense pattern to simulate network streaming:
