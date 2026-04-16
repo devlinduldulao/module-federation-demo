@@ -121,6 +121,50 @@ const StreamingMedicalRecords = () => {
 
 ---
 
+## 1c. Standalone Development — The Async Bootstrap Pattern
+
+Every module runs independently with full HMR. The key enabler is the async bootstrap pattern:
+
+```ts
+// packages/records/src/index.tsx — the ENTIRE file
+// Async boundary — required for Module Federation shared dependencies.
+// React is shared with eager:false, so it must be loaded asynchronously.
+// Without this, standalone mode fails with "loadShareSync" errors.
+import("./bootstrap");
+```
+
+```tsx
+// packages/records/src/bootstrap.tsx — actual React rendering
+import React from "react";
+import ReactDOM from "react-dom/client";
+import MedicalRecords from "./MedicalRecords";
+import "./index.css";
+
+const root = ReactDOM.createRoot(document.getElementById("root")!);
+root.render(<MedicalRecords />);
+```
+
+### Why it's needed
+
+Module Federation declares React as `shared` with `eager: false`:
+
+```js
+shared: {
+  react: { singleton: true, eager: false },    // ← loaded asynchronously
+}
+```
+
+If `index.tsx` does `import React from "react"` (static/synchronous), it tries to use React before MF has finished negotiating which copy to use. The `import("./bootstrap")` dynamic import creates an **async boundary** — MF resolves shared deps first, then `bootstrap.tsx` runs with React available.
+
+```
+❌ Without bootstrap:  index.tsx → import React (sync) → loadShareSync CRASH
+✅ With bootstrap:     index.tsx → import("./bootstrap") (async) → MF negotiates → React ready → render
+```
+
+All 5 packages (shell + 4 remotes) use this pattern. The shell has always had it; the remotes were missing it until this fix.
+
+---
+
 ## 2. Shell Composition — Loading Strategies + Three Layers of Resilience (DX + UX)
 
 ```tsx

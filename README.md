@@ -60,17 +60,47 @@ npm run test:prescriptions
 npm run test:analytics
 ```
 
-### Run a single package
+### Run a single package (standalone development)
+
+Each module is a fully self-contained React app. You can open any package folder in its own VS Code window and develop with full HMR — no other modules need to be running:
 
 ```bash
-cd packages/home && npm run dev       # :3004
-cd packages/records && npm run dev        # :3001
-cd packages/prescriptions && npm run dev  # :3002
-cd packages/analytics && npm run dev      # :3003
-cd packages/shell && npm run dev      # :3000
+cd packages/home && npm install && npm run dev          # :3004
+cd packages/records && npm install && npm run dev       # :3001
+cd packages/prescriptions && npm install && npm run dev # :3002
+cd packages/analytics && npm install && npm run dev     # :3003
+cd packages/shell && npm install && npm run dev         # :3000
 ```
 
-Each remote runs standalone at its own port with its own `index.html`.
+Each remote runs standalone at its own port with its own `index.html`. The shell also runs standalone — remotes it can't reach will show `ModuleFallback` instead of crashing.
+
+**What works standalone:** `dev` (with HMR), `build`, `typecheck`
+
+**What needs the monorepo root:** `lint` (shared ESLint config), `test` / `test:watch` (shared Vitest config)
+
+#### The async bootstrap pattern (required for standalone mode)
+
+Every package's `index.tsx` uses a dynamic import:
+
+```ts
+// index.tsx — thin async entry point
+import("./bootstrap");
+```
+
+```tsx
+// bootstrap.tsx — actual React rendering
+import React from "react";
+import ReactDOM from "react-dom/client";
+import MedicalRecords from "./MedicalRecords";
+import "./index.css";
+
+const root = ReactDOM.createRoot(document.getElementById("root")!);
+root.render(<MedicalRecords />);
+```
+
+This is **required** because Module Federation declares `react` and `react-dom` as `shared` with `eager: false`. The dynamic `import()` creates an async boundary that lets Module Federation negotiate shared dependencies before any React code runs. Without it, standalone mode fails with `loadShareSync` errors and you get a white screen.
+
+> **Do not remove the bootstrap pattern.** If you merge `bootstrap.tsx` back into `index.tsx`, standalone dev will break with `Invalid loadShareSync function call` errors. The shell has always had this pattern; all remotes now have it too.
 
 ### Prefetching + Eager Loading
 

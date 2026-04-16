@@ -114,6 +114,8 @@ module.exports = {
       // SHARED DEPENDENCIES — singleton: true ensures one React instance
       // across the entire federation. Without this, each remote loads its
       // own React copy and hooks break with "Invalid hook call" errors.
+      // eager: false means React loads asynchronously — this is why
+      // index.tsx must use import("./bootstrap") as an async boundary.
       shared: {
         react: {
           singleton: true,

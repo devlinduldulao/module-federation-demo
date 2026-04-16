@@ -2,10 +2,11 @@
   "name": "records",
   "version": "1.0.0",
   "scripts": {
-    "dev": "rspack serve",
-    "build": "rspack build",
-    "lint": "npm --prefix ../.. exec eslint -- src --ext .ts,.tsx",
+    "dev": "rspack serve --mode development",
+    "start": "rspack serve --mode development",
+    "build": "rspack build --mode production",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "cd ../.. && npx eslint packages/records/src",
     "test": "npm --prefix ../.. run test -- packages/records/src",
     "test:watch": "npm --prefix ../.. run test:watch -- packages/records/src"
   },

@@ -162,9 +162,19 @@ packages/records/
   rspack.config.js     ← own MF config, own dev server on :3001
   tsconfig.json        ← own TS config
   src/
+    index.tsx          ← import("./bootstrap") — async boundary for MF
+    bootstrap.tsx      ← actual ReactDOM.createRoot() render
     MedicalRecords.tsx ← standalone component (runs without the shell)
 ```
-Explain: "Every module is a self-contained app. A new team copies a package, picks a port, and ships independently."
+Explain: "Every module is a self-contained app. A new team copies a package, picks a port, and ships independently. You can open this one folder in its own VS Code, run `npm install && npm run dev`, and you have a working app with HMR at localhost:3001 — no shell, no other remotes needed."
+
+### Key talking point: the async bootstrap pattern
+
+Open `packages/records/src/index.tsx` and show it's one line: `import("./bootstrap")`.
+
+Then open `bootstrap.tsx` — the actual React render.
+
+Say: "This dynamic import is the async boundary that Module Federation requires. React is marked as a shared dependency with `eager: false`, meaning it loads asynchronously. Without this split, standalone mode fails with a white screen and `loadShareSync` errors. The shell has always had this pattern — every remote needs it too."
 
 ### Key talking point: the only property that matters
 

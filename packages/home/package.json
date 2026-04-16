@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "rspack serve",
+    "start": "rspack serve",
     "build": "rspack build",
-    "lint": "npm --prefix ../.. exec eslint -- src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "cd ../.. && npx eslint packages/home/src",
     "test": "npm --prefix ../.. run test -- packages/home/src",
     "test:watch": "npm --prefix ../.. run test:watch -- packages/home/src"
   },

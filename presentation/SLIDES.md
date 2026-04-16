@@ -119,6 +119,35 @@ With Suspense:     User clicks a tab → skeleton instantly → content streams 
 
 ## Slide 5 — Tech Stack
 
+### Each module is a standalone app
+
+Every package runs independently with full HMR:
+
+```bash
+cd packages/records && npm install && npm run dev   # :3001
+# → Full React app, own devServer, own build, own tsconfig
+# → HMR works — edit MedicalRecords.tsx, see changes instantly
+# → No shell, no other remotes needed
+```
+
+### The async bootstrap trick (Module Federation requirement)
+
+```
+index.tsx          bootstrap.tsx
+┌──────────────┐    ┌──────────────────────────┐
+│ import(        │ ─► │ import React              │
+│ "./bootstrap"  │    │ import ReactDOM           │
+│ )              │    │ ReactDOM.createRoot(...)  │
+└──────────────┘    └──────────────────────────┘
+      │                        ▲
+      └── async boundary ─────┘
+          gives MF time to negotiate
+          shared deps (React) before
+          any React code runs
+```
+
+Without this: white screen + `loadShareSync` error. With this: standalone HMR works.
+
 | Technology | Version | Why |
 |---|---|---|
 | **React** | 19.2 | Streaming Suspense as a first-class primitive |
