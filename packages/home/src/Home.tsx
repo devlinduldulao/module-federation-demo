@@ -117,7 +117,7 @@ function Home() {
               Micro-Frontend Architecture
             </span>
             <h2 className="font-display text-6xl lg:text-8xl italic text-cream tracking-tight leading-tight mb-6">
-              Welcome Home
+              A Modular Federation Showcase
             </h2>
             <p className="text-stone text-base max-w-2xl leading-loose">
               A demonstration of Module Federation with independently deployed micro-frontends.
