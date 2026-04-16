@@ -65,6 +65,62 @@ export default StreamingMedicalRecords;
 
 ---
 
+## 1b. Why React 19 Doesn't Break This Pattern
+
+React 19 changed Suspense: siblings in the **same** boundary render sequentially. But this architecture is immune:
+
+```tsx
+// ❌ VULNERABLE (React 19 waterfall) — two siblings in ONE boundary
+<Suspense fallback={<Spinner />}>
+  <MedicalRecords />          {/* suspends → blocks sibling */}
+  <PrescriptionOrders />      {/* waits for Records to resolve */}
+</Suspense>
+
+// ✅ THIS DEMO — route-based, separate boundaries, no siblings
+<Routes>
+  <Route path="/records" element={
+    <ErrorBoundary>           {/* own error boundary */}
+      <Suspense fallback={<RecordsSkeleton />}>  {/* own suspense */}
+        <MedicalRecords />     {/* only component in this boundary */}
+      </Suspense>
+    </ErrorBoundary>
+  } />
+  <Route path="/prescriptions" element={
+    <ErrorBoundary>
+      <Suspense fallback={<PrescriptionsSkeleton />}>
+        <StreamingPrescriptionOrders />
+      </Suspense>
+    </ErrorBoundary>
+  } />
+</Routes>
+```
+
+**React 19 benefits:**
+
+```tsx
+// createResource already follows "render-as-you-fetch" (React 19 best practice)
+const resource = getResource("records-initial", 2500);  // ← hoisted outside component
+
+const StreamingMedicalRecords = () => {
+  resource.read();  // just reads — doesn't initiate fetch
+  return <MedicalRecords />;
+};
+
+// Optional future migration to use() hook (React 19 first-class API):
+const StreamingMedicalRecords = () => {
+  use(resource.promise);  // replaces throw-promise pattern
+  return <MedicalRecords />;
+};
+```
+
+| React 19 Feature | Benefit |
+|-----------------|---------|
+| **Suspense batching (19.2+)** | Skeleton → content transitions grouped in single render pass |
+| **Compiler optimizations** | Shell re-renders (theme, palette, kills) skip unchanged paths |
+| **`use()` hook** | First-class replacement for throw-promise (migration optional) |
+
+---
+
 ## 2. Shell Composition — Loading Strategies + Three Layers of Resilience (DX + UX)
 
 ```tsx

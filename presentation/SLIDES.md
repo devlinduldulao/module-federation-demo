@@ -637,7 +637,55 @@ The landing page is instant. High-priority content is eager. Secondary content s
 
 ---
 
-## Slide 20 — What We Didn't Cover (But You Should Explore)
+## Slide 20 — Why React 19, Not 18?
+
+### The Waterfall Concern — And Why It Doesn't Apply Here
+
+React 19 changed Suspense: siblings in the **same** boundary now render sequentially, not in parallel.
+
+```
+React 18:  <Suspense>  →  [A fetches] [B fetches]  →  both render  (parallel)
+React 19:  <Suspense>  →  [A fetches] → [A renders] → [B fetches]  (sequential)
+```
+
+**But this architecture is immune:**
+
+```
+✅ Route-based    → only ONE module renders at a time (no siblings)
+✅ Own boundaries  → each module gets its own <Suspense> + <ErrorBoundary>
+✅ Pre-fetching    → eager preload + hover prefetch = chunks cached before render
+```
+
+### What React 19 Gives Us
+
+| Feature | Benefit for this demo |
+|---------|----------------------|
+| **Suspense batching (19.2+)** | Skeleton → content transitions are smoother — no "popping in" |
+| **Render-as-you-fetch** | `createResource` already follows this pattern — data hoisted outside component |
+| **Compiler optimizations** | Shell re-renders (theme, palette, kills) skip unchanged paths |
+| **Streaming SSR readiness** | Reduced UI churn if SSR is added later |
+
+```tsx
+// Our createResource already follows React 19 best practices:
+const resource = getResource("records-initial", 2500);  // ← hoisted, not in render
+
+const StreamingMedicalRecords = () => {
+  resource.read();  // just reads — doesn't initiate the fetch
+  return <MedicalRecords />;
+};
+
+// Future migration to use() hook (optional, not required):
+const StreamingMedicalRecords = () => {
+  use(resource.promise);  // first-class React 19 API, same behavior
+  return <MedicalRecords />;
+};
+```
+
+> **The throw-promise pattern still works in React 19.** The `use()` hook is the recommended replacement, but migration is optional — no breakage.
+
+---
+
+## Slide 21 — What We Didn't Cover (But You Should Explore)
 
 - **Server-side rendering** with streaming Suspense + Module Federation
 - **Shared design tokens** via a federated CSS module
@@ -650,7 +698,7 @@ The landing page is instant. High-priority content is eager. Secondary content s
 
 ---
 
-## Slide 21 — Resources
+## Slide 22 — Resources
 
 | Resource | URL |
 |---|---|
@@ -662,7 +710,7 @@ The landing page is instant. High-priority content is eager. Secondary content s
 
 ---
 
-## Slide 20 — Thank You
+## Slide 23 — Thank You
 
 # Questions?
 

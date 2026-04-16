@@ -47,6 +47,23 @@ Through a production-grade healthcare demo — a shell host composing a landing 
 4. **Fault isolation is a feature, not a side effect.** With `.catch()` wrappers on lazy imports and ErrorBoundaries per module, one team's broken deploy doesn't take down the entire application. You can prove this works by killing a remote live — and the rest of the app keeps running.
 5. **Events over shared state.** CustomEvents on `window` give you decoupled cross-module communication that survives independent deployments, version mismatches, and team reorganizations.
 
+## Why React 19, Not 18?
+
+React 19 introduced a behavioral change that concerns many developers: sibling components inside the same `<Suspense>` boundary now render sequentially instead of in parallel, creating potential "waterfall" effects. This talk addresses this directly.
+
+**This architecture is immune** because it follows three patterns that eliminate the concern:
+1. **Route-based rendering** — only one module renders at a time (no sibling contention)
+2. **Separate `<Suspense>` boundaries** — each module has its own boundary (parallel behavior preserved)
+3. **Pre-fetching** — eager preload + hover prefetch = chunks cached before render
+
+**React 19 actively benefits the architecture:**
+- **Suspense batching (19.2+)** — smoother skeleton → content transitions, no "popping in" effect
+- **Compiler optimizations** — shell re-renders (theme, palette, kill switches) skip unchanged paths
+- **Render-as-you-fetch alignment** — the `createResource` pattern already hoists data outside components, exactly as React 19 recommends
+- **`use()` hook readiness** — the throw-promise pattern still works, and migration to the first-class `use()` API is straightforward
+
+This is a question the audience **will** ask: "Doesn't React 19 break Suspense for micro-frontends?" This talk shows the answer is no — if you design your boundaries correctly.
+
 ## Talk Details
 
 - **Format:** 30-minute talk with live demo

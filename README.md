@@ -614,6 +614,56 @@ The shell wraps each lazy-loaded remote in `<Suspense fallback={<Skeleton />}>` 
 - **Eager** (Records) — imports the streaming wrapper but preloads it on shell mount
 - **Streamed** (Prescriptions, Analytics) — loaded on demand with skeleton fallbacks
 
+## Why React 19 (Not 18) for Module Federation + Suspense
+
+React 19 introduced a behavioral change in Suspense: sibling components inside the **same** `<Suspense>` boundary now render sequentially instead of in parallel. If the first sibling suspends, subsequent siblings wait — creating a potential waterfall. This raised concerns in the community about whether React 19 is safe for streaming micro-frontends.
+
+**This architecture is unaffected.** Here's why:
+
+| Concern | This demo's architecture | Impact |
+|---------|--------------------------|--------|
+| Sibling waterfall | Route-based rendering — only **one** module renders at a time | Not affected |
+| Same-boundary siblings | Each module has its own `<Suspense>` + `<ErrorBoundary>` | Parallel preserved |
+| throw-promise pattern | `createResource` still works in React 19 (legacy, not broken) | No breakage |
+| Pre-fetching | Eager preload + hover prefetch = chunks cached before render | Waterfall impossible |
+
+**React 19 actively benefits this architecture:**
+
+1. **Suspense batching (19.2+)** — Instead of showing fallbacks one boundary at a time, React 19 groups multiple boundary transitions in a single render pass. This means skeleton → content transitions are smoother — no "popping in" effect when navigating between modules.
+
+2. **Render-as-you-fetch** — React 19 encourages hoisting data calls outside components. The `createResource` pattern already does this — the resource is created at module evaluation time, not inside the component. The component just calls `resource.read()`.
+
+3. **Deterministic concurrent rendering** — The shell re-renders frequently (theme changes, command palette filtering, kill switch toggles). React 19's compiler optimizations skip entire update paths that haven't changed, making these interactions snappier.
+
+4. **Streaming SSR readiness** — React 19's improved batching in streaming SSR reduces "UI churn" (flickering). If this demo ever adds SSR, the skeleton → content transitions would look even better server-side.
+
+```tsx
+// This architecture avoids the waterfall by design:
+
+// 1. Route-based: only one module renders at a time
+<Routes>
+  <Route path="/records" element={<ModuleView module={records} />} />
+  <Route path="/prescriptions" element={<ModuleView module={prescriptions} />} />
+</Routes>
+
+// 2. Each module has its own Suspense boundary (never siblings)
+function ModuleView({ module }) {
+  return (
+    <ErrorBoundary>           {/* ← own error boundary */}
+      <Suspense fallback={..}> {/* ← own suspense boundary */}
+        <module.component />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+
+// 3. Pre-fetching eliminates any remaining concern
+const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
+for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }  // cached before render
+```
+
+> **Bottom line:** React 19 is the right choice. The waterfall concern applies to sibling components in the same boundary — a pattern this architecture intentionally avoids. The batching and compiler improvements directly benefit the shell's UX.
+
 ## Conference Demo Value
 
 This project demonstrates these micro-frontend concepts during a live talk:

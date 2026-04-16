@@ -152,6 +152,35 @@ That's the real insight — Suspense isn't just for code splitting, it's a micro
 
 ---
 
+## 3b. Why React 19 Is the Right Choice (Not React 18)
+
+React 19 introduced a controversial Suspense change: sibling components inside the **same** `<Suspense>` boundary now render sequentially instead of in parallel. The community raised concerns about "waterfall" effects.
+
+This demo is **designed to be unaffected**:
+
+1. **Route-based rendering** — `<Routes>` renders one module at a time. There are never two suspended siblings competing inside the same boundary.
+2. **Separate boundaries** — each module has its own `<Suspense>` + `<ErrorBoundary>` wrapper. Separate boundaries = independent parallel behavior preserved.
+3. **Pre-fetching** — eager modules preload at shell init, hover modules prefetch on mouse enter. By the time React renders the component, the chunk is already cached.
+
+**What React 19 adds that React 18 doesn't:**
+
+- **Suspense batching (19.2+)** — when the user navigates from Records to Prescriptions, React 19 groups the boundary transition in a single render pass. The skeleton → content transition is smoother — no elements "popping in" one by one.
+- **Deterministic concurrent rendering** — the shell re-renders frequently (theme toggles, command palette filtering, kill switch toggles). React 19's compiler skips unchanged paths, making these interactions snappier.
+- **Render-as-you-fetch alignment** — the `createResource` pattern hoists async calls outside the component. This is exactly what React 19 encourages. In React 18, this worked by accident. In React 19, it's the official best practice.
+- **`use()` hook readiness** — the throw-promise pattern (`resource.read()`) still works in React 19, but the `use()` hook is the first-class replacement. This demo can migrate to `use()` at any time with minimal changes.
+
+| Concern | Architecture answer |
+|---------|--------------------|
+| Sibling waterfall | Route-based = one module at a time |
+| Same-boundary contention | Each module has its own `<Suspense>` |
+| throw-promise deprecation | Still works; `use()` migration is optional |
+| Skeleton smoothness | React 19 batching = smoother transitions |
+| Shell interactivity | Compiler optimizations = faster re-renders |
+
+This is worth calling out during the talk because the audience **will** ask "Doesn't React 19 break Suspense for micro-frontends?" The answer is no — but only if you follow the patterns this demo implements: separate boundaries, route-based rendering, and pre-fetching.
+
+---
+
 ## 4. Three Layers of Resilience, Not Just One
 
 Most demos show `React.lazy()` and stop. This one stacks three independent safety nets:
