@@ -1,4 +1,4 @@
-# Streaming Micro-Frontends: React 19 Suspense Meets Module Federation
+# From 5 Devs to 200: Micro-Frontends That Scale Your Team and Stream Your UI
 
 > A 30-minute conference talk with live demo  
 > Built with: React 19 · Rspack · Module Federation · TypeScript 6 · Tailwind CSS v4
@@ -7,9 +7,9 @@
 
 ## Slide 1 — Title
 
-# Streaming Micro-Frontends
+# From 5 Devs to 200
 
-### React 19 Suspense Meets Module Federation
+### Micro-Frontends That Scale Your Team and Stream Your UI
 
 ```
 Shell (host)    :3000

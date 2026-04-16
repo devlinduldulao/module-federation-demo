@@ -1,34 +1,51 @@
-# Streaming Micro-Frontends: React 19 Suspense Meets Module Federation
+# From 5 Devs to 200: Micro-Frontends That Scale Your Team and Stream Your UI
 
 ## Description
 
-Micro-frontends let teams ship independently. React 19 Suspense lets components stream. This talk shows what happens when you stop treating them as separate ideas and start treating Suspense as a first-class micro-frontend primitive. Through a live-coded healthcare demo — a shell host composing four federated React 19 remotes via Rspack Module Federation — we'll explore how each remote can own its entire loading choreography with the `createResource` pattern, how a host shell can stay completely ignorant of its children's internals using nothing but `<Suspense>` and `<ErrorBoundary>`, and how custom DOM events replace shared state for cross-module communication that survives independent deployments. You'll see real streaming, real fault isolation with a live kill-switch demo panel, and a real test suite — no slides-only architecture diagrams.
+The real bottleneck in frontend development isn't your framework — it's what happens when your team outgrows your architecture. At 5 developers, a monolith is fast and fun. At 50, deploys are blocked by unrelated failures. At 200, nobody understands the full application and onboarding takes months.
+
+This talk tackles **both sides of the micro-frontend equation** through a live-coded healthcare demo built with React 19, Rspack Module Federation, and streaming Suspense:
+
+- **Developer experience (DX):** How Module Federation lets teams own, build, test, and deploy their modules independently — so a broken prescription test never blocks the medical records team, and a new hire ships to production in their first week, not their first quarter.
+- **User experience (UX):** How React 19 Suspense with per-module skeleton streaming eliminates the blank-screen problem — users see instant layout feedback the moment they navigate, even when remote chunks are still in flight.
+
+You'll watch a shell host compose four independent React 19 applications into one seamless experience, kill a remote live to prove fault isolation works, and see how `<Suspense>` + `<ErrorBoundary>` is all the shell needs to stay completely ignorant of its children's loading internals. No slides-only architecture diagrams — a running app, a real test suite, and patterns you can ship on Monday.
 
 ## Abstract
 
-Module Federation promised us independently deployed micro-frontends. React 19 promised us streaming Suspense. What happens when you combine them?
+Every growing frontend team hits the same wall. The product scales, you hire more engineers, and suddenly merge conflicts are daily, CI takes 20 minutes, and "don't merge yet, we're releasing" is a Slack message you read every morning. The architecture that worked at 5 developers is destroying your development culture at 50.
 
-In this talk, we'll build a production-grade healthcare shell that composes four independent React 19 applications — a landing page, medical records viewer, prescription orders, and clinical analytics dashboard — into a single cohesive experience using Rspack Module Federation. But we won't stop at lazy loading remote components. We'll push further into **streaming micro-frontends**: remote modules that leverage React's Suspense resource pattern to progressively render content with skeleton fallbacks, all orchestrated by a host shell that has zero knowledge of its children's internals.
+Module Federation solves the DX side: independent builds, independent deploys, independent test suites. Each team owns their module end-to-end. But here's what most micro-frontend talks ignore — **your users don't care about your team structure.** They care that the app feels fast. If navigating between federated modules means a blank screen and a spinner, you've traded DX for UX.
 
-**You'll learn how to:**
+This talk shows you don't have to choose.
 
-- Architect a Module Federation monorepo with Rspack that supports independent deployment, hot reload, and fault isolation across teams
-- Implement the `createResource` / Suspense streaming pattern inside federated remotes so each micro-frontend controls its own loading choreography
-- Build a resilient host shell with ErrorBoundary + Suspense composition that gracefully degrades when a remote is unavailable
-- Wire cross-module communication through custom DOM events (`addPrescription`, `showNotification`, `moduleChange`) without coupling any two modules together
-- Coordinate shell-owned theming across remotes with shared CSS variables, `localStorage`, and a typed `themeChange` event
-- Add hover-based prefetching for federated remotes using a simple prefetch map — no router library required
-- Test federated components in isolation with Vitest and React Testing Library, including strategies for mocking remote imports and handling Suspense boundaries in test environments
-- Demonstrate fault isolation live with a Federation Lab panel that lets you kill/restore individual remotes and toggle A/B deployment rings during the presentation
+Through a production-grade healthcare demo — a shell host composing a landing page, medical records viewer, prescription orders, and clinical analytics dashboard via Rspack Module Federation — we'll build an architecture with **two pillars**:
+
+**Pillar 1 — DX for your team (Module Federation):**
+- Five packages, five dev servers, five test suites — zero coupling between them
+- Each remote has its own `package.json`, Rspack config, and release cycle
+- Cross-module communication through typed DOM events (`addPrescription`, `showNotification`, `themeChange`) — no shared state, no version coupling
+- A new developer learns one module and contributes on day one
+
+**Pillar 2 — UX for your users (Suspense + Skeleton Streaming):**
+- Each remote owns its loading choreography with the `createResource` / Suspense pattern
+- The shell renders `<Suspense fallback={<Skeleton />}>` — no `isLoading` props, no loading spinners passed across module boundaries
+- Users see an instant skeleton layout the moment they navigate; content streams in as remote chunks resolve
+- Three deliberate loading strategies — **Instant** (Home), **Eager** (Records, preloaded on mount), **Streamed** (Prescriptions, Analytics with progressive rendering)
+
+**Live demos include:**
+- A Federation Lab panel that lets you kill and restore individual remotes mid-presentation to prove fault isolation
+- ErrorBoundary composition that gracefully degrades one module without taking down the application
+- Hover-based prefetching for federated remotes using a simple prefetch map
+- A full Vitest test suite running against federated components with mocked remote imports
 
 **Key takeaways:**
 
-1. **Suspense is a micro-frontend primitive.** Each remote owns its loading state. The shell just renders `<Suspense>` — no loading spinners, no `isLoading` props passed across module boundaries.
-2. **Events > shared state.** CustomEvents on `window` give you decoupled inter-module communication that survives independent deployments and version mismatches.
-3. **Fault isolation is a feature, not a side effect.** With `.catch()` wrappers on lazy imports and ErrorBoundaries per module, one team's broken deploy doesn't take down the entire application.
-4. **Rspack makes this fast.** Module Federation on Rspack gives you sub-second HMR in a monorepo with 5 applications and zero Webpack configuration headaches.
-
-This is not a theoretical architecture talk. Every pattern will be demonstrated in a live, running application with a dark editorial design system, real component streaming, a Federation Lab panel for live fault isolation demos, and a test suite that proves it all works. Whether you're splitting a monolith or starting fresh with micro-frontends, you'll leave with a blueprint you can ship on Monday.
+1. **Micro-frontends are a team-scaling strategy, not a code-splitting technique.** The architecture should match how your organization works. Small, autonomous teams that own their module end-to-end — from local dev to production deploy — move faster and ship with more confidence than any team fighting over a shared monolith.
+2. **Suspense is a micro-frontend primitive.** Each remote owns its loading state. The shell just renders `<Suspense>` — the user sees a skeleton instantly while content streams in. No loading spinners, no `isLoading` props leaking across module boundaries.
+3. **Skeleton streaming is the UX answer to independent deployment.** When modules load at different speeds from different servers, per-module skeletons give users immediate layout stability instead of blank screens and jarring layout shifts.
+4. **Fault isolation is a feature, not a side effect.** With `.catch()` wrappers on lazy imports and ErrorBoundaries per module, one team's broken deploy doesn't take down the entire application. You can prove this works by killing a remote live — and the rest of the app keeps running.
+5. **Events over shared state.** CustomEvents on `window` give you decoupled cross-module communication that survives independent deployments, version mismatches, and team reorganizations.
 
 ## Talk Details
 
@@ -36,6 +53,27 @@ This is not a theoretical architecture talk. Every pattern will be demonstrated 
 - **Level:** Intermediate to Advanced
 - **Audience:** React developers evaluating or implementing micro-frontend architectures, teams migrating from monolithic SPAs, and engineers interested in React 19 Suspense patterns beyond basic code splitting
 - **Prerequisites:** Familiarity with React lazy/Suspense, basic understanding of module bundlers
+
+## Why This Talk?
+
+Most micro-frontend talks fall into one of two traps. They either focus entirely on the infrastructure — how to wire up Module Federation, how to share dependencies — and leave the audience with a technically correct architecture that delivers a terrible user experience. Or they focus on React patterns in isolation — Suspense, streaming, skeletons — without addressing the organizational pain that makes micro-frontends necessary in the first place.
+
+This talk bridges both.
+
+**Your audience is living this problem right now.** The majority of React teams at conferences are either working inside a monolith that's slowing down as the team grows, or they've already adopted micro-frontends and are struggling with the UX tradeoffs — blank screens between navigations, inconsistent loading states, spinners everywhere. They've heard "micro-frontends" pitched as a solution but haven't seen one that addresses *both* the team-scaling DX problem and the end-user UX problem in the same architecture.
+
+**What makes this different from other MF talks:**
+
+- **It's not theoretical.** Every claim is demonstrated in a running application with 5 independent packages, 136 passing tests, and a CI/CD pipeline that deploys to production. The audience can clone the repo and run it after the talk.
+- **It names the real motivation.** Most talks justify micro-frontends with "independent deployment" or "technology diversity." This talk starts with the human problem — what happens to your development culture when 50 engineers share one `package.json` — and shows how the architecture solves it.
+- **It doesn't ignore UX.** The live demo shows three distinct loading strategies (Instant, Eager, Streamed) with per-module skeleton fallbacks. The audience sees the difference between a naively federated app (blank screens, spinners) and one where each remote owns its loading choreography through Suspense.
+- **It proves fault isolation live.** The Federation Lab panel lets the speaker kill a remote mid-demo and show the audience that the rest of the app keeps running. This is the moment that makes micro-frontends click for skeptics.
+- **It's current.** React 19.2, TypeScript 6, Rspack 1.7, Tailwind v4 — this is the stack teams are adopting right now, not a legacy Webpack 4 setup with outdated patterns.
+
+**The audience will leave with:**
+1. A mental model for when micro-frontends are worth the complexity (team size, not app size)
+2. A concrete pattern for streaming UX inside federated modules (createResource + Suspense + skeletons)
+3. A production-tested blueprint they can adapt — the demo repo is open source with CI/CD, tests, and documentation
 
 ## Speaker Bio
 
