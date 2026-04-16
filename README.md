@@ -686,6 +686,29 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }  // cached before render
 
 > **Bottom line:** React 19 is the right choice. The waterfall concern applies to sibling components in the same boundary — a pattern this architecture intentionally avoids. The batching and compiler improvements directly benefit the shell's UX.
 
+## Microservices vs Micro-frontends — Fault Isolation
+
+A common question: "Is this like microservices where one broken service doesn't take down the others?" **Yes — but with a nuance.**
+
+| | Microservices | This project (Micro-frontends) |
+|---|---|---|
+| **Isolation boundary** | Separate processes/containers — OS-level | Separate `ErrorBoundary` per module — React-level |
+| **If one crashes** | Other services keep running (OS guarantee) | Other modules keep rendering (ErrorBoundary catches the error) |
+| **Blast radius** | Network call fails, caller handles it | `import()` fails or component throws, ErrorBoundary shows fallback + Retry |
+| **Shared resource risk** | Each service has its own memory/CPU | All modules share one browser tab |
+
+### What this project does to achieve isolation
+
+1. **Per-module `ErrorBoundary`** — every remote is wrapped individually in `ModuleView`. If Records crashes, Prescriptions and Analytics keep working.
+2. **Per-module `Suspense`** — each remote has its own loading state. A slow remote only shows *its own* skeleton.
+3. **Route-based rendering** — only one module renders at a time, so a broken remote can't corrupt another module's DOM.
+4. **Independent deployment** — each remote has its own build and `remoteEntry.js`. A broken Records deploy doesn't touch Prescriptions.
+5. **`.catch()` on `lazy()`** — if a remote's `remoteEntry.js` fails to load (server down, network error), the import resolves to a `ModuleFallback` instead of crashing.
+
+### The one gap vs microservices
+
+All modules share one browser tab. If a remote has an infinite loop or massive memory leak, it freezes the entire page. Microservices don't have this problem because each runs in its own process. The fix is `<iframe>` isolation, but that breaks shared React context and degrades DX. Most teams accept this tradeoff — and it's why code review and testing at the module level matter.
+
 ## Conference Demo Value
 
 This project demonstrates these micro-frontend concepts during a live talk:

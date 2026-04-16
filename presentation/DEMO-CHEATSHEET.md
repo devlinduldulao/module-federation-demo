@@ -105,6 +105,10 @@ Before diving into loading strategies, quickly orient the audience on the three 
 7. Click **Restore All** in the Lab panel
 8. Explain: "This is where DX and UX meet. Each team deploys independently — that's the DX benefit. When one team's deploy breaks, the user still sees the rest of the app — that's the UX benefit. ErrorBoundary catches it and other modules keep running."
 
+### Talking point: "Is this like microservices?"
+
+Say: "People always ask this. The answer is **yes, for the 99% case.** Microservices isolate at the OS level — separate processes, separate memory. We isolate at the React level — per-module ErrorBoundary, per-module Suspense, `.catch()` on lazy imports. Crashes, network failures, bad deploys — all contained, just like a microservice going down. The 1% gap is that all modules share a browser tab, so a true infinite loop freezes everything. That's the inherent cost of a shared runtime, and virtually every MF architecture accepts it."
+
 ### Option B: Real server kill
 
 1. In terminal, stop the records dev server (Ctrl+C on the records process)

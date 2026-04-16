@@ -68,13 +68,22 @@ module.exports = {
   },
 
   plugins: [
+    // ── Module Federation ─────────────────────────────────────────────
+    // This plugin is the ONLY config that makes this app a micro-frontend.
+    // Everything else (entry, rules, devServer, etc.) is standard Rspack.
     new rspack.container.ModuleFederationPlugin({
-      name: "prescriptions",
-      filename: "remoteEntry.js",
+      name: "prescriptions",        // unique federation identity
+      filename: "remoteEntry.js",   // manifest file the host fetches at runtime
+
+      // PUBLIC API — the contract this team exposes to other apps
       exposes: {
         "./PrescriptionOrders": "./src/PrescriptionOrders.tsx",
         "./StreamingPrescriptionOrders": "./src/StreamingPrescriptionOrders.tsx",
       },
+
+      // SHARED DEPENDENCIES — singleton: true ensures one React instance
+      // across the entire federation. Without this, each remote loads its
+      // own React copy and hooks break with "Invalid hook call" errors.
       shared: {
         react: {
           singleton: true,

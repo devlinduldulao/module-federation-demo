@@ -200,6 +200,19 @@ function ModuleView({ module, isKilled }: { module: ModuleConfig; isKilled: bool
 }
 ```
 
+### Microservices vs Micro-frontends — the isolation model
+
+"Is this like microservices?" — **yes, for the 99% case.**
+
+| | Microservices | Micro-frontends (this demo) |
+|---|---|---|
+| **Isolation** | OS-level (separate processes) | React-level (`ErrorBoundary` per module) |
+| **If one crashes** | Other services keep running | Other modules keep rendering |
+| **Blast radius** | Network call fails → caller handles | `import()` fails → `ModuleFallback` + Retry |
+| **Shared risk** | None (own memory/CPU) | Shared browser tab |
+
+The three layers above (`.catch()` on `lazy()`, `Suspense`, `ErrorBoundary`) give you microservice-style fault isolation for crashes, network failures, and bad deploys. The one gap: all modules share a browser tab, so an infinite loop or memory leak in one remote *can* freeze the whole page. The fix (`<iframe>` isolation) breaks shared React context — most teams accept the tradeoff.
+
 ---
 
 ## 3. Cross-Module Communication (DX Pillar)

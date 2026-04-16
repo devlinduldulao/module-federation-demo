@@ -316,12 +316,27 @@ The shell header exposes three buttons that serve different roles during develop
 
 ---
 
-## Slide 10 — Fault Isolation
+## Slide 10 — Fault Isolation: Microservices for the Frontend
+
+### "Is this like microservices?"
+
+| | Microservices | Micro-frontends (this demo) |
+|---|---|---|
+| **Isolation** | OS-level (separate processes) | React-level (`ErrorBoundary` per module) |
+| **If one crashes** | Other services keep running | Other modules keep rendering |
+| **Blast radius** | Network call fails → caller handles | `import()` fails → fallback + Retry |
+| **Shared risk** | None (own memory/CPU) | Shared browser tab |
+
+### What we do to get isolation
+
+1. Per-module `ErrorBoundary` — Records crashes, Prescriptions keeps working
+2. Per-module `Suspense` — slow remote shows only *its own* skeleton
+3. `.catch()` on `lazy()` — server down → graceful `ModuleFallback`, not a white screen
+4. Route-based rendering — one module at a time, no cross-module DOM corruption
 
 ### DEMO: Kill a remote with the Federation Lab
 
 ```bash
-# Open the Federation Lab panel (click "Lab" button or Ctrl+K → "Open Federation Lab")
 # Toggle the records kill switch — the shell renders ModuleFallback
 # Prescriptions and Analytics are unaffected
 # Or: stop the actual records dev server for a real fault demo
@@ -341,7 +356,7 @@ const MedicalRecords = lazy(() =>
 );
 ```
 
-> **One team's broken deploy never takes down the entire application.**
+> **The 99% case (crashes, network failures, bad deploys) is fully isolated — just like microservices. The 1% gap (tab-level resource exhaustion) is the inherent cost of sharing a browser tab, and virtually every MF architecture accepts this tradeoff.**
 
 ---
 
