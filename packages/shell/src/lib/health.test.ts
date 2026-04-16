@@ -138,21 +138,22 @@ describe("useRemoteHealth", () => {
 
         renderHook(() => useRemoteHealth(REMOTES));
 
-        // Wait for initial run (2 calls)
+        // Flush the initial async runChecks() call (no timers involved — uses Promises)
         await act(async () => {
-            await vi.runAllTimersAsync();
+            await vi.advanceTimersByTimeAsync(0);
         });
 
         const callsAfterInitial = fetchMock.mock.calls.length;
-        expect(callsAfterInitial).toBeGreaterThanOrEqual(2);
+        expect(callsAfterInitial).toBeGreaterThanOrEqual(REMOTES.length);
 
-        // Advance past the 5000ms interval
+        // Advance by one interval tick (5000ms) and flush the resulting async work
         await act(async () => {
-            vi.advanceTimersByTime(5001);
-            await vi.runAllTimersAsync();
+            await vi.advanceTimersByTimeAsync(5001);
         });
 
         expect(fetchMock.mock.calls.length).toBeGreaterThan(callsAfterInitial);
+
+        vi.useRealTimers();
     });
 
     it("builds the correct health-check URL for each remote", async () => {

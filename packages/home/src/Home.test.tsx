@@ -24,7 +24,7 @@ describe("Home", () => {
 
     it("renders the hero heading and subtitle", () => {
         render(<Home />);
-        expect(screen.getByText("Welcome Home")).toBeInTheDocument();
+        expect(screen.getByText("A Modular Federation Showcase")).toBeInTheDocument();
         expect(screen.getByText("Micro-Frontend Architecture")).toBeInTheDocument();
     });
 

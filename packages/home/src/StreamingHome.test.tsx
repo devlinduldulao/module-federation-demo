@@ -61,7 +61,7 @@ describe("StreamingHome", () => {
             await vi.runAllTimersAsync();
         });
 
-        expect(screen.getByText("Welcome Home")).toBeInTheDocument();
+        expect(screen.getByText("A Modular Federation Showcase")).toBeInTheDocument();
         expect(screen.getByText("Micro-Frontend Architecture")).toBeInTheDocument();
     });
 
@@ -79,7 +79,7 @@ describe("StreamingHome", () => {
         });
 
         expect(screen.queryByText("Home loading skeleton")).not.toBeInTheDocument();
-        expect(screen.getByText("Welcome Home")).toBeInTheDocument();
+        expect(screen.getByText("A Modular Federation Showcase")).toBeInTheDocument();
     });
 
     it("reuses cached resource — a second render suspends with the existing pending resource", () => {
