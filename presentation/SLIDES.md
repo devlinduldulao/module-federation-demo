@@ -131,6 +131,29 @@ With Suspense:     User clicks a tab → skeleton instantly → content streams 
 
 ## Slide 6 — Module Federation Config
 
+### The One Property That Makes It Work
+
+Each `rspack.config.js` is a normal bundler config. **The only thing that turns separate apps into a micro-frontend architecture** is the `ModuleFederationPlugin` — specifically three sub-properties:
+
+| Property | Where | Purpose |
+|----------|-------|---------|
+| **`exposes`** | Remotes | “What components do I share?” — the team's public API |
+| **`remotes`** | Host | “Where do I find each remote at runtime?” — `scope@URL` discovery |
+| **`shared`** | Both | “What do we deduplicate?” — `singleton: true` = one React for all |
+
+```
+Remote (records)                    Shell (host)
+┌──────────────────────┐            ┌──────────────────────┐
+│ exposes:             │            │ remotes:             │
+│   ./MedicalRecords ──┼─ remoteEntry.js ─┼─► records@:3001│
+│                      │            │                      │
+│ shared:              │            │ shared:              │
+│   react: singleton ──┼────────────┼─► react: singleton   │
+└──────────────────────┘            └──────────────────────┘
+```
+
+> Remove the `ModuleFederationPlugin`, and you have five normal, unrelated apps. Add it back, and they become a federated architecture. Everything else in the config is standard Rspack.
+
 ### Remote (exposes)
 
 ```js

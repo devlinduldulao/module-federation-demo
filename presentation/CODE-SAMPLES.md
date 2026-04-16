@@ -275,6 +275,22 @@ const handleBrowseRecords = () => {
 
 This is the infrastructure that lets each team own their own build, deploy, and dev server.
 
+Each `rspack.config.js` has standard bundler settings (`entry`, `module.rules`, `devServer`, `optimization`). **The one property that turns separate apps into a federated architecture** is the `ModuleFederationPlugin` — and specifically three sub-properties:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ModuleFederationPlugin — the ONLY micro-frontend property  │
+├─────────────────────┬────────────────┬─────────────────────┤
+│ exposes (remotes)   │ remotes (host) │ shared (both)       │
+│ “What do I share?”  │ “Where are    │ “What do we         │
+│ = team’s public API │  they?”        │  deduplicate?”      │
+│                     │ = runtime     │ = singleton: true   │
+│                     │   discovery   │   = one React       │
+└─────────────────────┴────────────────┴─────────────────────┘
+```
+
+> Remove the `ModuleFederationPlugin`, and you have five normal, unrelated apps. Add it back, and they become a federated architecture. Everything else in each config file is standard Rspack.
+
 ### Remote (exposes modules)
 
 ```js

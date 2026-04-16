@@ -195,6 +195,28 @@ The values below are the default dark theme tokens. The shell persists the activ
 
 ## Module Federation Setup
 
+Each `rspack.config.js` is a standard Rspack configuration — `entry`, `module.rules`, `devServer`, `optimization`, `resolve` are all normal bundler settings that any app would have. **The only property that transforms separate apps into a federated architecture** is the `ModuleFederationPlugin` inside `plugins`, and specifically these three sub-properties:
+
+| Property | Defined on | What it does |
+|----------|-----------|-------------|
+| **`exposes`** | Remotes | Declares the module's public API — which components other apps can import. This is the **contract** between teams. |
+| **`remotes`** | Host (shell) | Tells the host where to find each remote's `remoteEntry.js` at runtime. Format: `scope@URL`. This is the **runtime discovery mechanism**. |
+| **`shared`** | Both | Declares which dependencies should be deduplicated across the federation. `singleton: true` on React ensures one instance — without it, each remote loads its own React and hooks break. |
+
+```
+Remote (records :3001)              Shell (host :3000)
+┌──────────────────────┐            ┌──────────────────────┐
+│ exposes:             │            │ remotes:             │
+│   ./MedicalRecords ──┼──remoteEntry.js──┼─► records@:3001│
+│                      │            │                      │
+│ shared:              │            │ shared:              │
+│   react: singleton ──┼────────────┼─► react: singleton   │
+│                      │            │   (one copy for all) │
+└──────────────────────┘            └──────────────────────┘
+```
+
+Everything else in the config is standard Rspack. Remove the `ModuleFederationPlugin`, and you have five normal, unrelated apps. Add it back, and they become a federated architecture.
+
 ### Shell (Host)
 
 ```js

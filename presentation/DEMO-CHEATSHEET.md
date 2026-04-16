@@ -162,6 +162,16 @@ packages/records/
 ```
 Explain: "Every module is a self-contained app. A new team copies a package, picks a port, and ships independently."
 
+### Key talking point: the only property that matters
+
+Open `packages/records/rspack.config.js` and scroll through it. Point out:
+> "This is a normal Rspack config — entry, rules, devServer, optimization. The ONE property that makes this a micro-frontend instead of a normal app is the `ModuleFederationPlugin`. Three sub-properties do all the work:
+> - **`exposes`** on remotes — the team's public API contract
+> - **`remotes`** on the host — runtime discovery (`scope@URL`)
+> - **`shared`** on both — `singleton: true` ensures one React instance. Remove this and hooks break."
+
+Then toggle to `packages/shell/rspack.config.js` and show the mirror side: `remotes` pointing to each `remoteEntry.js`.
+
 ### UX story: loading strategy taxonomy
 ```
 packages/shell/src/App.tsx
