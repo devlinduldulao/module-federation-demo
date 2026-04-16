@@ -119,6 +119,7 @@ function Home() {
             <h2 className="font-display text-6xl lg:text-8xl italic text-cream tracking-tight leading-tight mb-6">
               A Modular Federation Showcase
             </h2>
+            <h6>- Healthcare platform</h6>
             <p className="text-stone text-base max-w-2xl leading-loose">
               A demonstration of Module Federation with independently deployed micro-frontends.
               Each module runs on its own port, ships its own bundle, and can be developed in isolation.
