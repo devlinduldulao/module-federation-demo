@@ -2,8 +2,8 @@
   "name": "analytics",
   "version": "1.0.0",
   "scripts": {
-    "dev": "rspack serve",
-    "start": "rspack serve",
+    "dev": "rspack serve --mode development",
+    "start": "rspack serve --mode development",
     "build": "rspack build",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "cd ../.. && npx eslint packages/analytics/src",

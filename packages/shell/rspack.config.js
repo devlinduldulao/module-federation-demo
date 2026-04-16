@@ -2,7 +2,6 @@ const rspack = require("@rspack/core");
 const RefreshPlugin = require("@rspack/plugin-react-refresh");
 const path = require("path");
 
-const isDev = process.env.NODE_ENV === "development";
 const REMOTE_BASE_URL = process.env.REMOTE_BASE_URL; // set in CI for GitHub Pages
 const BASE_PATH = process.env.BASE_PATH || "";
 
@@ -12,16 +11,21 @@ const remoteUrl = (name, devPort) =>
     : `${name}@http://localhost:${devPort}/remoteEntry.js`;
 
 /** @type {import('@rspack/cli').Configuration} */
-module.exports = {
+module.exports = (_, argv = {}) => {
+  const mode = argv.mode || process.env.NODE_ENV || "development";
+  const isDev = mode === "development";
+
+  return {
   context: __dirname,
   entry: {
     main: "./src/index.tsx",
   },
-  mode: isDev ? "development" : "production",
+  mode,
   target: "web",
 
   output: {
     path: path.resolve(__dirname, "dist"),
+    uniqueName: "shell",
     publicPath: BASE_PATH ? `${BASE_PATH}/` : "auto",
     clean: true,
   },
@@ -143,9 +147,7 @@ module.exports = {
       inject: true,
     }),
     new rspack.DefinePlugin({
-      "process.env.NODE_ENV": JSON.stringify(
-        process.env.NODE_ENV || "development"
-      ),
+      "process.env.NODE_ENV": JSON.stringify(mode),
       "process.env.BASE_PATH": JSON.stringify(BASE_PATH),
     }),
     isDev && new RefreshPlugin(),
@@ -216,4 +218,5 @@ module.exports = {
     maxAssetSize: 512000,
     maxEntrypointSize: 512000,
   },
+  };
 };

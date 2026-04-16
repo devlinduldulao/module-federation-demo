@@ -2,19 +2,22 @@ const rspack = require("@rspack/core");
 const RefreshPlugin = require("@rspack/plugin-react-refresh");
 const path = require("path");
 
-const isDev = process.env.NODE_ENV === "development";
-
 /** @type {import('@rspack/cli').Configuration} */
-module.exports = {
+module.exports = (_, argv = {}) => {
+  const mode = argv.mode || process.env.NODE_ENV || "development";
+  const isDev = mode === "development";
+
+  return {
   context: __dirname,
   entry: {
     main: "./src/index.tsx",
   },
-  mode: isDev ? "development" : "production",
+  mode,
   target: "web",
 
   output: {
     path: path.resolve(__dirname, "dist"),
+    uniqueName: "prescriptions",
     publicPath: "auto",
     clean: true,
   },
@@ -113,9 +116,7 @@ module.exports = {
       inject: true,
     }),
     new rspack.DefinePlugin({
-      "process.env.NODE_ENV": JSON.stringify(
-        process.env.NODE_ENV || "development"
-      ),
+      "process.env.NODE_ENV": JSON.stringify(mode),
     }),
     isDev && new RefreshPlugin(),
   ].filter(Boolean),
@@ -159,4 +160,5 @@ module.exports = {
     maxAssetSize: 256000,
     maxEntrypointSize: 256000,
   },
+  };
 };
