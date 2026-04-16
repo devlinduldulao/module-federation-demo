@@ -291,16 +291,258 @@ declare global {
 
 The shell also exposes `window.__MF_THEME__` so remotes can read or update the active theme without importing host-only shell code.
 
-## Federation Lab (Demo Controls)
+## Shell Controls
 
-The shell includes a **Federation Lab** panel for live demonstrations. Click the **Lab** button in the header (or use the command palette: `Ctrl+K` → "Open Federation Lab") to access:
+The shell header exposes three control surfaces — **Settings**, **Commands**, and **Lab** — that serve distinct purposes during both development and live presentations. Each opens as a slide-over panel or overlay.
 
-- **Remote Health Monitor** — polls each remote's `remoteEntry.js` every 5 seconds with live status indicators and latency
-- **Fault Isolation Kill Switches** — toggle any module to simulate a remote going down. The shell renders a `ModuleFallback` while other modules keep running independently
-- **A/B Deployment Ring** — switch between stable and canary deployment variants with per-module version info
-- **Hot Reload Guide** — step-by-step instructions for demonstrating independent deployment during a live talk
+### Settings (Appearance Drawer)
 
-The status bar shows a live count of killed remotes and the active deployment ring.
+**Purpose:** Shell-owned theme control with live persistence and cross-module broadcasting.
+
+Click the **Settings** button in the header to open a slide-over drawer from the right. It provides:
+
+- **Theme selection** — toggle between Dark and Light palettes. Each option shows a description and an "Active" / "Available" badge.
+- **Live propagation** — selecting a theme immediately rewrites CSS custom properties on `:root`, persists the choice in `localStorage` under `mf-demo-theme`, and dispatches a typed `themeChange` event on `window`. All remotes react without a page refresh.
+- **Persistence indicator** — the drawer footer confirms the `localStorage` key being used.
+
+**Why it matters for the demo:** This proves that the shell can own shared UI state (theme) and broadcast changes across independently deployed remotes through CSS variables and events — no shared imports, no prop drilling across module boundaries.
+
+The header also includes an inline **Dark / Light** toggle for quick switching without opening the full drawer.
+
+**Implementation (`lib/theme.ts` + `App.tsx` + `SettingsDrawer`):**
+
+The theme system is built on three layers:
+
+1. **Theme registry** — `THEME_DEFINITIONS` maps each theme name to a label, description, color scheme, and a complete set of CSS custom property values. Adding a new theme means adding one entry here.
+
+2. **`applyTheme()` function** — the single entry point for all theme changes. It:
+   - Sets `data-theme` and `color-scheme` on `<html>` so CSS can target the active theme
+   - Iterates `definition.variables` and calls `root.style.setProperty()` for each token — this is how every remote's Tailwind classes update instantly
+   - Exposes `window.__MF_THEME__` (a getter/setter bridge) so remotes can read or change the theme without importing shell code
+   - Persists to `localStorage` (wrapped in try/catch for private browsing)
+   - Dispatches a typed `themeChange` CustomEvent so remotes listening via `useActiveTheme()` can react
+
+3. **Shell state** — `App.tsx` holds `theme` in `useState`, calls `applyTheme(theme)` in a `useEffect`, and listens for `StorageEvent` to sync theme changes across browser tabs. The `SettingsDrawer` component is a `memo`-wrapped overlay that receives `theme` and `onSelectTheme` as props — pure presentation, no side effects.
+
+```typescript
+// lib/theme.ts — core propagation
+export function applyTheme(theme: ThemeName): void {
+  const definition = THEME_DEFINITIONS[theme];
+  const root = document.documentElement;
+
+  root.dataset.theme = theme;
+  root.style.colorScheme = definition.colorScheme;
+
+  for (const [variable, value] of Object.entries(definition.variables)) {
+    root.style.setProperty(variable, value);  // ← every remote's CSS reacts
+  }
+
+  window.__MF_THEME__ = {                    // ← remote bridge
+    getTheme: () => theme,
+    setTheme: (next) => applyTheme(next),
+  };
+
+  localStorage.setItem(THEME_STORAGE_KEY, theme);
+
+  window.dispatchEvent(                      // ← event contract
+    new CustomEvent("themeChange", {
+      detail: { theme, colorScheme: definition.colorScheme },
+    })
+  );
+}
+```
+
+### Commands (Command Palette)
+
+**Purpose:** A keyboard-first command palette (VS Code–style) for navigating, theming, and controlling the demo without touching the mouse.
+
+Press **Ctrl+K** (or **Cmd+K** on Mac), or click the **Commands** button to open a search overlay. It provides:
+
+- **Navigation commands** — "Switch to Records", "Switch to Prescriptions", etc. Each shows the module name and port number.
+- **Theme commands** — "Apply Dark Theme", "Apply Light Theme" with descriptions.
+- **Demo commands** — "Open Federation Lab", "Kill/Restore \<module\> Remote", "Switch to Canary/Stable Ring".
+- **Fuzzy search** — type any keyword (module name, port, "kill", "canary", "dark") and the list filters in real time.
+- **Keyboard dismiss** — press Esc to close.
+
+**Why it matters for the demo:** During a live talk, the speaker can control the entire demo from the keyboard — navigate between modules, kill remotes, toggle themes, and switch deployment rings — without hunting for buttons. It also demonstrates that shell-level orchestration features (kill switch, version registry) are accessible from multiple surfaces: the Lab panel, the command palette, and the status strip.
+
+**Implementation (`App.tsx` — `CommandPalette` + `commandActions`):**
+
+The command palette is a `memo`-wrapped overlay component that receives a `commands` array and a `query` string as props. The actual command definitions are built in `ShellFrame` via `useMemo`:
+
+1. **Command generation** — `commandActions` is a memoized array built from three sources:
+   - **Navigation commands** — one per module, generated from the `MODULES` config array. Each calls `navigate(module.path)` and closes the palette.
+   - **Theme commands** — one per theme option, generated from `THEME_OPTIONS`. Each calls `handleThemeChange()`.
+   - **Demo commands** — "Open Federation Lab", per-module kill/restore toggles (label flips based on `killed[id]`), and a deployment ring toggle (label flips based on `variant`).
+
+2. **Filtering** — `filteredCommands` is a `useMemo` that runs a case-insensitive substring match against each command's `title + subtitle + keywords` string. The `keywords` field contains aliases (e.g., "module navigation 3001") so searching by port number or concept works.
+
+3. **Keyboard binding** — a `keydown` listener in `ShellFrame` catches `Ctrl+K` / `Cmd+K` to open, `Escape` to close. The query resets to empty when the palette closes.
+
+4. **Component structure** — the `CommandPalette` component renders a backdrop, a search input (auto-focused via `useRef`), and a scrollable list of command buttons. Each button calls `command.run()` which performs the action and closes the palette.
+
+```tsx
+// Command definition — every action is data-driven
+const commandActions = useMemo<readonly CommandAction[]>(() => {
+  const navigationCommands = MODULES.map((module) => ({
+    id: `goto-${module.id}`,
+    title: `Switch to ${module.label}`,
+    subtitle: `Load the ${module.label.toLowerCase()} micro-frontend on port ${module.port}`,
+    keywords: `${module.id} ${module.label.toLowerCase()} module navigation ${module.port}`,
+    run: () => { navigate(module.path); setIsCommandPaletteOpen(false); },
+  }));
+
+  const demoCommands: CommandAction[] = [
+    {
+      id: "demo-panel",
+      title: "Open Federation Lab",
+      keywords: "demo lab federation health kill fault isolation version canary",
+      run: () => { setIsDemoPanelOpen(true); setIsCommandPaletteOpen(false); },
+    },
+    ...MODULES.map((module) => ({
+      id: `kill-${module.id}`,
+      title: `${killed[module.id] ? "Restore" : "Kill"} ${module.label} Remote`,
+      run: () => { toggleKill(module.id); setIsCommandPaletteOpen(false); },
+    })),
+  ];
+
+  return [...navigationCommands, ...themeCommands, ...demoCommands];
+}, [navigate, killed, variant]);
+
+// Filtering — simple substring match against a combined search string
+const filteredCommands = useMemo(() => {
+  const q = commandQuery.trim().toLowerCase();
+  if (!q) return commandActions;
+  return commandActions.filter((cmd) =>
+    `${cmd.title} ${cmd.subtitle} ${cmd.keywords}`.toLowerCase().includes(q)
+  );
+}, [commandActions, commandQuery]);
+```
+
+### Lab (Federation Lab)
+
+**Purpose:** A live demo control panel for proving micro-frontend resilience — fault isolation, health monitoring, and independent deployment versioning.
+
+Click the **Lab** button (orange border, right side of header) or use the command palette (`Ctrl+K` → "Open Federation Lab") to open a full-height slide-over panel. It contains four sections:
+
+**1. Remote Health Monitor**
+- Polls each remote's `remoteEntry.js` endpoint every 5 seconds (only while the panel is open).
+- Shows a color-coded status dot (green = online, red = offline/killed, gray = checking) with per-remote latency in milliseconds.
+- Lists each remote by name, port, and current status.
+
+**2. Fault Isolation — Kill Switches**
+- One toggle per remote module. Clicking a toggle "kills" that remote — the shell immediately renders a `ModuleFallback` component for that module while all other modules continue working.
+- **Kill All** / **Restore All** bulk actions for dramatic demo moments.
+- The kill is client-side only (the dev server keeps running). It simulates what happens when a remote's CDN is down or a deploy is broken.
+- The status strip in the header shows a red "N KILLED" counter when any remotes are down.
+
+**3. A/B Deployment Ring**
+- Toggles between **Stable** and **Canary** deployment variants.
+- Shows per-module version info (version number + build hash) that changes based on the active ring.
+- The status strip shows a "CANARY" badge when the canary ring is active.
+- Demonstrates how each remote can be deployed at a different version independently — one team ships canary while others stay on stable.
+
+**4. Hot Reload Guide**
+- Step-by-step instructions for demonstrating independent deployment live: stop a remote's dev server, show the ErrorBoundary fallback, edit source code, restart the server, click Retry — the module reloads with changes while others never went down.
+
+**Why it matters for the demo:** This is the centerpiece of the live talk. It lets the speaker prove fault isolation in real time (kill a remote → others keep running), show independent versioning (canary ring), and demonstrate that the architecture handles failure gracefully. It answers the skeptic's question: "What happens when one team's deploy breaks?"
+
+**Implementation (`lib/health.ts` + `lib/demo.ts` + `DemoPanel.tsx`):**
+
+The Federation Lab is composed from three custom hooks in `lib/` and one presentation component:
+
+**1. `useRemoteHealth(remotes, enabled)` — `lib/health.ts`**
+
+Polls each remote's `remoteEntry.js` via `fetch()` with `method: "HEAD"` and `mode: "no-cors"` every 5 seconds. Returns a readonly array of `RemoteHealth` objects with `status` (`"online" | "offline" | "checking"`), `latencyMs`, and `lastChecked`. Polling only runs when `enabled` is `true` (tied to the panel being open) to avoid unnecessary network traffic. Uses `useRef` for the enabled flag to avoid stale closures in the interval callback.
+
+```typescript
+// lib/health.ts — core polling logic
+async function checkRemote(port: string): Promise<{ ok: boolean; latencyMs: number }> {
+  const start = performance.now();
+  try {
+    const response = await fetch(`http://localhost:${port}/remoteEntry.js`, {
+      method: "HEAD",
+      mode: "no-cors",
+      cache: "no-store",
+    });
+    const latencyMs = Math.round(performance.now() - start);
+    return { ok: response.ok || response.type === "opaque", latencyMs };
+  } catch {
+    return { ok: false, latencyMs: Math.round(performance.now() - start) };
+  }
+}
+```
+
+**2. `useKillSwitch(moduleIds)` — `lib/demo.ts`**
+
+Manages a `Record<string, boolean>` of killed states. Returns `{ killed, toggle, killAll, restoreAll }`. The `toggle` function flips one module's killed state; `killAll`/`restoreAll` set all modules at once. State is entirely client-side — no server interaction. The shell's `ModuleView` component checks `isKilled` before rendering: if true, it renders `<ModuleFallback>` immediately instead of attempting the lazy import.
+
+```typescript
+// lib/demo.ts — kill switch hook
+export function useKillSwitch(moduleIds: readonly string[]) {
+  const [killed, setKilled] = useState<KilledRemotes>(() =>
+    Object.fromEntries(moduleIds.map((id) => [id, false]))
+  );
+
+  const toggle = useCallback((id: string) => {
+    setKilled((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
+
+  const killAll = useCallback(() => {
+    setKilled((prev) =>
+      Object.fromEntries(Object.keys(prev).map((id) => [id, true]))
+    );
+  }, []);
+
+  const restoreAll = useCallback(() => {
+    setKilled((prev) =>
+      Object.fromEntries(Object.keys(prev).map((id) => [id, false]))
+    );
+  }, []);
+
+  return { killed, toggle, killAll, restoreAll } as const;
+}
+
+// App.tsx — how the kill switch integrates with rendering
+function ModuleView({ module, isKilled }: { module: ModuleConfig; isKilled: boolean }) {
+  if (isKilled) {
+    return <ModuleFallback title={`${module.label} Module Killed`} message="..." />;
+  }
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<Skeleton />}>
+        <Component />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+```
+
+**3. `useVersionRegistry(moduleIds)` — `lib/demo.ts`**
+
+Manages a `"stable" | "canary"` variant toggle with two static version maps (`MOCK_VERSIONS` and `CANARY_VERSIONS`). Returns `{ variant, versions, toggleVariant }`. The `versions` array is a `useMemo` that selects from the active registry. In a real production system, these version maps would come from a remote manifest or deployment API.
+
+```typescript
+// lib/demo.ts — version registry hook
+export function useVersionRegistry(moduleIds: readonly string[]) {
+  const [variant, setVariant] = useState<DeploymentVariant>("stable");
+
+  const versions = useMemo<readonly RemoteVersionInfo[]>(() => {
+    const registry = variant === "stable" ? MOCK_VERSIONS : CANARY_VERSIONS;
+    return moduleIds.map((id) => registry[id]!);
+  }, [moduleIds, variant]);
+
+  const toggleVariant = useCallback(() => {
+    setVariant((prev) => (prev === "stable" ? "canary" : "stable"));
+  }, []);
+
+  return { variant, versions, toggleVariant } as const;
+}
+```
+
+**4. `DemoPanel.tsx` — presentation component**
+
+A `memo`-wrapped component that receives all three hooks' outputs as props. It renders four sections (Health Monitor, Kill Switches, A/B Deployment, Hot Reload Guide) as pure presentation with zero business logic. Status colors are driven by a `STATUS_CONFIG` lookup table. The component is entirely controlled — all state mutations happen through callback props (`onToggleKill`, `onKillAll`, `onRestoreAll`, `onToggleVariant`).
 
 ### Individual kill scripts
 

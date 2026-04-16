@@ -255,7 +255,45 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 ---
 
-## Slide 9 — Fault Isolation
+## Slide 9 — Shell Controls: Settings, Commands, and Federation Lab
+
+### Three Control Surfaces, Three Purposes
+
+The shell header exposes three buttons that serve different roles during development and live demos:
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│  MF Demo    HOME  RECORDS  PRESCRIPTIONS  ANALYTICS            │
+│             [DARK|LIGHT]  [Settings]  [Commands]  [Lab]  ⌘K   │
+└────────────────────────────────────────────────────────────────┘
+```
+
+| Button | Opens | Purpose |
+|--------|-------|---------|
+| **Settings** | Right slide-over drawer | Theme control — switch Dark/Light, see persistence, prove shell-owned theming across remotes |
+| **Commands** | Centered search overlay | VS Code–style command palette — navigate, theme, kill remotes, toggle rings — all from the keyboard |
+| **Lab** | Right slide-over panel | Federation Lab — health monitor, kill switches, A/B deployment, hot reload guide |
+
+**Settings** answers: *"How does the shell share UI state across independent remotes?"*
+- Selects a theme → rewrites CSS variables on `:root` → persists to `localStorage` → dispatches `themeChange` event
+- Every remote reacts immediately — no shared imports, no prop drilling
+
+**Commands** answers: *"How do you control a micro-frontend demo without fumbling with a mouse?"*
+- `Ctrl+K` opens a searchable palette with navigation, theme, kill, and deployment commands
+- Type "kill records" or "canary" or "dark" — the list filters in real time
+- Every action in the Lab and Settings is also accessible here
+
+**Lab** answers: *"What happens when things break?"*
+- **Health Monitor** — polls `remoteEntry.js` per remote every 5s, shows latency
+- **Kill Switches** — simulate remote failure. Shell renders `ModuleFallback`, other modules keep running
+- **A/B Deployment** — toggle Stable ↔ Canary ring, see per-module version/build hash
+- **Hot Reload Guide** — step-by-step: stop a server → show fallback → edit code → restart → click Retry
+
+> **The command palette is the speaker's secret weapon.** You can kill a remote, switch themes, navigate modules, and toggle deployment rings without ever leaving the keyboard — keeping the audience focused on the demo, not on UI chrome.
+
+---
+
+## Slide 10 — Fault Isolation
 
 ### DEMO: Kill a remote with the Federation Lab
 
@@ -284,7 +322,7 @@ const MedicalRecords = lazy(() =>
 
 ---
 
-## Slide 10 — Cross-Module Communication
+## Slide 11 — Cross-Module Communication
 
 ### Events > Shared State
 
@@ -328,7 +366,7 @@ window.dispatchEvent(new CustomEvent("navigateToModule", {
 
 ---
 
-## Slide 11 — Typed Event Contracts
+## Slide 12 — Typed Event Contracts
 
 ### TypeScript makes events safe
 
@@ -360,7 +398,7 @@ declare global {
 
 ---
 
-## Slide 12 — Theme System
+## Slide 13 — Theme System
 
 ### Shell-owned theming across the federation
 
@@ -400,7 +438,7 @@ export function useActiveTheme() {
 
 ---
 
-## Slide 13 — Prefetching + Eager Loading
+## Slide 14 — Prefetching + Eager Loading
 
 ### Two layers: eager on mount, hover on demand
 
@@ -433,7 +471,7 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 ---
 
-## Slide 14 — Testing Strategy
+## Slide 15 — Testing Strategy
 
 ### How to test federated components in isolation
 
@@ -478,7 +516,7 @@ it("dispatches addPrescription event on Add click", async () => {
 
 ---
 
-## Slide 15 — Design System: Noir Editorial
+## Slide 16 — Design System: Noir Editorial
 
 ### A design language that doesn't look like generic AI
 
@@ -499,7 +537,7 @@ it("dispatches addPrescription event on Add click", async () => {
 
 ---
 
-## Slide 16 — Live Demo Script
+## Slide 17 — Live Demo Script
 
 ### 1. Full federation + DX story (2 min)
 - Open `localhost:3000` — Home landing page loads **instantly** (no skeleton, no delay — it's the "instant" strategy)
@@ -541,7 +579,7 @@ it("dispatches addPrescription event on Add click", async () => {
 
 ---
 
-## Slide 17 — Key Takeaways
+## Slide 18 — Key Takeaways
 
 ### 1. Micro-frontends solve a people problem, not just a code problem
 The #1 reason to adopt this architecture: your team is growing and your monolith can't keep up. Independent modules = independent teams = DX that scales to hundreds of developers.
@@ -572,7 +610,7 @@ The landing page is instant. High-priority content is eager. Secondary content s
 
 ---
 
-## Slide 18 — When to Apply This
+## Slide 19 — When to Apply This
 
 ### You're ready for this architecture when…
 
@@ -599,7 +637,7 @@ The landing page is instant. High-priority content is eager. Secondary content s
 
 ---
 
-## Slide 19 — What We Didn't Cover (But You Should Explore)
+## Slide 20 — What We Didn't Cover (But You Should Explore)
 
 - **Server-side rendering** with streaming Suspense + Module Federation
 - **Shared design tokens** via a federated CSS module
@@ -612,7 +650,7 @@ The landing page is instant. High-priority content is eager. Secondary content s
 
 ---
 
-## Slide 19 — Resources
+## Slide 21 — Resources
 
 | Resource | URL |
 |---|---|

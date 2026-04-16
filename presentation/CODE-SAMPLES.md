@@ -438,3 +438,160 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 > **Why `lazy()` for eager modules?** Module Federation remotes are separate builds on separate servers — you can't use a static `import`. The eager pattern fires `import()` at shell init to warm the browser's module cache; when `lazy()` later calls the same `import()`, it resolves instantly. This is confirmed by the test: *"renders records immediately without a skeleton (eager strategy)"*.
 | **Hover** | Prefetched when user hovers a tab | Prescriptions, Analytics |
+
+---
+
+## 9. Shell Controls Implementation
+
+Three control surfaces in the shell header — each built with a different pattern:
+
+### Settings — Theme propagation via CSS variables + events
+
+```typescript
+// lib/theme.ts — applyTheme() is the single entry point for ALL theme changes
+export function applyTheme(theme: ThemeName): void {
+  const definition = THEME_DEFINITIONS[theme];  // label, description, CSS vars
+  const root = document.documentElement;
+
+  // 1. Set data attribute + color scheme (CSS can target [data-theme="dark"])
+  root.dataset.theme = theme;
+  root.style.colorScheme = definition.colorScheme;
+
+  // 2. Rewrite every CSS custom property — this is how remotes update instantly
+  for (const [variable, value] of Object.entries(definition.variables)) {
+    root.style.setProperty(variable, value);
+  }
+
+  // 3. Expose a bridge on window so remotes can read/set without importing shell
+  window.__MF_THEME__ = {
+    getTheme: () => theme,
+    setTheme: (next) => applyTheme(next),
+  };
+
+  // 4. Persist to localStorage (survives refresh)
+  localStorage.setItem(THEME_STORAGE_KEY, theme);
+
+  // 5. Broadcast typed event (remotes listening via useActiveTheme() react)
+  window.dispatchEvent(
+    new CustomEvent("themeChange", {
+      detail: { theme, colorScheme: definition.colorScheme },
+    })
+  );
+}
+```
+
+> **Key insight:** Remotes never import shell code. They style with Tailwind classes that reference CSS variables (`text-cream`, `bg-noir`). When the shell rewrites those variables, every remote re-paints automatically — zero coupling.
+
+### Commands — Data-driven command palette
+
+```tsx
+// App.tsx — commands are generated from module config + hook state
+const commandActions = useMemo<readonly CommandAction[]>(() => {
+  // Navigation: one command per module from the MODULES config array
+  const nav = MODULES.map((m) => ({
+    id: `goto-${m.id}`,
+    title: `Switch to ${m.label}`,
+    keywords: `${m.id} ${m.label.toLowerCase()} module ${m.port}`,
+    run: () => { navigate(m.path); setIsCommandPaletteOpen(false); },
+  }));
+
+  // Theme: one per THEME_OPTIONS
+  const themes = THEME_OPTIONS.map((t) => ({
+    id: `theme-${t}`,
+    title: `Apply ${THEME_DEFINITIONS[t].label} Theme`,
+    run: () => { handleThemeChange(t); setIsCommandPaletteOpen(false); },
+  }));
+
+  // Demo: kill/restore per module + deployment ring toggle
+  const demo = [
+    { id: "demo-panel", title: "Open Federation Lab", run: () => setIsDemoPanelOpen(true) },
+    ...MODULES.map((m) => ({
+      id: `kill-${m.id}`,
+      title: `${killed[m.id] ? "Restore" : "Kill"} ${m.label} Remote`,
+      run: () => toggleKill(m.id),
+    })),
+  ];
+
+  return [...nav, ...themes, ...demo];
+}, [navigate, killed, variant]);
+
+// Filtering: simple case-insensitive substring match
+const filtered = useMemo(() => {
+  const q = commandQuery.trim().toLowerCase();
+  if (!q) return commandActions;
+  return commandActions.filter((c) =>
+    `${c.title} ${c.subtitle} ${c.keywords}`.toLowerCase().includes(q)
+  );
+}, [commandActions, commandQuery]);
+```
+
+> **Pattern:** Commands are pure data (`{ id, title, keywords, run }`). The palette UI is generic and reusable — it doesn't know about modules, themes, or kill switches. Adding a new command means adding one object to the array.
+
+### Lab — Three hooks compose the Federation Lab
+
+```typescript
+// lib/health.ts — useRemoteHealth: polls remoteEntry.js via HEAD request
+async function checkRemote(port: string) {
+  const start = performance.now();
+  try {
+    const res = await fetch(`http://localhost:${port}/remoteEntry.js`, {
+      method: "HEAD", mode: "no-cors", cache: "no-store",
+    });
+    return { ok: res.ok || res.type === "opaque", latencyMs: Math.round(performance.now() - start) };
+  } catch {
+    return { ok: false, latencyMs: Math.round(performance.now() - start) };
+  }
+}
+
+// Polls every 5s, only when `enabled` is true (panel is open)
+export function useRemoteHealth(remotes, enabled) {
+  // ...runs Promise.all(remotes.map(checkRemote)) on an interval
+  // Returns: readonly RemoteHealth[] with { id, port, status, latencyMs }
+}
+```
+
+```typescript
+// lib/demo.ts — useKillSwitch: client-side fault simulation
+export function useKillSwitch(moduleIds: readonly string[]) {
+  const [killed, setKilled] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(moduleIds.map((id) => [id, false]))
+  );
+  const toggle = useCallback((id) =>
+    setKilled((prev) => ({ ...prev, [id]: !prev[id] })), []);
+  const killAll = useCallback(() => /* set all to true */, []);
+  const restoreAll = useCallback(() => /* set all to false */, []);
+  return { killed, toggle, killAll, restoreAll };
+}
+```
+
+```typescript
+// lib/demo.ts — useVersionRegistry: A/B deployment ring with mock data
+export function useVersionRegistry(moduleIds: readonly string[]) {
+  const [variant, setVariant] = useState<"stable" | "canary">("stable");
+  const versions = useMemo(() => {
+    const registry = variant === "stable" ? MOCK_VERSIONS : CANARY_VERSIONS;
+    return moduleIds.map((id) => registry[id]!);
+  }, [moduleIds, variant]);
+  const toggleVariant = useCallback(() =>
+    setVariant((p) => p === "stable" ? "canary" : "stable"), []);
+  return { variant, versions, toggleVariant };
+}
+```
+
+```tsx
+// App.tsx — ModuleView checks kill state before rendering
+function ModuleView({ module, isKilled }) {
+  if (isKilled) {
+    return <ModuleFallback title={`${module.label} Module Killed`} />;
+  }
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<ModuleSkeleton />}>
+        <module.component />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
+```
+
+> **Architecture:** The three hooks (`useRemoteHealth`, `useKillSwitch`, `useVersionRegistry`) live in `lib/` and are consumed by `ShellFrame` in `App.tsx`. `DemoPanel.tsx` is a pure presentation component — it receives all state as props and fires callback props for mutations. Zero business logic in the panel itself.

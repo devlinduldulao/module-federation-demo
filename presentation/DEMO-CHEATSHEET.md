@@ -22,7 +22,42 @@ npm run dev
 
 ---
 
-## 2. Show loading strategies in action (UX pillar)
+## 2. Shell controls walkthrough
+
+Before diving into loading strategies, quickly orient the audience on the three control surfaces in the header:
+
+### Settings button
+1. Click **Settings** in the header
+2. Show the slide-over drawer with Dark / Light theme options
+3. Select **Light** → all modules immediately switch themes
+4. Point out the footer showing `mf-demo-theme` localStorage key
+5. Switch back to **Dark**
+6. Explain: "The shell owns theme state. It rewrites CSS custom properties on `:root`, persists to `localStorage`, and dispatches a typed `themeChange` event. Every remote reacts without a page refresh or shared import."
+
+### Commands button (Ctrl+K)
+1. Press **Ctrl+K** (or click **Commands**)
+2. Show the search overlay with all available commands
+3. Type **"kill"** → filtered list shows kill/restore commands for each remote
+4. Type **"dark"** → shows "Apply Dark Theme"
+5. Type **"records"** → shows "Switch to Records"
+6. Run a command from the palette (e.g., "Switch to Prescriptions")
+7. Explain: "This is a VS Code–style command palette. During the live demo, you can navigate, kill remotes, toggle themes, and switch deployment rings — all from the keyboard, without hunting for buttons."
+
+### Lab button (Federation Lab)
+1. Click the **Lab** button (orange border) or press `Ctrl+K` → type "lab"
+2. Walk through the four sections:
+   - **Remote Health** — "Each dot polls `remoteEntry.js` every 5 seconds. Green means the remote is reachable."
+   - **Kill Switches** — "I can take down any remote from here. The shell renders a fallback, other modules keep running."
+   - **A/B Deployment** — "Toggle between stable and canary rings. Each module can be at a different version."
+   - **Hot Reload Guide** — "Step-by-step instructions for the real server kill demo."
+3. Close the panel
+4. Explain: "The Lab is the demo centerpiece. It proves fault isolation, health monitoring, and independent versioning — all live."
+
+> **Pro tip:** Every Lab action is also available in the command palette. During the talk, use `Ctrl+K` for quick actions and the Lab panel for the visual walkthrough.
+
+---
+
+## 3. Show loading strategies in action (UX pillar)
 
 1. Open `http://localhost:3000`
 2. See the **Home** landing page — loads **instantly** (no skeleton delay). Status strip shows **INSTANT** with a green dot.
@@ -44,7 +79,7 @@ npm run dev
 
 ---
 
-## 3. Show cross-module communication
+## 4. Show cross-module communication
 
 1. Navigate to **Records**
 2. Click **Add →** on "Sarah Chen prescription"
@@ -57,7 +92,7 @@ npm run dev
 
 ---
 
-## 4. Demonstrate fault isolation (DX + UX)
+## 5. Demonstrate fault isolation (DX + UX)
 
 ### Option A: Federation Lab (recommended for live demo)
 
@@ -83,7 +118,7 @@ npm run dev
 
 ---
 
-## 5. Theme switching
+## 6. Theme switching
 
 1. Click through **Dark → Light** buttons in the header
 2. Show that all remote modules react to the theme change
@@ -93,7 +128,7 @@ npm run dev
 
 ---
 
-## 5b. A/B deployment demo (Federation Lab)
+## 6b. A/B deployment demo (Federation Lab)
 
 1. Open the Federation Lab (click **Lab**)
 2. Show the **A/B Deployment** section — all modules on "Stable Ring"
@@ -104,7 +139,7 @@ npm run dev
 
 ---
 
-## 6. Show prefetching
+## 7. Show prefetching
 
 1. Open DevTools → Network tab
 2. Hover over **Prescriptions** tab (don't click)
@@ -114,7 +149,7 @@ npm run dev
 
 ---
 
-## 7. Code walkthrough — Key files to show
+## 8. Code walkthrough — Key files to show
 
 ### DX story: independent module structure
 ```
@@ -165,7 +200,7 @@ Show: `useActiveTheme()` hook — reads from host bridge, listens for `themeChan
 
 ---
 
-## 8. Run the test suite
+## 9. Run the test suite
 
 ```bash
 npm test
@@ -185,7 +220,7 @@ Show the vitest.config.ts alias trick:
 
 ---
 
-## 9. Fallback: Static screenshots
+## 10. Fallback: Static screenshots
 
 If wifi/demo gods fail, have screenshots of:
 - [ ] Home landing page with architecture cards
