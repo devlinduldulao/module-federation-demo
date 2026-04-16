@@ -185,6 +185,26 @@ window.addEventListener("showNotification", (event) => {
 
 Any remote can trigger notifications by dispatching this event.
 
+## Remote CSS Contract
+
+The shell imports exposed remote modules directly from each remote's `remoteEntry.js`. Because of that, a remote's stylesheet must be imported from the exposed component itself, not only from `bootstrap.tsx`.
+
+Correct pattern:
+
+```tsx
+// packages/records/src/MedicalRecords.tsx
+import "./index.css";
+```
+
+Avoid this as the only CSS import:
+
+```tsx
+// packages/records/src/bootstrap.tsx
+import "./index.css";
+```
+
+That bootstrap file only runs in standalone mode. If CSS is loaded there exclusively, the remote can look correct on its own and then lose spacing or utility classes when rendered inside the shell.
+
 ## Design Tokens
 
 Defined in `index.css` under `@theme { ... }` — see the root README for the full token table. The shell also defines all shared animations: `fadeInUp`, `slideInRight`, `shimmer`, `subtlePulse`, etc.

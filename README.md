@@ -92,7 +92,6 @@ import("./bootstrap");
 import React from "react";
 import ReactDOM from "react-dom/client";
 import MedicalRecords from "./MedicalRecords";
-import "./index.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(<MedicalRecords />);
@@ -101,6 +100,17 @@ root.render(<MedicalRecords />);
 This is **required** because Module Federation declares `react` and `react-dom` as `shared` with `eager: false`. The dynamic `import()` creates an async boundary that lets Module Federation negotiate shared dependencies before any React code runs. Without it, standalone mode fails with `loadShareSync` errors and you get a white screen.
 
 > **Do not remove the bootstrap pattern.** If you merge `bootstrap.tsx` back into `index.tsx`, standalone dev will break with `Invalid loadShareSync function call` errors. The shell has always had this pattern; all remotes now have it too.
+
+#### CSS ownership in federated remotes
+
+For remotes, the **exposed component must import its own stylesheet**:
+
+```tsx
+// MedicalRecords.tsx — exposed by Module Federation
+import "./index.css";
+```
+
+Do **not** rely on `bootstrap.tsx` to load remote CSS. `bootstrap.tsx` only runs in standalone mode, but the shell imports the exposed component directly from `remoteEntry.js`. If the CSS import lives only in bootstrap, the remote looks correct at `localhost:3001` and then loses spacing or utility styles when mounted inside the shell.
 
 ### Prefetching + Eager Loading
 
@@ -246,6 +256,8 @@ Remote (records :3001)              Shell (host :3000)
 ```
 
 Everything else in the config is standard Rspack. Remove the `ModuleFederationPlugin`, and you have five normal, unrelated apps. Add it back, and they become a federated architecture.
+
+One practical rule follows from that: if a file is listed under `exposes`, treat it as a real runtime entrypoint. It must bring along any required CSS or other side-effect imports on its own instead of depending on standalone-only bootstrap code.
 
 ### Shell (Host)
 

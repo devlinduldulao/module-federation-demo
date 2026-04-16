@@ -13,6 +13,8 @@ exposes: {
 }
 ```
 
+`ClinicalAnalytics.tsx` imports the module stylesheet directly because the shell loads the exposed component from `remoteEntry.js`. `bootstrap.tsx` is only the standalone mount path.
+
 ## File Structure
 
 ```
@@ -23,7 +25,7 @@ analytics/
 ├── public/index.html          # Standalone dev page
 └── src/
     ├── index.tsx              # Standalone bootstrap
-    ├── ClinicalAnalytics.tsx      # Full analytics with stats + activity
+    ├── ClinicalAnalytics.tsx      # Full analytics with stats + activity, imports index.css
     ├── ClinicalAnalytics.test.tsx # Analytics rendering tests
     ├── StreamingClinicalAnalytics.tsx # Resource + Suspense wrapper
     ├── index.css              # @theme tokens, count-up animation, activity timeline

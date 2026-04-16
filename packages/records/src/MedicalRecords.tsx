@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, memo } from "react";
 import { cn } from "./lib/utils";
 import { MedicalRecord, PrescriptionItem, RecordCategory } from "./types";
 import { useActiveTheme } from "./lib/theme";
+import "./index.css";
 
 const MOCK_RECORDS: readonly MedicalRecord[] = [
   {
@@ -111,7 +112,7 @@ const RecordCard = memo<{
     aria-label={`Record: ${record.patientName}`}
   >
     {/* Type indicator */}
-    <div className="aspect-[3/1] bg-elevated relative overflow-hidden flex items-center justify-center">
+    <div className="aspect-3/1 bg-elevated relative overflow-hidden flex items-center justify-center">
       <span className="font-mono text-sm text-dim tracking-wider">
         {record.recordType === "lab-results" ? "LAB" : record.recordType === "imaging" ? "IMG" : "CONSULT"}
       </span>

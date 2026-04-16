@@ -15,6 +15,8 @@ exposes: {
 
 The shell imports `MedicalRecords` directly (the eager loading strategy) — the chunk is preloaded on shell mount so it's cached before the user navigates to Records.
 
+Because the shell imports `MedicalRecords` directly, `MedicalRecords.tsx` is also where the module's stylesheet must be imported. `bootstrap.tsx` is standalone-only and cannot be the only place that loads `index.css`.
+
 ## File Structure
 
 ```
@@ -25,7 +27,7 @@ records/
 ├── public/index.html          # Standalone dev page
 └── src/
     ├── index.tsx              # Standalone bootstrap (renders MedicalRecords)
-    ├── MedicalRecords.tsx    # Full catalog with filters + grid
+    ├── MedicalRecords.tsx    # Full catalog with filters + grid, imports index.css
     ├── MedicalRecords.test.tsx # Medical records tests
     ├── StreamingMedicalRecords.tsx # Resource + Suspense wrapper
     ├── index.css              # @theme tokens, animations
@@ -100,6 +102,8 @@ npm run test
 ```
 
 Visit `http://localhost:3001` to see the records viewer standalone. The shell at `:3000` loads this module's `remoteEntry.js` automatically.
+
+When changing styles, keep CSS ownership with the exposed component. If `index.css` is imported only from `bootstrap.tsx`, the standalone app still looks right while the federated shell render loses remote utility styles.
 
 ## Testing
 

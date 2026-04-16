@@ -15,6 +15,8 @@ exposes: {
 
 The shell imports `Home` directly (the instant loading strategy) — no streaming delay, the landing page renders the moment the chunk arrives.
 
+Because `Home.tsx` is an exposed runtime entrypoint, it imports the module stylesheet directly. `bootstrap.tsx` is only for standalone mounting and should not be the only place that loads `index.css`.
+
 ## File Structure
 
 ```
@@ -25,7 +27,7 @@ home/
 ├── public/index.html          # Standalone dev page
 └── src/
     ├── index.tsx              # Standalone bootstrap (renders Home)
-    ├── Home.tsx               # Landing page with architecture overview + nav cards
+    ├── Home.tsx               # Landing page with architecture overview + nav cards, imports index.css
     ├── StreamingHome.tsx      # Resource + Suspense wrapper
     ├── index.css              # @theme tokens, animations
     ├── types.ts               # ModuleDestination, events

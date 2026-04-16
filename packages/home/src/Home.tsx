@@ -1,6 +1,7 @@
 import { useCallback, memo } from "react";
 import { useActiveTheme } from "./lib/theme";
 import { ModuleDestination } from "./types";
+import "./index.css";
 
 const MODULE_DESTINATIONS: readonly ModuleDestination[] = [
   {

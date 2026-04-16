@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import type { PrescriptionItem, AddPrescriptionEvent } from "./types";
 import { useActiveTheme } from "./lib/theme";
+import "./index.css";
 
 // Prescription row
 const PrescriptionRow = memo<{

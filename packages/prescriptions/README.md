@@ -13,6 +13,8 @@ exposes: {
 }
 ```
 
+`PrescriptionOrders.tsx` imports the module stylesheet directly because the shell loads that file from `remoteEntry.js`. `bootstrap.tsx` remains standalone-only.
+
 ## File Structure
 
 ```
@@ -23,7 +25,7 @@ prescriptions/
 ├── public/index.html          # Standalone dev page
 └── src/
     ├── index.tsx              # Standalone bootstrap
-    ├── PrescriptionOrders.tsx       # Full prescriptions management
+    ├── PrescriptionOrders.tsx       # Full prescriptions management, imports index.css
     ├── PrescriptionOrders.test.tsx  # Prescriptions behavior tests
     ├── StreamingPrescriptionOrders.tsx # Resource + Suspense wrapper
     ├── index.css              # @theme tokens, animations

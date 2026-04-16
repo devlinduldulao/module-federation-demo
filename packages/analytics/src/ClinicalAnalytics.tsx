@@ -1,6 +1,7 @@
 import { memo, useMemo } from "react";
 import type { AnalyticsStat, ClinicalActivity } from "./types";
 import { useActiveTheme } from "./lib/theme";
+import "./index.css";
 
 // Mock stats
 const MOCK_STATS: readonly AnalyticsStat[] = [
