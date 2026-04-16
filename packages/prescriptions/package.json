@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "rspack serve --mode development",
     "start": "rspack serve --mode development",
-    "build": "rspack build",
+    "build": "rspack build --mode production",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "cd ../.. && npx eslint packages/prescriptions/src",
     "test": "npm --prefix ../.. run test -- packages/prescriptions/src",
