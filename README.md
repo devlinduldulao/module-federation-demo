@@ -608,6 +608,41 @@ The workflow now checks whether a Pages site already exists before building. If 
 
 After that first bootstrap, normal deploys can continue with the default workflow token.
 
+## Per-Module CI Pipelines (Independent Build & Deploy)
+
+Each micro-frontend has its own GitHub Actions workflow that triggers **only when that module's code changes**:
+
+| Module | Workflow | Triggers on |
+|--------|----------|-------------|
+| Shell | `ci-shell.yml` | `packages/shell/**` |
+| Home | `ci-home.yml` | `packages/home/**` |
+| Records | `ci-records.yml` | `packages/records/**` |
+| Prescriptions | `ci-prescriptions.yml` | `packages/prescriptions/**` |
+| Analytics | `ci-analytics.yml` | `packages/analytics/**` |
+
+Each workflow runs four parallel-then-gated jobs:
+
+```
+lint ──┐
+typecheck ──┼──► build (uploads artifact)
+test ──┘
+```
+
+All workflows also trigger when shared root configs change (`vitest.config.ts`, `eslint.config.mjs`, `package.json`).
+
+The full-repo [ci.yml](.github/workflows/ci.yml) still exists as a safety net for cross-cutting changes, but in a real multi-repo setup the per-module workflows are all you need.
+
+### Why per-module workflows matter
+
+This is the **independent deploy** promise of micro-frontends in action:
+
+- **Records team** pushes a fix → only `ci-records.yml` runs → only Records is linted, typechecked, tested, and built
+- **Shell team** pushes a feature → only `ci-shell.yml` runs → other modules are untouched
+- A PR that touches `packages/prescriptions/` does NOT trigger CI for analytics, records, or home
+- Each module's build artifact is uploaded independently and can be deployed to its own CDN/S3 bucket
+
+In a production multi-repo setup, each of these workflows would live in its own repository and deploy to its own origin. The shell discovers remotes at runtime via `remoteEntry.js` URLs — it never needs to build the remotes itself.
+
 ## React Suspense Streaming Pattern
 
 Each remote uses a Resource-based Suspense pattern to simulate network streaming:

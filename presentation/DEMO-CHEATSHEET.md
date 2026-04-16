@@ -214,7 +214,37 @@ Show: `useActiveTheme()` hook — reads from host bridge, listens for `themeChan
 
 ---
 
-## 9. Run the test suite
+## 9. Show per-module CI pipelines
+
+Open `.github/workflows/` in the file tree:
+```
+ci-shell.yml
+ci-home.yml
+ci-records.yml
+ci-prescriptions.yml
+ci-analytics.yml
+```
+
+Open `ci-records.yml` and highlight the `paths` filter:
+```yaml
+paths:
+  - "packages/records/**"   # ← ONLY records changes trigger this
+```
+
+Explain: "This is the independent deploy promise of micro-frontends applied to CI. Each module has its own workflow file. When the Records team pushes a fix, only records CI runs — analytics, prescriptions, home are completely untouched. This mirrors how microservices CI/CD works: each service has its own pipeline, its own build, its own deploy target. The shell discovers remotes at runtime via `remoteEntry.js` URLs — it never needs to build the remotes itself."
+
+Then show the job dependency chain:
+```
+lint ──┐
+typecheck ──┼──► build (upload artifact)
+test ──┘
+```
+
+Say: "The anti-pattern is one big workflow that rebuilds everything on every push. That couples your deploys — which defeats the entire point of micro-frontends."
+
+---
+
+## 10. Run the test suite
 
 ```bash
 npm test
@@ -234,7 +264,7 @@ Show the vitest.config.ts alias trick:
 
 ---
 
-## 10. Fallback: Static screenshots
+## 11. Fallback: Static screenshots
 
 If wifi/demo gods fail, have screenshots of:
 - [ ] Home landing page with architecture cards

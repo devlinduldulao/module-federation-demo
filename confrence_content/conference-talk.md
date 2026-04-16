@@ -46,6 +46,7 @@ Through a production-grade healthcare demo — a shell host composing a landing 
 3. **Skeleton streaming is the UX answer to independent deployment.** When modules load at different speeds from different servers, per-module skeletons give users immediate layout stability instead of blank screens and jarring layout shifts.
 4. **Fault isolation is a feature, not a side effect — and yes, it's like microservices.** With `.catch()` wrappers on lazy imports and ErrorBoundaries per module, one team's broken deploy doesn't take down the entire application. You can prove this works by killing a remote live — and the rest of the app keeps running. The isolation model mirrors microservices: separate boundaries, independent failure handling, graceful degradation. The one difference is that all modules share a browser tab — so a true infinite loop or memory leak freezes everything. That's the inherent cost of a shared runtime, but the 99% case (crashes, network failures, bad deploys) is fully contained.
 5. **Events over shared state.** CustomEvents on `window` give you decoupled cross-module communication that survives independent deployments, version mismatches, and team reorganizations.
+6. **Per-module CI is the CI/CD best practice for micro-frontends.** Each module should have its own workflow file triggered only when its code changes — mirroring how microservices each have their own pipeline. One big workflow that rebuilds everything on every push is an anti-pattern that couples your deploys and defeats the point of MF.
 
 ## Why React 19, Not 18?
 

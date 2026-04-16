@@ -526,7 +526,84 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 ---
 
-## 9. Shell Controls Implementation
+## 9. Per-Module CI Pipelines (DX Pillar)
+
+### Best practice: one workflow file per micro-frontend
+
+Each module has its own GitHub Actions workflow. The `paths` filter ensures it only runs when **that module's code changes**:
+
+```yaml
+# .github/workflows/ci-records.yml
+name: "CI: Records"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/records/**"    # ← ONLY records changes trigger this
+      - "vitest.config.ts"       # shared test config
+      - "eslint.config.mjs"      # shared lint config
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: 24 }
+      - run: npm install --force
+      - run: npx eslint packages/records/src
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: 24 }
+      - run: npm install --force
+      - run: cd packages/records && npx tsc --noEmit
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: 24 }
+      - run: npm install --force
+      - run: npx vitest run packages/records/src
+
+  build:
+    needs: [lint, typecheck, test]   # ← gate: only build if all 3 pass
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with: { node-version: 24 }
+      - run: npm install --force
+      - run: cd packages/records && npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: records-dist
+          path: packages/records/dist/
+```
+
+### Why separate files instead of one big matrix?
+
+```
+❌ One workflow (anti-pattern)          ✅ Per-module workflows (best practice)
+┌──────────────────────────────┐       ┌──────────────────────────────┐
+│ Records change triggers ALL  │       │ Records change triggers ONLY │
+│ modules' CI — analytics,     │       │ records CI. Other modules    │
+│ prescriptions, shell all     │       │ don't run. Independent       │
+│ run unnecessarily.           │       │ deploy preserved.            │
+└──────────────────────────────┘       └──────────────────────────────┘
+```
+
+This mirrors microservices CI/CD: each service has its own pipeline, its own build, its own deploy target.
+
+---
+
+## 10. Shell Controls Implementation
 
 Three control surfaces in the shell header — each built with a different pattern:
 

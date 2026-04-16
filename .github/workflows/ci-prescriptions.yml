@@ -1,21 +1,29 @@
-# Full-repo CI: runs lint, typecheck, test, and build across ALL packages.
-# This catches cross-cutting changes (shared configs, root deps, vitest setup).
-#
-# Each micro-frontend also has its own independent CI workflow (ci-<name>.yml)
-# that triggers only when that module's code changes. In a real multi-repo
-# setup, the per-module workflows are all you need. This full-repo workflow
-# is a safety net for the monorepo.
+# Independent CI pipeline for the Prescriptions micro-frontend.
+# Triggers ONLY when prescriptions code changes — other modules don't run this.
+# In a real multi-repo setup, this would be the repo's only CI workflow.
 
-name: CI
+name: "CI: Prescriptions"
 
 on:
   pull_request:
     branches: [main]
+    paths:
+      - "packages/prescriptions/**"
+      - "vitest.config.ts"
+      - "vitest.setup.ts"
+      - "eslint.config.mjs"
+      - "package.json"
   push:
     branches: [main]
+    paths:
+      - "packages/prescriptions/**"
+      - "vitest.config.ts"
+      - "vitest.setup.ts"
+      - "eslint.config.mjs"
+      - "package.json"
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-prescriptions-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -28,7 +36,7 @@ jobs:
         with:
           node-version: 24
       - run: npm install --force
-      - run: npx eslint .
+      - run: npx eslint packages/prescriptions/src
 
   typecheck:
     name: Type Check
@@ -39,13 +47,7 @@ jobs:
         with:
           node-version: 24
       - run: npm install --force
-      - name: Typecheck all packages
-        run: |
-          for pkg in shell records prescriptions analytics home; do
-            echo "::group::Typechecking $pkg"
-            (cd packages/$pkg && npx tsc --noEmit)
-            echo "::endgroup::"
-          done
+      - run: cd packages/prescriptions && npx tsc --noEmit
 
   test:
     name: Test
@@ -56,7 +58,7 @@ jobs:
         with:
           node-version: 24
       - run: npm install --force
-      - run: npm test
+      - run: npx vitest run packages/prescriptions/src
 
   build:
     name: Build
@@ -68,4 +70,9 @@ jobs:
         with:
           node-version: 24
       - run: npm install --force
-      - run: npm run build
+      - run: cd packages/prescriptions && npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: prescriptions-dist
+          path: packages/prescriptions/dist/
+          retention-days: 7

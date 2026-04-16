@@ -723,12 +723,45 @@ const StreamingMedicalRecords = () => {
 
 ---
 
-## Slide 21 — What We Didn't Cover (But You Should Explore)
+## Slide 21 — Per-Module CI: Independent Pipelines in Practice
+
+### Best practice: one workflow per micro-frontend
+
+Each module gets its own GitHub Actions file triggered **only when its code changes**:
+
+```
+ci-shell.yml         → packages/shell/**
+ci-home.yml          → packages/home/**
+ci-records.yml       → packages/records/**
+ci-prescriptions.yml → packages/prescriptions/**
+ci-analytics.yml     → packages/analytics/**
+```
+
+### Each workflow runs:
+
+```
+lint ──┐
+typecheck ──┼──► build (upload artifact)
+test ──┘
+```
+
+### Why separate files, not one big matrix?
+
+| One workflow (anti-pattern) | Per-module workflows (best practice) |
+|---|---|
+| Records change triggers analytics CI | Records change triggers only records CI |
+| All teams wait for the slowest module | Each team's pipeline is independent |
+| Coupled deploy — defeats the point of MF | Independent deploy — the whole point of MF |
+
+> **This mirrors microservices CI/CD**: each service has its own pipeline, its own build, its own deploy. The shell discovers remotes at runtime — it never needs to build them.
+
+---
+
+## Slide 22 — What We Didn't Cover (But You Should Explore)
 
 - **Server-side rendering** with streaming Suspense + Module Federation
 - **Shared design tokens** via a federated CSS module
 - **Version negotiation** when remotes have different React versions
-- **Deployment pipelines** — independent CI/CD per remote
 - **Dynamic remote URLs** — loading remotes from a manifest at runtime
 - **Real health checks** — replacing the demo's HEAD-request polling with production-grade liveness probes
 - **Feature flags** — extending the A/B ring concept with runtime feature toggles per module
@@ -736,7 +769,7 @@ const StreamingMedicalRecords = () => {
 
 ---
 
-## Slide 22 — Resources
+## Slide 23 — Resources
 
 | Resource | URL |
 |---|---|
@@ -748,7 +781,7 @@ const StreamingMedicalRecords = () => {
 
 ---
 
-## Slide 23 — Thank You
+## Slide 24 — Thank You
 
 # Questions?
 
