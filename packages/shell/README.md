@@ -16,7 +16,7 @@ The root route `/` renders the **Home** landing page. Unknown routes redirect to
 - Listen for `showNotification` events from any module and display dark toasts
 - Dispatch `moduleChange` events when switching tabs so other modules can react
 - Listen for `navigateToModule` events so remotes can request host-owned navigation without importing the shell router
-- Prefetch remote entry points on tab hover via a `PREFETCH_MAP`
+- Prefetch remote entry points on tab hover via the `PREFETCHERS` map
 - Persist the selected theme in `localStorage`
 - Broadcast `themeChange` events and expose `window.__MF_THEME__` to remotes
 - Provide the **Federation Lab** demo panel with remote health monitoring, kill switches, and A/B deployment controls
@@ -145,7 +145,7 @@ The shell remains the only owner of router state, but remotes can still trigger 
 
 ## Prefetching
 
-The shell defines a `PREFETCH_MAP` that maps each module to a bare `import()` call. On hover, the corresponding remote entry point is fetched in the background so the module loads instantly when clicked.
+The shell defines a `PREFETCHERS` map that maps each module to a bare `import()` call. On hover, the corresponding remote entry point is fetched in the background so the module loads instantly when clicked.
 
 ## Theme System
 
@@ -232,7 +232,7 @@ npm run test
 
 Requires all four remotes to be running for full functionality, but the shell starts fine on its own — offline remotes show `ModuleFallback`.
 
-From the repo root, `npm run ports:check` verifies that `3000`–`3003` are free before you start the full conference demo.
+From the repo root, `npm run kill:ports` clears the demo ports if one of the remote dev servers is already running.
 
 ## Testing
 

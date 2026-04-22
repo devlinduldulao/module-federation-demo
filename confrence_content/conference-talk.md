@@ -4,7 +4,7 @@
 
 The real bottleneck in frontend development isn't your framework — it's what happens when your team outgrows your architecture. At 5 developers, a monolith is fast and fun. At 50, deploys are blocked by unrelated failures. At 200, nobody understands the full application and onboarding takes months.
 
-This talk tackles **both sides of the micro-frontend equation** through a live-coded healthcare demo built with React 19, Rspack Module Federation, and streaming Suspense:
+This talk tackles **both sides of the micro-frontend equation** through a live-coded healthcare demo built with React 19, Rspack 2 Module Federation, and streaming Suspense:
 
 - **Developer experience (DX):** How Module Federation lets teams own, build, test, and deploy their modules independently — so a broken prescription test never blocks the medical records team, and a new hire ships to production in their first week, not their first quarter.
 - **User experience (UX):** How React 19 Suspense with per-module skeleton streaming eliminates the blank-screen problem — users see instant layout feedback the moment they navigate, even when remote chunks are still in flight.
@@ -38,6 +38,7 @@ Through a production-grade healthcare demo — a shell host composing a landing 
 - ErrorBoundary composition that gracefully degrades one module without taking down the application
 - Hover-based prefetching for federated remotes using a simple prefetch map
 - A full Vitest test suite running against federated components with mocked remote imports
+- A Rspack 2 migration walkthrough that shows the real breaking changes teams hit: explicit `@rspack/dev-server`, explicit `@module-federation/runtime-tools`, and the updated React refresh plugin import shape
 
 **Key takeaways:**
 
@@ -83,11 +84,11 @@ This talk bridges both.
 
 **What makes this different from other MF talks:**
 
-- **It's not theoretical.** Every claim is demonstrated in a running application with 5 independent packages, 136 passing tests, and a CI/CD pipeline that deploys to production. The audience can clone the repo and run it after the talk.
+- **It's not theoretical.** Every claim is demonstrated in a running application with 5 independent packages, 209 passing tests, and a CI/CD pipeline that deploys to production. The audience can clone the repo and run it after the talk.
 - **It names the real motivation.** Most talks justify micro-frontends with "independent deployment" or "technology diversity." This talk starts with the human problem — what happens to your development culture when 50 engineers share one `package.json` — and shows how the architecture solves it.
 - **It doesn't ignore UX.** The live demo shows three distinct loading strategies (Instant, Eager, Streamed) with per-module skeleton fallbacks. The audience sees the difference between a naively federated app (blank screens, spinners) and one where each remote owns its loading choreography through Suspense.
 - **It proves fault isolation live.** The Federation Lab panel lets the speaker kill a remote mid-demo and show the audience that the rest of the app keeps running. This is the moment that makes micro-frontends click for skeptics.
-- **It's current.** React 19.2, TypeScript 6, Rspack 1.7, Tailwind v4 — this is the stack teams are adopting right now, not a legacy Webpack 4 setup with outdated patterns.
+- **It's current.** React 19.2, TypeScript 6, Rspack 2.0, Tailwind v4 — this is the stack teams are adopting right now, not a legacy Webpack 4 setup with outdated patterns.
 
 **The audience will leave with:**
 1. A mental model for when micro-frontends are worth the complexity (team size, not app size)
@@ -103,7 +104,7 @@ _[Your name and bio here]_
 | Technology | Version | Role |
 |---|---|---|
 | React | 19.2 | UI framework with streaming Suspense |
-| Rspack | 1.7 | Bundler with native Module Federation |
+| Rspack | 2.0 | Bundler with native Module Federation |
 | TypeScript | 6.0 | Strict mode across all packages |
 | Tailwind CSS | 4.2 | Utility-first styling (Noir Editorial design system) |
 | Vitest | 4.1 | Unit + component testing |

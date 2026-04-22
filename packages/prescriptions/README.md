@@ -15,6 +15,8 @@ exposes: {
 
 `PrescriptionOrders.tsx` imports the module stylesheet directly because the shell loads that file from `remoteEntry.js`. `bootstrap.tsx` remains standalone-only.
 
+This package now runs on **Rspack 2**, so its `rspack.config.js` uses the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies added during the migration.
+
 ## File Structure
 
 ```

@@ -29,19 +29,16 @@ The root route `/` renders the **Home** landing page, which provides an overview
 ## Quick Start
 
 ```bash
-# Install everything (root + all 4 packages)
+# Install everything (root + all 5 packages)
 npm install
 
-# Confirm the demo ports are available before starting the federation
-npm run ports:check
-
-# Start all four dev servers concurrently
+# Start all five dev servers concurrently
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The shell renders the Home landing page at `/` and pulls remote entry points from ports 3001–3004.
 
-If `npm run dev` fails, the most common cause is that one of the demo ports is already occupied. `npm run ports:check` now reports that clearly before you start the full stack.
+If `npm run dev` fails, the most common cause is that one of the demo ports is already occupied. Use `npm run kill:ports` to clear the demo ports and retry.
 
 ### Quality Checks
 
@@ -52,12 +49,11 @@ npm run lint
 # Run TypeScript checks across the workspace
 npm run typecheck
 
-# Run all tests or one package suite
+# Run all tests
 npm test
-npm run test:shell
-npm run test:records
-npm run test:prescriptions
-npm run test:analytics
+
+# Build every package
+npm run build
 ```
 
 ### Run a single package (standalone development)
@@ -186,11 +182,11 @@ module-federation-demo/
 | Tool | Version | Role |
 |------|---------|------|
 | React | ^19.2.5 | UI library |
-| TypeScript | ^6.0.2 | Type safety |
-| Rspack | ^1.7.11 | Bundler + Module Federation |
+| TypeScript | ^6.0.3 | Type safety |
+| Rspack | ^2.0.0 | Bundler + Module Federation |
 | Tailwind CSS | v4 | Utility-first CSS via `@theme` |
 | PostCSS | ^8.5.10 | CSS pipeline (`@tailwindcss/postcss`) |
-| Vitest | ^4.1.4 | Unit + component testing |
+| Vitest | ^4.1.5 | Unit + component testing |
 | concurrently | ^9.2.1 | Dev server orchestration |
 
 ## Design System — "Noir Editorial"
@@ -258,6 +254,15 @@ Remote (records :3001)              Shell (host :3000)
 Everything else in the config is standard Rspack. Remove the `ModuleFederationPlugin`, and you have five normal, unrelated apps. Add it back, and they become a federated architecture.
 
 One practical rule follows from that: if a file is listed under `exposes`, treat it as a real runtime entrypoint. It must bring along any required CSS or other side-effect imports on its own instead of depending on standalone-only bootstrap code.
+
+## Rspack 2 Notes
+
+This repository now runs on **Rspack 2**. Two migration details matter for anyone copying this setup:
+
+- `rspack serve` now requires an explicit `@rspack/dev-server` dependency in each package that runs a dev server.
+- `ModuleFederationPlugin` now requires an explicit `@module-federation/runtime-tools` dependency in each federated package.
+- In CommonJS `rspack.config.js`, the React refresh plugin is imported as `{ ReactRefreshRspackPlugin }`.
+- The configs also use Rspack 2's cleaner defaults: `target: ["web", "es2020"]` and `detectSyntax: "auto"` on `builtin:swc-loader`.
 
 ### Shell (Host)
 

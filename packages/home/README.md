@@ -15,6 +15,8 @@ exposes: {
 
 The shell imports `Home` directly (the instant loading strategy) — no streaming delay, the landing page renders the moment the chunk arrives.
 
+This package now runs on **Rspack 2**, so its `rspack.config.js` uses the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies added during the migration.
+
 Because `Home.tsx` is an exposed runtime entrypoint, it imports the module stylesheet directly. `bootstrap.tsx` is only for standalone mounting and should not be the only place that loads `index.css`.
 
 ## File Structure
@@ -75,7 +77,17 @@ const StreamingHome = () => {
 ```bash
 npm run dev    # Starts on :3004
 npm run build  # Production build
+npm run lint   # Lint home source through the workspace ESLint config
 npm run typecheck
+npm run test
+```
+
+## Testing
+
+`Home.test.tsx` and `StreamingHome.test.tsx` cover the landing page content, navigation request events, and streaming behavior. Run from the repo root:
+
+```bash
+npm test
 ```
 
 Visit `http://localhost:3004` to see the landing page standalone. The shell at `:3000` loads this module's `remoteEntry.js` automatically at the root route `/`.

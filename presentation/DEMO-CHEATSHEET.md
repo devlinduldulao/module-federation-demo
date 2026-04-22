@@ -11,6 +11,7 @@ Quick reference for the live coding portion of the talk.
 ## 1. Start the demo
 
 ```bash
+npm run kill:ports   # optional cleanup if a previous demo left ports busy
 npm run dev
 # Opens 5 dev servers concurrently:
 #   Shell      → http://localhost:3000
@@ -258,7 +259,7 @@ Say: "The anti-pattern is one big workflow that rebuilds everything on every pus
 
 ```bash
 npm test
-# 136 tests across 10 files — all green
+# 209 tests across 21 files — all green
 ```
 
 Show the vitest.config.ts alias trick:
@@ -293,9 +294,9 @@ If wifi/demo gods fail, have screenshots of:
 | Action | Command |
 |---|---|
 | Start all servers | `npm run dev` |
+| Clear demo ports | `npm run kill:ports` |
 | Run all tests | `npm test` |
 | Test with coverage | `npm run test:coverage` |
 | Build all packages | `npm run build` |
-| Kill all demo ports | `npm run kill:ports` |
 | Kill single remote | `npm run kill:records` / `kill:prescriptions` / `kill:analytics` / `kill:home` |
 | Start single remote | `cd packages/records && npm run dev` |

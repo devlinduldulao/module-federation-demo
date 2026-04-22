@@ -1,7 +1,7 @@
 # From 5 Devs to 200: Micro-Frontends That Scale Your Team and Stream Your UI
 
 > A 30-minute conference talk with live demo  
-> Built with: React 19 · Rspack · Module Federation · TypeScript 6 · Tailwind CSS v4
+> Built with: React 19 · Rspack 2 · Module Federation · TypeScript 6 · Tailwind CSS v4
 
 ---
 
@@ -151,7 +151,7 @@ Without this: white screen + `loadShareSync` error. With this: standalone HMR wo
 | Technology | Version | Why |
 |---|---|---|
 | **React** | 19.2 | Streaming Suspense as a first-class primitive |
-| **Rspack** | 1.7 | Native Module Federation, sub-second HMR |
+| **Rspack** | 2.0 | Native Module Federation, explicit runtime tooling, sub-second HMR |
 | **TypeScript** | 6.0 | Strict mode, type-safe event contracts |
 | **Tailwind CSS** | v4 | `@theme` tokens for the design system |
 | **Vitest** | 4.1 | Fast component tests with jsdom |
@@ -579,7 +579,7 @@ it("dispatches addPrescription event on Add click", async () => {
 });
 ```
 
-**136 tests across 10 files — all passing.**
+**209 tests across 21 files — all passing.**
 
 ---
 
@@ -641,7 +641,7 @@ it("dispatches addPrescription event on Add click", async () => {
 - `lib/health.ts` — useRemoteHealth hook (HEAD requests to remoteEntry.js)
 
 ### 6. Testing (1 min)
-- Run `npm test` — 136 tests, all green
+- Run `npm test` — 209 tests, all green
 - Show vitest.config.ts alias trick for MF imports
 
 ---
@@ -815,7 +815,7 @@ test ──┘
 # Questions?
 
 ```
-npm install && npm run ports:check && npm run dev
+npm install && npm run dev
 ```
 
 Open `localhost:3000` and start exploring.
@@ -836,7 +836,7 @@ Open `localhost:3000` and start exploring.
 - **28:00–30:00** — Questions
 
 ### Demo Prep Checklist
-- [ ] `npm run ports:check` passes
+- [ ] demo ports are free, or `npm run kill:ports` has been run
 - [ ] All 4 dev servers running (`npm run dev`)
 - [ ] Browser at `localhost:3000`
 - [ ] DevTools Network tab open (to show remoteEntry.js loads)

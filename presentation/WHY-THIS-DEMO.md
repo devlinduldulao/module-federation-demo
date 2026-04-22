@@ -252,19 +252,23 @@ Two themes (dark and light) switch at runtime by rewriting CSS custom properties
 
 ## 8. The Test Suite Proves It Works
 
-136 tests across 10 files. All green.
+209 tests across 21 files. All green.
 
 ```
 packages/shell/src/App.test.tsx                    — 21 tests
 packages/shell/src/components/ErrorBoundary.test.tsx — 6 tests
-packages/shell/src/components/ModuleFallback.test.tsx — 5 tests
-packages/shell/src/components/DemoPanel.test.tsx   — 21 tests
-packages/shell/src/lib/theme.test.ts               — 21 tests
-packages/shell/src/lib/demo.test.ts                — 11 tests
-packages/records/src/MedicalRecords.test.tsx        — 11 tests
-packages/prescriptions/src/PrescriptionOrders.test.tsx — 17 tests
-packages/analytics/src/ClinicalAnalytics.test.tsx   — 11 tests
-packages/home/src/Home.test.tsx                    — 13 tests
+packages/shell/src/components/ModuleFallback.test.tsx          — 5 tests
+packages/shell/src/components/DemoPanel.test.tsx               — 21 tests
+packages/shell/src/lib/theme.test.ts                           — 21 tests
+packages/shell/src/lib/demo.test.ts                            — 11 tests
+packages/records/src/MedicalRecords.test.tsx                  — 11 tests
+packages/records/src/StreamingMedicalRecords.test.tsx         — 5 tests
+packages/prescriptions/src/PrescriptionOrders.test.tsx        — 17 tests
+packages/prescriptions/src/StreamingPrescriptionOrders.test.tsx — 5 tests
+packages/analytics/src/ClinicalAnalytics.test.tsx             — 10 tests
+packages/analytics/src/StreamingClinicalAnalytics.test.tsx    — 5 tests
+packages/home/src/Home.test.tsx                               — 13 tests
+packages/home/src/StreamingHome.test.tsx                      — 5 tests
 ```
 
 The tests cover:
@@ -286,7 +290,7 @@ Module Federation imports are aliased to source files in `vitest.config.ts`, so 
 |------|---------|---------------|
 | React | 19.2 | Streaming Suspense is a first-class feature, not experimental |
 | TypeScript | 6.0 | Strict mode with `ES2025` target |
-| Rspack | 1.7 | Native Module Federation, sub-second HMR, no Webpack baggage |
+| Rspack | 2.0 | Native Module Federation, explicit runtime tooling, sub-second HMR, no Webpack baggage |
 | Tailwind CSS | v4 | `@theme` block for design tokens, `@tailwindcss/postcss` pipeline |
 | Vitest | 4.1 | Fast test runner with jsdom, compatible with React Testing Library |
 
@@ -305,7 +309,7 @@ The demo has a natural flow for a 30-minute talk:
 5. **Open the Federation Lab** → Kill a remote live, watch it fail gracefully
 6. **Toggle A/B deployment** → Show independent versioning
 7. **Switch themes** → CSS variables cascade across all remotes
-8. **Run the test suite** → 136 tests, all green, no dev servers needed
+8. **Run the test suite** → 209 tests, all green, no dev servers needed
 
 Each step demonstrates a different micro-frontend concept. The audience sees real behavior, not diagrams.
 
