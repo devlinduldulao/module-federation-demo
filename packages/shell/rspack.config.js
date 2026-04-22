@@ -1,5 +1,5 @@
 const rspack = require("@rspack/core");
-const RefreshPlugin = require("@rspack/plugin-react-refresh");
+const { ReactRefreshRspackPlugin } = require("@rspack/plugin-react-refresh");
 const path = require("path");
 
 const REMOTE_BASE_URL = process.env.REMOTE_BASE_URL; // set in CI for GitHub Pages
@@ -21,7 +21,7 @@ module.exports = (_, argv = {}) => {
     main: "./src/index.tsx",
   },
   mode,
-  target: "web",
+  target: ["web", "es2020"],
 
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -42,15 +42,12 @@ module.exports = (_, argv = {}) => {
   module: {
     rules: [
       {
-        test: /\.(jsx?|tsx?)$/,
+        test: /\.(?:js|mjs|jsx|ts|tsx)$/,
         use: {
           loader: "builtin:swc-loader",
           options: {
+            detectSyntax: "auto",
             jsc: {
-              parser: {
-                syntax: "typescript",
-                tsx: true,
-              },
               transform: {
                 react: {
                   runtime: "automatic",
@@ -58,7 +55,6 @@ module.exports = (_, argv = {}) => {
                   refresh: isDev,
                 },
               },
-              target: "es2020",
             },
           },
         },
@@ -150,7 +146,7 @@ module.exports = (_, argv = {}) => {
       "process.env.NODE_ENV": JSON.stringify(mode),
       "process.env.BASE_PATH": JSON.stringify(BASE_PATH),
     }),
-    isDev && new RefreshPlugin(),
+    isDev && new ReactRefreshRspackPlugin(),
   ].filter(Boolean),
 
   optimization: {

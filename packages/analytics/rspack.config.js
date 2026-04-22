@@ -1,5 +1,5 @@
 const rspack = require("@rspack/core");
-const RefreshPlugin = require("@rspack/plugin-react-refresh");
+const { ReactRefreshRspackPlugin } = require("@rspack/plugin-react-refresh");
 const path = require("path");
 
 /** @type {import('@rspack/cli').Configuration} */
@@ -13,7 +13,7 @@ module.exports = (_, argv = {}) => {
     main: "./src/index.tsx",
   },
   mode,
-  target: "web",
+  target: ["web", "es2020"],
 
   output: {
     path: path.resolve(__dirname, "dist"),
@@ -29,15 +29,12 @@ module.exports = (_, argv = {}) => {
   module: {
     rules: [
       {
-        test: /\.(jsx?|tsx?)$/,
+        test: /\.(?:js|mjs|jsx|ts|tsx)$/,
         use: {
           loader: "builtin:swc-loader",
           options: {
+            detectSyntax: "auto",
             jsc: {
-              parser: {
-                syntax: "typescript",
-                tsx: true,
-              },
               transform: {
                 react: {
                   runtime: "automatic",
@@ -45,7 +42,6 @@ module.exports = (_, argv = {}) => {
                   refresh: isDev,
                 },
               },
-              target: "es2020",
             },
           },
         },
@@ -118,7 +114,7 @@ module.exports = (_, argv = {}) => {
     new rspack.DefinePlugin({
       "process.env.NODE_ENV": JSON.stringify(mode),
     }),
-    isDev && new RefreshPlugin(),
+    isDev && new ReactRefreshRspackPlugin(),
   ].filter(Boolean),
 
   optimization: {

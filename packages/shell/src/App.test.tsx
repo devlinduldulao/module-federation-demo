@@ -60,6 +60,9 @@ describe("Shell App", () => {
     render(<App />);
     expect(screen.getByText("MF")).toBeInTheDocument();
     expect(screen.getByText("Demo")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("records")).toBeInTheDocument();
+    });
   });
 
   it("renders all four navigation links", async () => {
