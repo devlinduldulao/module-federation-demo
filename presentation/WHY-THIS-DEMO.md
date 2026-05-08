@@ -317,7 +317,7 @@ Each step demonstrates a different micro-frontend concept. The audience sees rea
 
 ## 11. What This Demo Is NOT
 
-- It's **not a monorepo tool demo** — it uses plain npm scripts and `concurrently`
+- It's **not a monorepo tool demo** — it uses plain pnpm scripts and `concurrently`
 - It's **not a framework comparison** — it's React-only, on purpose, to go deep instead of wide
 - It's **not a deployment pipeline demo** — it focuses on runtime architecture, not CI/CD
 - It's **not a design system library** — the tokens are inlined per package to demonstrate independence

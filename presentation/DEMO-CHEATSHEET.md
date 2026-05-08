@@ -11,8 +11,8 @@ Quick reference for the live coding portion of the talk.
 ## 1. Start the demo
 
 ```bash
-npm run kill:ports   # optional cleanup if a previous demo left ports busy
-npm run dev
+pnpm run kill:ports   # optional cleanup if a previous demo left ports busy
+pnpm run dev
 # Opens 5 dev servers concurrently:
 #   Shell      → http://localhost:3000
 #   Records    → http://localhost:3001
@@ -167,7 +167,7 @@ packages/records/
     bootstrap.tsx      ← actual ReactDOM.createRoot() render
     MedicalRecords.tsx ← standalone component (runs without the shell)
 ```
-Explain: "Every module is a self-contained app. A new team copies a package, picks a port, and ships independently. You can open this one folder in its own VS Code, run `npm install && npm run dev`, and you have a working app with HMR at localhost:3001 — no shell, no other remotes needed."
+Explain: "Every module is a self-contained app. A new team copies a package, picks a port, and ships independently. You can open this one folder in its own VS Code, run `pnpm install && pnpm run dev`, and you have a working app with HMR at localhost:3001 — no shell, no other remotes needed."
 
 ### Key talking point: the async bootstrap pattern
 
@@ -258,7 +258,7 @@ Say: "The anti-pattern is one big workflow that rebuilds everything on every pus
 ## 10. Run the test suite
 
 ```bash
-npm test
+pnpm test
 # 209 tests across 21 files — all green
 ```
 
@@ -293,10 +293,10 @@ If wifi/demo gods fail, have screenshots of:
 
 | Action | Command |
 |---|---|
-| Start all servers | `npm run dev` |
-| Clear demo ports | `npm run kill:ports` |
-| Run all tests | `npm test` |
-| Test with coverage | `npm run test:coverage` |
-| Build all packages | `npm run build` |
-| Kill single remote | `npm run kill:records` / `kill:prescriptions` / `kill:analytics` / `kill:home` |
-| Start single remote | `cd packages/records && npm run dev` |
+| Start all servers | `pnpm run dev` |
+| Clear demo ports | `pnpm run kill:ports` |
+| Run all tests | `pnpm test` |
+| Test with coverage | `pnpm run test:coverage` |
+| Build all packages | `pnpm run build` |
+| Kill single remote | `pnpm run kill:records` / `kill:prescriptions` / `kill:analytics` / `kill:home` |
+| Start single remote | `cd packages/records && pnpm run dev` |

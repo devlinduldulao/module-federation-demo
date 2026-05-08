@@ -42,12 +42,21 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
+
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
 
       - name: Install dependencies
-        run: npm install --force
+        run: pnpm install --force
 
       - name: Ensure GitHub Pages site exists
         id: pages
@@ -127,13 +136,13 @@ jobs:
         run: |
           for remote in home records prescriptions analytics; do
             echo "::group::Building $remote"
-            (cd packages/$remote && npm run build)
+            (cd packages/$remote && pnpm run build)
             echo "::endgroup::"
           done
 
       # Build the shell host with production remote URLs and base path
       - name: Build shell
-        run: cd packages/shell && npm run build
+        run: cd packages/shell && pnpm run build
         env:
           REMOTE_BASE_URL: ${{ steps.pages.outputs.base_url }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}

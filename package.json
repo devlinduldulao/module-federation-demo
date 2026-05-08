@@ -28,11 +28,11 @@
     "test:coverage": "vitest run --coverage",
     "postinstall": "pnpm run install:packages",
     "install:packages": "cd packages/shell && pnpm install --force && cd ../records && pnpm install --force && cd ../prescriptions && pnpm install --force && cd ../analytics && pnpm install --force && cd ../home && pnpm install --force",
-    "kill:ports": "npx kill-port 3000 3001 3002 3003 3004",
-    "kill:records": "npx kill-port 3001",
-    "kill:prescriptions": "npx kill-port 3002",
-    "kill:analytics": "npx kill-port 3003",
-    "kill:home": "npx kill-port 3004"
+    "kill:ports": "pnpm exec kill-port 3000 3001 3002 3003 3004",
+    "kill:records": "pnpm exec kill-port 3001",
+    "kill:prescriptions": "pnpm exec kill-port 3002",
+    "kill:analytics": "pnpm exec kill-port 3003",
+    "kill:home": "pnpm exec kill-port 3004"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

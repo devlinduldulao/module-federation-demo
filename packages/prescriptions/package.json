@@ -6,9 +6,9 @@
     "start": "rspack serve --mode development",
     "build": "rspack build --mode production",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "lint": "cd ../.. && npx eslint packages/prescriptions/src",
-    "test": "npm --prefix ../.. run test -- packages/prescriptions/src",
-    "test:watch": "npm --prefix ../.. run test:watch -- packages/prescriptions/src"
+    "lint": "cd ../.. && pnpm exec eslint packages/prescriptions/src",
+    "test": "pnpm --dir ../.. run test -- packages/prescriptions/src",
+    "test:watch": "pnpm --dir ../.. run test:watch -- packages/prescriptions/src"
   },
   "dependencies": {
     "react": "^19.2.5",

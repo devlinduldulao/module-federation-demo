@@ -6,9 +6,9 @@
     "start": "rspack serve --mode development",
     "build": "rspack build --mode production",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "lint": "cd ../.. && npx eslint packages/shell/src",
-    "test": "npm --prefix ../.. run test -- packages/shell/src",
-    "test:watch": "npm --prefix ../.. run test:watch -- packages/shell/src"
+    "lint": "cd ../.. && pnpm exec eslint packages/shell/src",
+    "test": "pnpm --dir ../.. run test -- packages/shell/src",
+    "test:watch": "pnpm --dir ../.. run test:watch -- packages/shell/src"
   },
   "dependencies": {
     "clsx": "^2.1.1",

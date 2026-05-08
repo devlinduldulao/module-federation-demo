@@ -30,30 +30,30 @@ The root route `/` renders the **Home** landing page, which provides an overview
 
 ```bash
 # Install everything (root + all 5 packages)
-npm install
+pnpm install
 
 # Start all five dev servers concurrently
-npm run dev
+pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The shell renders the Home landing page at `/` and pulls remote entry points from ports 3001–3004.
 
-If `npm run dev` fails, the most common cause is that one of the demo ports is already occupied. Use `npm run kill:ports` to clear the demo ports and retry.
+If `pnpm run dev` fails, the most common cause is that one of the demo ports is already occupied. Use `pnpm run kill:ports` to clear the demo ports and retry.
 
 ### Quality Checks
 
 ```bash
 # Lint every package
-npm run lint
+pnpm run lint
 
 # Run TypeScript checks across the workspace
-npm run typecheck
+pnpm run typecheck
 
 # Run all tests
-npm test
+pnpm test
 
 # Build every package
-npm run build
+pnpm run build
 ```
 
 ### Run a single package (standalone development)
@@ -61,11 +61,11 @@ npm run build
 Each module is a fully self-contained React app. You can open any package folder in its own VS Code window and develop with full HMR — no other modules need to be running:
 
 ```bash
-cd packages/home && npm install && npm run dev          # :3004
-cd packages/records && npm install && npm run dev       # :3001
-cd packages/prescriptions && npm install && npm run dev # :3002
-cd packages/analytics && npm install && npm run dev     # :3003
-cd packages/shell && npm install && npm run dev         # :3000
+cd packages/home && pnpm install && pnpm run dev          # :3004
+cd packages/records && pnpm install && pnpm run dev       # :3001
+cd packages/prescriptions && pnpm install && pnpm run dev # :3002
+cd packages/analytics && pnpm install && pnpm run dev     # :3003
+cd packages/shell && pnpm install && pnpm run dev         # :3000
 ```
 
 Each remote runs standalone at its own port with its own `index.html`. The shell also runs standalone — remotes it can't reach will show `ModuleFallback` instead of crashing.
@@ -616,11 +616,11 @@ A `memo`-wrapped component that receives all three hooks' outputs as props. It r
 ### Individual kill scripts
 
 ```bash
-npm run kill:records    # Stop records on :3001
-npm run kill:prescriptions         # Stop prescriptions on :3002
-npm run kill:analytics    # Stop analytics on :3003
-npm run kill:home         # Stop home on :3004
-npm run kill:ports        # Stop all demo ports (3000–3004)
+pnpm run kill:records    # Stop records on :3001
+pnpm run kill:prescriptions         # Stop prescriptions on :3002
+pnpm run kill:analytics    # Stop analytics on :3003
+pnpm run kill:home         # Stop home on :3004
+pnpm run kill:ports        # Stop all demo ports (3000–3004)
 ```
 
 ## Testing
@@ -628,11 +628,11 @@ npm run kill:ports        # Stop all demo ports (3000–3004)
 The project uses **Vitest** + **React Testing Library** with `jsdom` for component testing. Tests live alongside source files.
 
 ```bash
-npm test              # Run all tests once
-npm run test:watch    # Watch mode
-npm run test:coverage # Coverage report (v8)
-npm run lint          # Lint all packages with ESLint
-npm run typecheck     # TypeScript validation across all packages
+pnpm test              # Run all tests once
+pnpm run test:watch    # Watch mode
+pnpm run test:coverage # Coverage report (v8)
+pnpm run lint          # Lint all packages with ESLint
+pnpm run typecheck     # TypeScript validation across all packages
 ```
 
 Remote module imports are aliased in `vitest.config.ts` so federated components can be tested in isolation without running dev servers. Each package has its own test file:
@@ -808,7 +808,7 @@ This project demonstrates these micro-frontend concepts during a live talk:
 
 ### What to show in a talk
 
-- Start `npm run dev`, open `:3000` — Home loads **instantly** (no skeleton delay, status strip shows INSTANT)
+- Start `pnpm run dev`, open `:3000` — Home loads **instantly** (no skeleton delay, status strip shows INSTANT)
 - Click Records — loads fast because it was **eagerly preloaded** on shell mount (status strip shows EAGER)
 - Click Prescriptions — observe skeleton **streaming** in (status strip shows STREAMING)
 - Navigate to `/records`, add a prescription, then use the prescriptions empty-state CTA to show remote-requested host navigation
@@ -823,23 +823,23 @@ This project demonstrates these micro-frontend concepts during a live talk:
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start all five dev servers concurrently |
-| `npm run build` | Build all five packages for production |
-| `npm run dev:shell` | Start only the shell (`:3000`) |
-| `npm run dev:home` | Start only home (`:3004`) |
-| `npm run dev:records` | Start only records (`:3001`) |
-| `npm run dev:prescriptions` | Start only prescriptions (`:3002`) |
-| `npm run dev:analytics` | Start only analytics (`:3003`) |
-| `npm run kill:ports` | Kill all demo ports (`3000`–`3004`) |
-| `npm run kill:records` | Kill only the records port (`:3001`) |
-| `npm run kill:prescriptions` | Kill only the prescriptions port (`:3002`) |
-| `npm run kill:analytics` | Kill only the analytics port (`:3003`) |
-| `npm run kill:home` | Kill only the home port (`:3004`) |
+| `pnpm run dev` | Start all five dev servers concurrently |
+| `pnpm run build` | Build all five packages for production |
+| `pnpm run dev:shell` | Start only the shell (`:3000`) |
+| `pnpm run dev:home` | Start only home (`:3004`) |
+| `pnpm run dev:records` | Start only records (`:3001`) |
+| `pnpm run dev:prescriptions` | Start only prescriptions (`:3002`) |
+| `pnpm run dev:analytics` | Start only analytics (`:3003`) |
+| `pnpm run kill:ports` | Kill all demo ports (`3000`–`3004`) |
+| `pnpm run kill:records` | Kill only the records port (`:3001`) |
+| `pnpm run kill:prescriptions` | Kill only the prescriptions port (`:3002`) |
+| `pnpm run kill:analytics` | Kill only the analytics port (`:3003`) |
+| `pnpm run kill:home` | Kill only the home port (`:3004`) |
 
 ## Prerequisites
 
 - Node.js 20+ (required for Tailwind CSS v4)
-- npm 9+
+- pnpm 9+
 - Modern browser (Chrome 111+, Firefox 128+, Safari 16.4+)
 
 ## License

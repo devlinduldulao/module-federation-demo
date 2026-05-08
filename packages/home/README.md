@@ -75,11 +75,11 @@ const StreamingHome = () => {
 ## Development
 
 ```bash
-npm run dev    # Starts on :3004
-npm run build  # Production build
-npm run lint   # Lint home source through the workspace ESLint config
-npm run typecheck
-npm run test
+pnpm run dev    # Starts on :3004
+pnpm run build  # Production build
+pnpm run lint   # Lint home source through the workspace ESLint config
+pnpm run typecheck
+pnpm run test
 ```
 
 ## Testing
@@ -87,7 +87,7 @@ npm run test
 `Home.test.tsx` and `StreamingHome.test.tsx` cover the landing page content, navigation request events, and streaming behavior. Run from the repo root:
 
 ```bash
-npm test
+pnpm test
 ```
 
 Visit `http://localhost:3004` to see the landing page standalone. The shell at `:3000` loads this module's `remoteEntry.js` automatically at the root route `/`.

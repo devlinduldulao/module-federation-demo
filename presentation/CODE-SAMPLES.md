@@ -593,38 +593,74 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
-        with: { node-version: 24 }
-      - run: npm install --force
-      - run: npx eslint packages/records/src
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: pnpm exec eslint packages/records/src
 
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
-        with: { node-version: 24 }
-      - run: npm install --force
-      - run: cd packages/records && npx tsc --noEmit
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: cd packages/records && pnpm exec tsc --noEmit
 
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
-        with: { node-version: 24 }
-      - run: npm install --force
-      - run: npx vitest run packages/records/src
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: pnpm exec vitest run packages/records/src
 
   build:
     needs: [lint, typecheck, test]   # ← gate: only build if all 3 pass
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
-        with: { node-version: 24 }
-      - run: npm install --force
-      - run: cd packages/records && npm run build
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: cd packages/records && pnpm run build
       - uses: actions/upload-artifact@v7
         with:
           name: records-dist

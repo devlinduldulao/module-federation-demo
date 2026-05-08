@@ -96,11 +96,11 @@ The shell's `<Suspense fallback={<RecordsSkeleton />}>` catches the thrown promi
 ## Development
 
 ```bash
-npm run dev    # Starts on :3001
-npm run build  # Production build
-npm run lint   # Lint records source through the workspace ESLint config
-npm run typecheck
-npm run test
+pnpm run dev    # Starts on :3001
+pnpm run build  # Production build
+pnpm run lint   # Lint records source through the workspace ESLint config
+pnpm run typecheck
+pnpm run test
 ```
 
 Visit `http://localhost:3001` to see the records viewer standalone. The shell at `:3000` loads this module's `remoteEntry.js` automatically.
@@ -112,5 +112,5 @@ When changing styles, keep CSS ownership with the exposed component. If `index.c
 `MedicalRecords.test.tsx` covers records grid rendering, category filtering, add-to-prescriptions event dispatch, notification events, and accessibility roles. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
 
 ```bash
-npm test
+pnpm test
 ```

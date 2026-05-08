@@ -223,21 +223,21 @@ Open with the **Lab** button in the header or via the command palette (`Ctrl+K` 
 ## Development
 
 ```bash
-npm run dev    # Starts rspack-dev-server on :3000
-npm run build  # Production build to dist/
-npm run lint   # Lint shell source through the workspace ESLint config
-npm run typecheck
-npm run test
+pnpm run dev    # Starts rspack-dev-server on :3000
+pnpm run build  # Production build to dist/
+pnpm run lint   # Lint shell source through the workspace ESLint config
+pnpm run typecheck
+pnpm run test
 ```
 
 Requires all four remotes to be running for full functionality, but the shell starts fine on its own — offline remotes show `ModuleFallback`.
 
-From the repo root, `npm run kill:ports` clears the demo ports if one of the remote dev servers is already running.
+From the repo root, `pnpm run kill:ports` clears the demo ports if one of the remote dev servers is already running.
 
 ## Testing
 
 `App.test.tsx` covers route rendering, direct URL entry, redirects, `moduleChange` event dispatch, notification display and auto-dismiss, skeleton fallback rendering, theme restoration, theme persistence, and `themeChange` event broadcasting. Run from the repo root:
 
 ```bash
-npm test
+pnpm test
 ```

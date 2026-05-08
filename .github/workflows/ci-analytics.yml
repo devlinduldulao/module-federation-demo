@@ -32,33 +32,57 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: npm install --force
-      - run: npx eslint packages/analytics/src
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: pnpm exec eslint packages/analytics/src
 
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: npm install --force
-      - run: cd packages/analytics && npx tsc --noEmit
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: cd packages/analytics && pnpm exec tsc --noEmit
 
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: npm install --force
-      - run: npx vitest run packages/analytics/src
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: pnpm exec vitest run packages/analytics/src
 
   build:
     name: Build
@@ -66,11 +90,19 @@ jobs:
     needs: [lint, typecheck, test]
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: npm install --force
-      - run: cd packages/analytics && npm run build
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: cd packages/analytics && pnpm run build
       - uses: actions/upload-artifact@v7
         with:
           name: analytics-dist

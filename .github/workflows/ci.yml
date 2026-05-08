@@ -24,26 +24,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: npm install --force
-      - run: npx eslint .
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: pnpm exec eslint .
 
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: npm install --force
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
       - name: Typecheck all packages
         run: |
           for pkg in shell records prescriptions analytics home; do
             echo "::group::Typechecking $pkg"
-            (cd packages/$pkg && npx tsc --noEmit)
+            (cd packages/$pkg && pnpm exec tsc --noEmit)
             echo "::endgroup::"
           done
 
@@ -52,11 +68,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: npm install --force
-      - run: npm test
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: pnpm test
 
   build:
     name: Build
@@ -64,8 +88,16 @@ jobs:
     needs: [lint, typecheck, test]
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11
+          run_install: false
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: npm install --force
-      - run: npm run build
+          cache: pnpm
+          cache-dependency-path: |
+            pnpm-lock.yaml
+            packages/*/pnpm-lock.yaml
+      - run: pnpm install --force
+      - run: pnpm run build

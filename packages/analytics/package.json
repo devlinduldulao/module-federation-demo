@@ -6,9 +6,9 @@
     "start": "rspack serve --mode development",
     "build": "rspack build --mode production",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "lint": "cd ../.. && npx eslint packages/analytics/src",
-    "test": "npm --prefix ../.. run test -- packages/analytics/src",
-    "test:watch": "npm --prefix ../.. run test:watch -- packages/analytics/src"
+    "lint": "cd ../.. && pnpm exec eslint packages/analytics/src",
+    "test": "pnpm --dir ../.. run test -- packages/analytics/src",
+    "test:watch": "pnpm --dir ../.. run test:watch -- packages/analytics/src"
   },
   "dependencies": {
     "react": "^19.2.5",

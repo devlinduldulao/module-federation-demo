@@ -322,7 +322,7 @@ const DemoPanel = memo<DemoPanelProps>(
                                 <div className="px-4 py-3">
                                     <span className="font-mono text-[10px] text-citrine block mb-1">Step 3</span>
                                     <p className="font-mono text-[11px] text-stone">
-                                        Edit the remote's source and run <span className="text-cream">npm run dev</span> — it hot-reloads independently
+                                        Edit the remote's source and run <span className="text-cream">pnpm run dev</span> — it hot-reloads independently
                                     </p>
                                 </div>
                                 <div className="px-4 py-3">

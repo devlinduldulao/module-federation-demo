@@ -124,7 +124,7 @@ With Suspense:     User clicks a tab → skeleton instantly → content streams 
 Every package runs independently with full HMR:
 
 ```bash
-cd packages/records && npm install && npm run dev   # :3001
+cd packages/records && pnpm install && pnpm run dev   # :3001
 # → Full React app, own devServer, own build, own tsconfig
 # → HMR works — edit MedicalRecords.tsx, see changes instantly
 # → No shell, no other remotes needed
@@ -641,7 +641,7 @@ it("dispatches addPrescription event on Add click", async () => {
 - `lib/health.ts` — useRemoteHealth hook (HEAD requests to remoteEntry.js)
 
 ### 6. Testing (1 min)
-- Run `npm test` — 209 tests, all green
+- Run `pnpm test` — 209 tests, all green
 - Show vitest.config.ts alias trick for MF imports
 
 ---
@@ -815,7 +815,7 @@ test ──┘
 # Questions?
 
 ```
-npm install && npm run dev
+pnpm install && pnpm run dev
 ```
 
 Open `localhost:3000` and start exploring.
@@ -836,8 +836,8 @@ Open `localhost:3000` and start exploring.
 - **28:00–30:00** — Questions
 
 ### Demo Prep Checklist
-- [ ] demo ports are free, or `npm run kill:ports` has been run
-- [ ] All 4 dev servers running (`npm run dev`)
+- [ ] demo ports are free, or `pnpm run kill:ports` has been run
+- [ ] All 4 dev servers running (`pnpm run dev`)
 - [ ] Browser at `localhost:3000`
 - [ ] DevTools Network tab open (to show remoteEntry.js loads)
 - [ ] Terminal split showing server logs
