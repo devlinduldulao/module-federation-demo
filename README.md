@@ -802,7 +802,7 @@ This project demonstrates these micro-frontend concepts during a live talk:
 5. **Loading strategy taxonomy** — instant (Home), eager (Records), streamed (Prescriptions/Analytics) — not every module should load the same way
 5. **Loose coupling** — modules communicate through events, not imports
 6. **Host-owned routing** — remotes can request navigation through `navigateToModule` without importing `react-router-dom`
-7. **Independent tech choices** — each package has its own `rspack.config.ts`, `postcss.config.js`, and `tsconfig.json`
+7. **Independent tech choices** — each package has its own `rspack.config.ts`, `postcss.config.cjs`, and `tsconfig.json`
 8. **Design system consistency** — shared `@theme` tokens across all packages keep the UI cohesive without a shared CSS build step
 9. **Live demo controls** — the Federation Lab panel lets you kill/restore remotes, monitor health, and toggle A/B deployment during a presentation
 

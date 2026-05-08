@@ -24,7 +24,7 @@ Because `Home.tsx` is an exposed runtime entrypoint, it imports the module style
 ```
 home/
 ├── rspack.config.ts           # MF remote — name: "home", port: 3004
-├── postcss.config.js          # @tailwindcss/postcss
+├── postcss.config.cjs         # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html          # Standalone dev page
 └── src/

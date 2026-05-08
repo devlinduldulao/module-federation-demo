@@ -22,7 +22,7 @@ This package now runs on **Rspack 2**, so its `rspack.config.ts` uses `defineCon
 ```
 analytics/
 ├── rspack.config.ts           # MF remote — name: "analytics", port: 3003
-├── postcss.config.js          # @tailwindcss/postcss
+├── postcss.config.cjs         # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html          # Standalone dev page
 └── src/

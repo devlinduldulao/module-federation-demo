@@ -24,7 +24,7 @@ Because the shell imports `MedicalRecords` directly, `MedicalRecords.tsx` is als
 ```
 records/
 ├── rspack.config.ts           # MF remote — name: "records", port: 3001
-├── postcss.config.js          # @tailwindcss/postcss
+├── postcss.config.cjs         # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html          # Standalone dev page
 └── src/

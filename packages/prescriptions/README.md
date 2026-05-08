@@ -22,7 +22,7 @@ This package now runs on **Rspack 2**, so its `rspack.config.ts` uses `defineCon
 ```
 prescriptions/
 ├── rspack.config.ts           # MF remote — name: "prescriptions", port: 3002
-├── postcss.config.js          # @tailwindcss/postcss
+├── postcss.config.cjs         # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html          # Standalone dev page
 └── src/

@@ -1,6 +1,7 @@
 {
   "name": "analytics",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "dev": "rspack dev --mode development",
     "start": "rspack dev --mode development",
