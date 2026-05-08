@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "migrate-to-rsbuild": {
+      "source": "rstackjs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/migrate-to-rsbuild/SKILL.md",
+      "computedHash": "391e1f94788f3b60e65b393b0637cf4555f9e83b19189427a00dfaa19425586b"
+    },
+    "rsbuild-best-practices": {
+      "source": "rstackjs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/rsbuild-best-practices/SKILL.md",
+      "computedHash": "2f1de26a27367666c49d16b114d31dbf78dc71f02b3e0784b1e3bf90f4e6e90b"
+    },
+    "rsbuild-v2-upgrade": {
+      "source": "rstackjs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/rsbuild-v2-upgrade/SKILL.md",
+      "computedHash": "4bc74b1cda35f7b61cafcb831d4099deca8eecb4d7c0a1d2cb69a2412178038d"
+    },
+    "rsdoctor-analysis": {
+      "source": "rstackjs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/rsdoctor-analysis/SKILL.md",
+      "computedHash": "1646df360094d3c00e3e37593a579df9ee186c0edb7cb0e116723fe1169041d5"
+    },
+    "rspack-best-practices": {
+      "source": "rstackjs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/rspack-best-practices/SKILL.md",
+      "computedHash": "1fa1f81e135ff913271a538f995aa378649b22775a588a573c861cf7f507ebd5"
+    },
+    "rspack-debugging": {
+      "source": "rstackjs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/rspack-debugging/SKILL.md",
+      "computedHash": "037ccda420d1a07ff1f7acf283edbe171a3373613fb12ff5de85bf2b63c3b653"
+    },
+    "rspack-v2-upgrade": {
+      "source": "rstackjs/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/rspack-v2-upgrade/SKILL.md",
+      "computedHash": "117b7c12d7d9cdcd24dd2739af036fac1b0fd8a90a424620ad2bb0a1f6b85bd7"
+    }
+  }
+}
