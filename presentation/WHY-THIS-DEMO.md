@@ -37,7 +37,7 @@ packages/
   shell/      ← Platform team: owns routing, theme, error handling
 ```
 
-Each package has its own `package.json`, `tsconfig.json`, `rspack.config.js`, and test file. There is **zero code shared between remotes** — they communicate only through typed events on `window`. That means:
+Each package has its own `package.json`, `tsconfig.json`, `rspack.config.ts`, and test file. There is **zero code shared between remotes** — they communicate only through typed events on `window`. That means:
 
 | What kills DX in a monolith | What this architecture gives you |
 |---|---|

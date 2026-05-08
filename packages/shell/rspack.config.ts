@@ -1,9 +1,22 @@
-const rspack = require("@rspack/core");
-const { ReactRefreshRspackPlugin } = require("@rspack/plugin-react-refresh");
-const path = require("path");
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-/** @type {import('@rspack/cli').Configuration} */
-module.exports = (_, argv = {}) => {
+import { defineConfig } from "@rspack/cli";
+import * as rspack from "@rspack/core";
+import { ReactRefreshRspackPlugin } from "@rspack/plugin-react-refresh";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const REMOTE_BASE_URL = process.env.REMOTE_BASE_URL;
+const BASE_PATH = process.env.BASE_PATH || "";
+
+const remoteUrl = (name: string, devPort: number) =>
+  REMOTE_BASE_URL
+    ? `${name}@${REMOTE_BASE_URL}/remotes/${name}/remoteEntry.js`
+    : `${name}@http://localhost:${devPort}/remoteEntry.js`;
+
+export default defineConfig((_env, argv = {}) => {
   const mode = argv.mode || process.env.NODE_ENV || "development";
   const isDev = mode === "development";
 
@@ -15,10 +28,14 @@ module.exports = (_, argv = {}) => {
     mode,
     target: ["web", "es2020"],
 
+    experiments: {
+      css: true,
+    },
+
     output: {
       path: path.resolve(__dirname, "dist"),
-      uniqueName: "records",
-      publicPath: "auto",
+      uniqueName: "shell",
+      publicPath: BASE_PATH ? `${BASE_PATH}/` : "auto",
       clean: true,
     },
 
@@ -53,43 +70,36 @@ module.exports = (_, argv = {}) => {
         },
         {
           test: /\.css$/,
-          use: [
-            "style-loader",
-            {
-              loader: "css-loader",
-              options: {
-                importLoaders: 1,
-                modules: false,
-              },
-            },
-            {
-              loader: "postcss-loader",
-            },
-          ],
-          type: "javascript/auto",
+          type: "css",
+          use: ["postcss-loader"],
+        },
+        {
+          test: /\.(png|jpe?g|gif|svg|ico)$/i,
+          type: "asset/resource",
+          generator: {
+            filename: "images/[name].[hash:8][ext]",
+          },
+        },
+        {
+          test: /\.(woff|woff2|eot|ttf|otf)$/i,
+          type: "asset/resource",
+          generator: {
+            filename: "fonts/[name].[hash:8][ext]",
+          },
         },
       ],
     },
 
     plugins: [
-      // ── Module Federation ─────────────────────────────────────────────
-      // This plugin is the ONLY config that makes this app a micro-frontend.
-      // Everything else (entry, rules, devServer, etc.) is standard Rspack.
       new rspack.container.ModuleFederationPlugin({
-        name: "records",              // unique federation identity
-        filename: "remoteEntry.js",   // manifest file the host fetches at runtime
-
-        // PUBLIC API — the contract this team exposes to other apps
-        exposes: {
-          "./MedicalRecords": "./src/MedicalRecords.tsx",
-          "./StreamingMedicalRecords": "./src/StreamingMedicalRecords.tsx",
+        name: "shell",
+        filename: "remoteEntry.js",
+        remotes: {
+          home: remoteUrl("home", 3004),
+          records: remoteUrl("records", 3001),
+          prescriptions: remoteUrl("prescriptions", 3002),
+          analytics: remoteUrl("analytics", 3003),
         },
-
-        // SHARED DEPENDENCIES — singleton: true ensures one React instance
-        // across the entire federation. Without this, each remote loads its
-        // own React copy and hooks break with "Invalid hook call" errors.
-        // eager: false means React loads asynchronously — this is why
-        // index.tsx must use import("./bootstrap") as an async boundary.
         shared: {
           react: {
             singleton: true,
@@ -118,18 +128,44 @@ module.exports = (_, argv = {}) => {
       }),
       new rspack.DefinePlugin({
         "process.env.NODE_ENV": JSON.stringify(mode),
+        "process.env.BASE_PATH": JSON.stringify(BASE_PATH),
       }),
       isDev && new ReactRefreshRspackPlugin(),
     ].filter(Boolean),
 
     optimization: {
       minimize: !isDev,
+      splitChunks: {
+        chunks: "async",
+        minSize: 20000,
+        maxSize: 244000,
+        cacheGroups: {
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: "vendors",
+            priority: -10,
+            chunks: "all",
+            enforce: true,
+          },
+          react: {
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+            name: "react",
+            priority: 20,
+            chunks: "all",
+          },
+        },
+      },
       usedExports: true,
       sideEffects: false,
     },
 
     devServer: {
-      port: 3001,
+      port: 3000,
       hot: true,
       historyApiFallback: true,
       compress: true,
@@ -144,6 +180,7 @@ module.exports = (_, argv = {}) => {
           errors: true,
           warnings: false,
         },
+        progress: true,
       },
       static: {
         directory: path.join(__dirname, "public"),
@@ -151,15 +188,12 @@ module.exports = (_, argv = {}) => {
     },
 
     devtool: isDev ? "cheap-module-source-map" : "source-map",
-
     cache: true,
-
     stats: "errors-only",
-
     performance: {
       hints: isDev ? false : "warning",
-      maxAssetSize: 256000,
-      maxEntrypointSize: 256000,
+      maxAssetSize: 512000,
+      maxEntrypointSize: 512000,
     },
   };
-};
+});

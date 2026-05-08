@@ -25,7 +25,7 @@ The root route `/` renders the **Home** landing page. Unknown routes redirect to
 
 ```
 shell/
-├── rspack.config.js           # MF host — remotes: home, records, prescriptions, analytics
+├── rspack.config.ts           # MF host — remotes: home, records, prescriptions, analytics
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html

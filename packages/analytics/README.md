@@ -15,13 +15,13 @@ exposes: {
 
 `ClinicalAnalytics.tsx` imports the module stylesheet directly because the shell loads the exposed component from `remoteEntry.js`. `bootstrap.tsx` is only the standalone mount path.
 
-This package now runs on **Rspack 2**, so its `rspack.config.js` uses the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies added during the migration.
+This package now runs on **Rspack 2**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, and Rspack's built-in CSS handling for the module stylesheet.
 
 ## File Structure
 
 ```
 analytics/
-├── rspack.config.js           # MF remote — name: "analytics", port: 3003
+├── rspack.config.ts           # MF remote — name: "analytics", port: 3003
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html          # Standalone dev page

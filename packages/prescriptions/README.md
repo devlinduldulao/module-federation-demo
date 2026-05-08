@@ -15,13 +15,13 @@ exposes: {
 
 `PrescriptionOrders.tsx` imports the module stylesheet directly because the shell loads that file from `remoteEntry.js`. `bootstrap.tsx` remains standalone-only.
 
-This package now runs on **Rspack 2**, so its `rspack.config.js` uses the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies added during the migration.
+This package now runs on **Rspack 2**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, and Rspack's built-in CSS handling for the module stylesheet.
 
 ## File Structure
 
 ```
 prescriptions/
-├── rspack.config.js           # MF remote — name: "prescriptions", port: 3002
+├── rspack.config.ts           # MF remote — name: "prescriptions", port: 3002
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html          # Standalone dev page

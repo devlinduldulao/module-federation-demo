@@ -332,7 +332,7 @@ const handleBrowseRecords = () => {
 
 This is the infrastructure that lets each team own their own build, deploy, and dev server.
 
-Each `rspack.config.js` has standard bundler settings (`entry`, `module.rules`, `devServer`, `optimization`). **The one property that turns separate apps into a federated architecture** is the `ModuleFederationPlugin` — and specifically three sub-properties:
+Each `rspack.config.ts` has standard bundler settings (`entry`, `module.rules`, `devServer`, `optimization`). **The one property that turns separate apps into a federated architecture** is the `ModuleFederationPlugin` — and specifically three sub-properties:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -350,8 +350,8 @@ Each `rspack.config.js` has standard bundler settings (`entry`, `module.rules`, 
 
 ### Remote (exposes modules)
 
-```js
-// packages/records/rspack.config.js
+```ts
+// packages/records/rspack.config.ts
 new rspack.container.ModuleFederationPlugin({
   name: "records",
   filename: "remoteEntry.js",
@@ -368,8 +368,8 @@ new rspack.container.ModuleFederationPlugin({
 
 ### Host (consumes remotes)
 
-```js
-// packages/shell/rspack.config.js
+```ts
+// packages/shell/rspack.config.ts
 new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {

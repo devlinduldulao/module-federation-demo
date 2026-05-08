@@ -15,7 +15,7 @@ exposes: {
 
 The shell imports `Home` directly (the instant loading strategy) — no streaming delay, the landing page renders the moment the chunk arrives.
 
-This package now runs on **Rspack 2**, so its `rspack.config.js` uses the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies added during the migration.
+This package now runs on **Rspack 2**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, and Rspack's built-in CSS handling for the module stylesheet.
 
 Because `Home.tsx` is an exposed runtime entrypoint, it imports the module stylesheet directly. `bootstrap.tsx` is only for standalone mounting and should not be the only place that loads `index.css`.
 
@@ -23,7 +23,7 @@ Because `Home.tsx` is an exposed runtime entrypoint, it imports the module style
 
 ```
 home/
-├── rspack.config.js           # MF remote — name: "home", port: 3004
+├── rspack.config.ts           # MF remote — name: "home", port: 3004
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html          # Standalone dev page

@@ -123,7 +123,7 @@ module-federation-demo/
 ├── package.json                       # Workspace scripts (concurrently)
 └── packages/
     ├── shell/                         # Host application
-    │   ├── rspack.config.js           # MF remotes config
+    │   ├── rspack.config.ts           # MF remotes config
     │   ├── src/
     │   │   ├── App.tsx                # Navigation, Suspense orchestration
     │   │   ├── App.test.tsx           # Shell integration tests
@@ -145,14 +145,14 @@ module-federation-demo/
     │       ├── demo.ts                # Kill switch + version registry hooks
     │       └── utils.ts               # cn() — clsx + tailwind-merge
     ├── home/                          # Remote — landing page
-    │   ├── rspack.config.js           # MF exposes config
+    │   ├── rspack.config.ts           # MF exposes config
     │   └── src/
     │       ├── Home.tsx               # Landing page with architecture overview
     │       ├── StreamingHome.tsx      # Suspense-wrapped
     │       ├── types.ts
     │       └── lib/utils.ts           # cn() utility
     ├── records/                      # Remote — medical records
-    │   ├── rspack.config.js           # MF exposes config
+    │   ├── rspack.config.ts           # MF exposes config
     │   └── src/
     │       ├── MedicalRecords.tsx     # Standalone version
     │       ├── MedicalRecords.test.tsx
@@ -160,7 +160,7 @@ module-federation-demo/
     │       ├── types.ts
     │       └── lib/utils.ts           # cn() utility
     ├── prescriptions/                          # Remote — prescription orders
-    │   ├── rspack.config.js
+    │   ├── rspack.config.ts
     │   └── src/
     │       ├── PrescriptionOrders.tsx
     │       ├── PrescriptionOrders.test.tsx
@@ -168,7 +168,7 @@ module-federation-demo/
     │       ├── types.ts
     │       └── lib/utils.ts           # cn() utility
     └── analytics/                     # Remote — clinical analytics
-        ├── rspack.config.js
+        ├── rspack.config.ts
         └── src/
             ├── ClinicalAnalytics.tsx
             ├── ClinicalAnalytics.test.tsx
@@ -231,7 +231,7 @@ The values below are the default dark theme tokens. The shell persists the activ
 
 ## Module Federation Setup
 
-Each `rspack.config.js` is a standard Rspack configuration — `entry`, `module.rules`, `devServer`, `optimization`, `resolve` are all normal bundler settings that any app would have. **The only property that transforms separate apps into a federated architecture** is the `ModuleFederationPlugin` inside `plugins`, and specifically these three sub-properties:
+Each `rspack.config.ts` is a standard Rspack configuration — `entry`, `module.rules`, `devServer`, `optimization`, `resolve` are all normal bundler settings that any app would have. **The only property that transforms separate apps into a federated architecture** is the `ModuleFederationPlugin` inside `plugins`, and specifically these three sub-properties:
 
 | Property | Defined on | What it does |
 |----------|-----------|-------------|
@@ -257,17 +257,17 @@ One practical rule follows from that: if a file is listed under `exposes`, treat
 
 ## Rspack 2 Notes
 
-This repository now runs on **Rspack 2**. Two migration details matter for anyone copying this setup:
+This repository now runs on **Rspack 2**. A few setup details matter for anyone copying this setup:
 
-- `rspack serve` now requires an explicit `@rspack/dev-server` dependency in each package that runs a dev server.
+- Local development scripts use `rspack dev`, backed by an explicit `@rspack/dev-server` dependency in each package that runs a dev server.
 - `ModuleFederationPlugin` now requires an explicit `@module-federation/runtime-tools` dependency in each federated package.
-- In CommonJS `rspack.config.js`, the React refresh plugin is imported as `{ ReactRefreshRspackPlugin }`.
-- The configs also use Rspack 2's cleaner defaults: `target: ["web", "es2020"]` and `detectSyntax: "auto"` on `builtin:swc-loader`.
+- The configs use `rspack.config.ts` + `defineConfig` and Rspack 2's cleaner defaults: `target: ["web", "es2020"]` and `detectSyntax: "auto"` on `builtin:swc-loader`.
+- CSS now uses Rspack's built-in CSS handling with `type: "css"` and keeps `postcss-loader` only for Tailwind/PostCSS transforms.
 
 ### Shell (Host)
 
-```js
-// rspack.config.js — shell
+```ts
+// rspack.config.ts — shell
 new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {
@@ -286,8 +286,8 @@ new rspack.container.ModuleFederationPlugin({
 
 ### Remote (example: records)
 
-```js
-// rspack.config.js — records
+```ts
+// rspack.config.ts — records
 new rspack.container.ModuleFederationPlugin({
   name: "records",
   filename: "remoteEntry.js",
@@ -802,7 +802,7 @@ This project demonstrates these micro-frontend concepts during a live talk:
 5. **Loading strategy taxonomy** — instant (Home), eager (Records), streamed (Prescriptions/Analytics) — not every module should load the same way
 5. **Loose coupling** — modules communicate through events, not imports
 6. **Host-owned routing** — remotes can request navigation through `navigateToModule` without importing `react-router-dom`
-7. **Independent tech choices** — each package has its own `rspack.config.js`, `postcss.config.js`, and `tsconfig.json`
+7. **Independent tech choices** — each package has its own `rspack.config.ts`, `postcss.config.js`, and `tsconfig.json`
 8. **Design system consistency** — shared `@theme` tokens across all packages keep the UI cohesive without a shared CSS build step
 9. **Live demo controls** — the Federation Lab panel lets you kill/restore remotes, monitor health, and toggle A/B deployment during a presentation
 

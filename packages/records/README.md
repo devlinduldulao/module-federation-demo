@@ -15,7 +15,7 @@ exposes: {
 
 The shell imports `MedicalRecords` directly (the eager loading strategy) — the chunk is preloaded on shell mount so it's cached before the user navigates to Records.
 
-This package now runs on **Rspack 2**, so its `rspack.config.js` uses the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies added during the migration.
+This package now runs on **Rspack 2**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, and Rspack's built-in CSS handling for the module stylesheet.
 
 Because the shell imports `MedicalRecords` directly, `MedicalRecords.tsx` is also where the module's stylesheet must be imported. `bootstrap.tsx` is standalone-only and cannot be the only place that loads `index.css`.
 
@@ -23,7 +23,7 @@ Because the shell imports `MedicalRecords` directly, `MedicalRecords.tsx` is als
 
 ```
 records/
-├── rspack.config.js           # MF remote — name: "records", port: 3001
+├── rspack.config.ts           # MF remote — name: "records", port: 3001
 ├── postcss.config.js          # @tailwindcss/postcss
 ├── tsconfig.json
 ├── public/index.html          # Standalone dev page

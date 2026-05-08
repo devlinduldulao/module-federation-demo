@@ -162,7 +162,7 @@ Without this: white screen + `loadShareSync` error. With this: standalone HMR wo
 
 ### The One Property That Makes It Work
 
-Each `rspack.config.js` is a normal bundler config. **The only thing that turns separate apps into a micro-frontend architecture** is the `ModuleFederationPlugin` — specifically three sub-properties:
+Each `rspack.config.ts` is a normal bundler config. **The only thing that turns separate apps into a micro-frontend architecture** is the `ModuleFederationPlugin` — specifically three sub-properties:
 
 | Property | Where | Purpose |
 |----------|-------|---------|
@@ -185,8 +185,8 @@ Remote (records)                    Shell (host)
 
 ### Remote (exposes)
 
-```js
-// packages/records/rspack.config.js
+```ts
+// packages/records/rspack.config.ts
 new rspack.container.ModuleFederationPlugin({
   name: "records",
   filename: "remoteEntry.js",
@@ -203,8 +203,8 @@ new rspack.container.ModuleFederationPlugin({
 
 ### Host (consumes)
 
-```js
-// packages/shell/rspack.config.js
+```ts
+// packages/shell/rspack.config.ts
 new rspack.container.ModuleFederationPlugin({
   name: "shell",
   remotes: {

@@ -160,7 +160,7 @@ Say: "People always ask this. The answer is **yes, for the 99% case.** Microserv
 ```
 packages/records/
   package.json         ← own dependencies, own scripts
-  rspack.config.js     ← own MF config, own dev server on :3001
+  rspack.config.ts     ← own MF config, own dev server on :3001
   tsconfig.json        ← own TS config
   src/
     index.tsx          ← import("./bootstrap") — async boundary for MF
@@ -179,13 +179,13 @@ Say: "This dynamic import is the async boundary that Module Federation requires.
 
 ### Key talking point: the only property that matters
 
-Open `packages/records/rspack.config.js` and scroll through it. Point out:
+Open `packages/records/rspack.config.ts` and scroll through it. Point out:
 > "This is a normal Rspack config — entry, rules, devServer, optimization. The ONE property that makes this a micro-frontend instead of a normal app is the `ModuleFederationPlugin`. Three sub-properties do all the work:
 > - **`exposes`** on remotes — the team's public API contract
 > - **`remotes`** on the host — runtime discovery (`scope@URL`)
 > - **`shared`** on both — `singleton: true` ensures one React instance. Remove this and hooks break."
 
-Then toggle to `packages/shell/rspack.config.js` and show the mirror side: `remotes` pointing to each `remoteEntry.js`.
+Then toggle to `packages/shell/rspack.config.ts` and show the mirror side: `remotes` pointing to each `remoteEntry.js`.
 
 ### UX story: loading strategy taxonomy
 ```
