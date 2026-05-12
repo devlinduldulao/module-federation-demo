@@ -28,6 +28,8 @@ The root route `/` renders the **Home** landing page, which provides an overview
 
 ## Quick Start
 
+Prerequisites: Node.js 20+ and `pnpm`. If `pnpm` is not installed yet, run `corepack enable` first.
+
 ```bash
 # Install everything (root + all 5 packages)
 pnpm install

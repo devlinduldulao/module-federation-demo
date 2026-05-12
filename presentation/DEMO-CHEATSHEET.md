@@ -10,6 +10,8 @@ Quick reference for the live coding portion of the talk.
 
 ## 1. Start the demo
 
+Demo machine prerequisite: Node.js 20+ with `pnpm` available. If needed, run `corepack enable` before the talk.
+
 ```bash
 pnpm run kill:ports   # optional cleanup if a previous demo left ports busy
 pnpm run dev
