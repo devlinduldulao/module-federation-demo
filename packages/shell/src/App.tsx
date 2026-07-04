@@ -220,11 +220,15 @@ const NavigationItem = memo(function NavigationItem({
 }: {
   module: ModuleConfig;
 }) {
+  const shouldPrefetchOnHover = module.id !== "prescriptions";
+
   return (
     <NavLink
       to={module.path}
       onMouseEnter={() => {
-        PREFETCHERS[module.id]();
+        if (shouldPrefetchOnHover) {
+          PREFETCHERS[module.id]();
+        }
       }}
       className={({ isActive }) =>
         cn(
