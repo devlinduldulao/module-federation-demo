@@ -2,6 +2,7 @@ import React, {
   Suspense,
   lazy,
   memo,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -120,6 +121,22 @@ type CommandAction = {
 
 type LoadStrategy = "instant" | "eager" | "streamed";
 
+type RenderBenchmark = {
+  readonly id: ModuleType;
+  readonly label: string;
+  readonly strategy: string;
+  readonly detail: string;
+  readonly firstTimingMs: number | null;
+  readonly latestTimingMs: number | null;
+  readonly runs: number;
+};
+
+type RenderTimingState = {
+  readonly firstTimingMs: number;
+  readonly latestTimingMs: number;
+  readonly runs: number;
+};
+
 type ModuleConfig = {
   id: ModuleType;
   label: string;
@@ -180,6 +197,27 @@ const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
   analytics: () => import("analytics/StreamingClinicalAnalytics").catch(() => undefined),
 };
 
+const BENCHMARK_TARGETS = [
+  {
+    id: "records",
+    label: "Records",
+    strategy: "Eager",
+    detail: "Preloaded when the shell mounts.",
+  },
+  {
+    id: "prescriptions",
+    label: "Prescriptions",
+    strategy: "On click",
+    detail: "No eager load and no hover prefetch.",
+  },
+  {
+    id: "analytics",
+    label: "Analytics",
+    strategy: "Hover prefetch",
+    detail: "Remote chunk prefetches on hover before click.",
+  },
+] as const satisfies readonly Omit<RenderBenchmark, "firstTimingMs" | "latestTimingMs" | "runs">[];
+
 // Eagerly preload modules marked as "eager" so their chunks (and streaming
 // delays) resolve before the user navigates. This fires once at module
 // evaluation time — the very first thing the shell does after importing.
@@ -217,8 +255,10 @@ function showToast(type: NotificationType, message: string): void {
 
 const NavigationItem = memo(function NavigationItem({
   module,
+  onNavigateStart,
 }: {
   module: ModuleConfig;
+  onNavigateStart: (module: ModuleConfig) => void;
 }) {
   const shouldPrefetchOnHover = module.id !== "prescriptions";
 
@@ -230,6 +270,7 @@ const NavigationItem = memo(function NavigationItem({
           PREFETCHERS[module.id]();
         }
       }}
+      onClick={() => onNavigateStart(module)}
       className={({ isActive }) =>
         cn(
           "relative px-5 py-2.5 font-mono text-sm tracking-wide transition-all duration-500 focus:outline-hidden",
@@ -252,6 +293,22 @@ const NavigationItem = memo(function NavigationItem({
     </NavLink>
   );
 });
+
+function RenderTimingMarker({
+  moduleId,
+  onRendered,
+  children,
+}: {
+  moduleId: ModuleType;
+  onRendered: (moduleId: ModuleType) => void;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  useEffect(() => {
+    onRendered(moduleId);
+  }, [moduleId, onRendered]);
+
+  return <>{children}</>;
+}
 
 const ThemeSelector = memo(function ThemeSelector({
   theme,
@@ -463,7 +520,15 @@ const CommandPalette = memo(function CommandPalette({
   );
 });
 
-function ModuleView({ module, isKilled }: { module: ModuleConfig; isKilled: boolean }): React.JSX.Element {
+function ModuleView({
+  module,
+  isKilled,
+  onRendered,
+}: {
+  module: ModuleConfig;
+  isKilled: boolean;
+  onRendered: (moduleId: ModuleType) => void;
+}): React.JSX.Element {
   const Component = module.component;
 
   const fallback = useMemo(() => {
@@ -493,7 +558,9 @@ function ModuleView({ module, isKilled }: { module: ModuleConfig; isKilled: bool
   return (
     <ErrorBoundary key={module.id}>
       <Suspense key={module.id} fallback={fallback}>
-        <Component />
+        <RenderTimingMarker moduleId={module.id} onRendered={onRendered}>
+          <Component />
+        </RenderTimingMarker>
       </Suspense>
     </ErrorBoundary>
   );
@@ -507,6 +574,10 @@ function ShellFrame(): React.JSX.Element {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isDemoPanelOpen, setIsDemoPanelOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState("");
+  const renderStartTimes = useRef<Partial<Record<ModuleType, number>>>({});
+  const [renderTimings, setRenderTimings] = useState<
+    Partial<Record<ModuleType, RenderTimingState>>
+  >({});
 
   const moduleIds = useMemo(() => MODULES.map((m) => m.id as string), []);
   const remoteSpecs = useMemo(() => MODULES.map((m) => ({ id: m.id, port: m.port })), []);
@@ -515,6 +586,49 @@ function ShellFrame(): React.JSX.Element {
   const { variant, versions, toggleVariant } = useVersionRegistry(moduleIds);
 
   const activeModule = useMemo(() => getModuleForPath(location.pathname), [location.pathname]);
+
+  const handleNavigateStart = useCallback((module: ModuleConfig) => {
+    renderStartTimes.current[module.id] = performance.now();
+  }, []);
+
+  const handleModuleRendered = useCallback((moduleId: ModuleType) => {
+    const startedAt = renderStartTimes.current[moduleId];
+
+    if (startedAt === undefined) {
+      return;
+    }
+
+    const timingMs = Math.round(performance.now() - startedAt);
+    delete renderStartTimes.current[moduleId];
+
+    setRenderTimings((current) => {
+      const currentTiming = current[moduleId];
+
+      return {
+        ...current,
+        [moduleId]: {
+          firstTimingMs: currentTiming?.firstTimingMs ?? timingMs,
+          latestTimingMs: timingMs,
+          runs: (currentTiming?.runs ?? 0) + 1,
+        },
+      };
+    });
+  }, []);
+
+  const renderBenchmarks = useMemo<readonly RenderBenchmark[]>(
+    () =>
+      BENCHMARK_TARGETS.map((target) => {
+        const timing = renderTimings[target.id];
+
+        return {
+          ...target,
+          firstTimingMs: timing?.firstTimingMs ?? null,
+          latestTimingMs: timing?.latestTimingMs ?? null,
+          runs: timing?.runs ?? 0,
+        };
+      }),
+    [renderTimings]
+  );
 
   useEffect(() => {
     if (location.pathname !== "/" && !KNOWN_PATHS.has(location.pathname)) {
@@ -738,6 +852,7 @@ function ShellFrame(): React.JSX.Element {
         versions={versions}
         variant={variant}
         onToggleVariant={toggleVariant}
+        renderBenchmarks={renderBenchmarks}
       />
 
       <div className="relative z-10 flex min-h-screen flex-col">
@@ -752,7 +867,11 @@ function ShellFrame(): React.JSX.Element {
               <div className="flex flex-col gap-3 lg:items-end">
                 <nav className="flex flex-wrap items-center gap-1" aria-label="Module navigation">
                   {MODULES.map((module) => (
-                    <NavigationItem key={module.id} module={module} />
+                    <NavigationItem
+                      key={module.id}
+                      module={module}
+                      onNavigateStart={handleNavigateStart}
+                    />
                   ))}
                 </nav>
 
@@ -853,7 +972,13 @@ function ShellFrame(): React.JSX.Element {
                 <Route
                   key={module.id}
                   path={module.path}
-                  element={<ModuleView module={module} isKilled={!!killed[module.id]} />}
+                  element={
+                    <ModuleView
+                      module={module}
+                      isKilled={!!killed[module.id]}
+                      onRendered={handleModuleRendered}
+                    />
+                  }
                 />
               ))}
               <Route path="*" element={<Navigate to={DEFAULT_MODULE.path} replace />} />

@@ -43,7 +43,7 @@ function getResource(key: string, delayMs: number): Resource<void> {
 }
 
 const StreamingPrescriptionOrders = () => {
-    const resource = getResource("prescriptions-initial", 3500);
+    const resource = getResource("prescriptions-initial", 1000);
     resource.read();
     return <PrescriptionOrders />;
 };

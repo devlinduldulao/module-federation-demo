@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DemoPanel from "./DemoPanel";
 import type { RemoteHealth } from "../lib/health";
@@ -26,6 +26,36 @@ const VERSIONS: RemoteVersionInfo[] = [
     { id: "analytics", version: "1.5.0", variant: "stable", buildHash: "d9f2a7c" },
 ];
 
+const RENDER_BENCHMARKS = [
+    {
+        id: "records",
+        label: "Records",
+        strategy: "Eager",
+        detail: "Preloaded when the shell mounts.",
+        firstTimingMs: 42,
+        latestTimingMs: 8,
+        runs: 2,
+    },
+    {
+        id: "prescriptions",
+        label: "Prescriptions",
+        strategy: "On click",
+        detail: "No eager load and no hover prefetch.",
+        firstTimingMs: 3504,
+        latestTimingMs: 9,
+        runs: 2,
+    },
+    {
+        id: "analytics",
+        label: "Analytics",
+        strategy: "Hover prefetch",
+        detail: "Remote chunk prefetches on hover before click.",
+        firstTimingMs: null,
+        latestTimingMs: null,
+        runs: 0,
+    },
+];
+
 const defaults = {
     isOpen: true,
     onClose: vi.fn(),
@@ -37,6 +67,7 @@ const defaults = {
     versions: VERSIONS,
     variant: "stable" as const,
     onToggleVariant: vi.fn(),
+    renderBenchmarks: RENDER_BENCHMARKS,
 };
 
 describe("DemoPanel", () => {
@@ -96,13 +127,25 @@ describe("DemoPanel", () => {
     it("shows latency for online remotes", () => {
         render(<DemoPanel {...defaults} />);
         expect(screen.getByText("12ms")).toBeInTheDocument();
-        expect(screen.getByText("8ms")).toBeInTheDocument();
+        expect(screen.getAllByText("8ms").length).toBeGreaterThan(0);
     });
 
     it("shows status labels correctly", () => {
         render(<DemoPanel {...defaults} />);
         expect(screen.getByText("Offline")).toBeInTheDocument();
         expect(screen.getByText("Checking")).toBeInTheDocument();
+    });
+
+    it("renders route render benchmark timings", () => {
+        render(<DemoPanel {...defaults} />);
+        const benchmark = screen.getByRole("region", { name: /route render benchmark/i });
+
+        expect(within(benchmark).getByText("Render Benchmark")).toBeInTheDocument();
+        expect(within(benchmark).getByText("42ms")).toBeInTheDocument();
+        expect(within(benchmark).getByText("3504ms")).toBeInTheDocument();
+        expect(within(benchmark).getByText("8ms")).toBeInTheDocument();
+        expect(within(benchmark).getByText("9ms")).toBeInTheDocument();
+        expect(within(benchmark).getAllByText("Not run")).toHaveLength(2);
     });
 
     // Kill switch section

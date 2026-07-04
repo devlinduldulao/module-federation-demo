@@ -18,6 +18,7 @@ interface DemoPanelProps {
     readonly versions: readonly RemoteVersionInfo[];
     readonly variant: DeploymentVariant;
     readonly onToggleVariant: () => void;
+    readonly renderBenchmarks: readonly RenderBenchmark[];
 }
 
 const STATUS_CONFIG: Record<RemoteStatus, { label: string; color: string; dot: string }> = {
@@ -25,6 +26,19 @@ const STATUS_CONFIG: Record<RemoteStatus, { label: string; color: string; dot: s
     offline: { label: "Offline", color: "text-rose", dot: "bg-rose" },
     checking: { label: "Checking", color: "text-stone", dot: "bg-stone" },
 };
+
+interface RenderBenchmark {
+    readonly id: string;
+    readonly label: string;
+    readonly strategy: string;
+    readonly detail: string;
+    readonly firstTimingMs: number | null;
+    readonly latestTimingMs: number | null;
+    readonly runs: number;
+}
+
+const formatTiming = (timingMs: number | null): string =>
+    timingMs === null ? "Not run" : `${timingMs}ms`;
 
 const DemoPanel = memo<DemoPanelProps>(
     ({
@@ -38,6 +52,7 @@ const DemoPanel = memo<DemoPanelProps>(
         versions,
         variant,
         onToggleVariant,
+        renderBenchmarks,
     }) => {
         if (!isOpen) return null;
 
@@ -136,7 +151,60 @@ const DemoPanel = memo<DemoPanelProps>(
                             </div>
                         </section>
 
-                        {/* Section 2: Fault Isolation — Kill Switches */}
+                        {/* Section 2: Render Benchmark */}
+                        <section className="mb-8" aria-label="Route render benchmark">
+                            <div className="mb-4">
+                                <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-1">
+                                    Render Benchmark
+                                </span>
+                                <p className="text-sm text-stone leading-relaxed">
+                                    First run is preserved; latest run shows warm-cache navigation.
+                                </p>
+                            </div>
+
+                            <div className="border border-edge divide-y divide-edge">
+                                {renderBenchmarks.map((benchmark) => (
+                                    <div key={benchmark.id} className="px-4 py-3">
+                                        <div className="mb-3 flex items-center justify-between gap-4">
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-mono text-[11px] tracking-wider text-cream uppercase">
+                                                    {benchmark.label}
+                                                </span>
+                                                <span className="font-mono text-[10px] text-dim uppercase">
+                                                    {benchmark.strategy}
+                                                </span>
+                                            </div>
+                                            <span className="font-mono text-[10px] text-dim uppercase">
+                                                {benchmark.runs} run{benchmark.runs === 1 ? "" : "s"}
+                                            </span>
+                                        </div>
+                                        <div className="mb-2 grid grid-cols-2 gap-3">
+                                            <div>
+                                                <span className="mb-1 block font-mono text-[9px] tracking-[0.2em] text-dim uppercase">
+                                                    First
+                                                </span>
+                                                <span className="font-mono text-[11px] text-citrine">
+                                                    {formatTiming(benchmark.firstTimingMs)}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span className="mb-1 block font-mono text-[9px] tracking-[0.2em] text-dim uppercase">
+                                                    Latest
+                                                </span>
+                                                <span className="font-mono text-[11px] text-citrine">
+                                                    {formatTiming(benchmark.latestTimingMs)}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs leading-relaxed text-stone">
+                                            {benchmark.detail}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        {/* Section 3: Fault Isolation — Kill Switches */}
                         <section className="mb-8" aria-label="Fault isolation controls">
                             <div className="mb-4">
                                 <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-1">
@@ -223,7 +291,7 @@ const DemoPanel = memo<DemoPanelProps>(
                             </div>
                         </section>
 
-                        {/* Section 3: Version Registry & A/B Deployment */}
+                        {/* Section 4: Version Registry & A/B Deployment */}
                         <section className="mb-8" aria-label="Version registry and A/B deployment">
                             <div className="mb-4">
                                 <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-1">
@@ -294,7 +362,7 @@ const DemoPanel = memo<DemoPanelProps>(
                             </div>
                         </section>
 
-                        {/* Section 4: Independent Deployment Guide */}
+                        {/* Section 5: Independent Deployment Guide */}
                         <section aria-label="Independent deployment demo">
                             <div className="mb-4">
                                 <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-1">
