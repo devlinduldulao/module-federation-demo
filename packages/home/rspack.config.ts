@@ -20,10 +20,6 @@ export default defineConfig((_env, argv = {}) => {
     mode,
     target: ["web", "es2020"],
 
-    experiments: {
-      css: true,
-    },
-
     output: {
       path: path.resolve(__dirname, "dist"),
       uniqueName: "home",
