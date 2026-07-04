@@ -12,25 +12,25 @@
     "test:watch": "pnpm --dir ../.. run test:watch -- packages/analytics/src"
   },
   "dependencies": {
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
-    "@module-federation/runtime-tools": "^2.0.0",
-    "@rspack/cli": "^2.0.0",
-    "@rspack/core": "^2.0.0",
-    "@rspack/dev-server": "^2.0.0",
-    "@rspack/plugin-react-refresh": "^2.0.0",
+    "@module-federation/runtime-tools": "^2.6.0",
+    "@rspack/cli": "^2.1.2",
+    "@rspack/core": "^2.1.2",
+    "@rspack/dev-server": "^2.1.0",
+    "@rspack/plugin-react-refresh": "^2.0.2",
     "react-refresh": "^0.18.0",
-    "@tailwindcss/postcss": "^4.2.4",
-    "postcss": "^8.5.10",
+    "@tailwindcss/postcss": "^4.3.2",
+    "postcss": "^8.5.16",
     "postcss-loader": "^8.2.1",
     "typescript": "^6.0.3",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@types/node": "^25.6.0",
-    "webpack-sources": "^3.3.4"
+    "@types/node": "^26.1.0",
+    "webpack-sources": "^3.5.0"
   }
 }
