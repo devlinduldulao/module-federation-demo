@@ -261,7 +261,7 @@ Say: "The anti-pattern is one big workflow that rebuilds everything on every pus
 
 ```bash
 pnpm test
-# 209 tests across 21 files — all green
+# 210 tests across 21 files — all green
 ```
 
 Show the vitest.config.ts alias trick:

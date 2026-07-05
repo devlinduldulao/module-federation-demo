@@ -579,7 +579,7 @@ it("dispatches addPrescription event on Add click", async () => {
 });
 ```
 
-**209 tests across 21 files — all passing.**
+**210 tests across 21 files — all passing.**
 
 ---
 
@@ -641,7 +641,7 @@ it("dispatches addPrescription event on Add click", async () => {
 - `lib/health.ts` — useRemoteHealth hook (HEAD requests to remoteEntry.js)
 
 ### 6. Testing (1 min)
-- Run `pnpm test` — 209 tests, all green
+- Run `pnpm test` — 210 tests, all green
 - Show vitest.config.ts alias trick for MF imports
 
 ---
@@ -729,7 +729,7 @@ React 19:  <Suspense>  →  [A fetches] → [A renders] → [B fetches]  (sequen
 |---------|----------------------|
 | **Suspense batching (19.2+)** | Skeleton → content transitions are smoother — no "popping in" |
 | **Render-as-you-fetch** | `createResource` already follows this pattern — data hoisted outside component |
-| **Compiler optimizations** | Shell re-renders (theme, palette, kills) skip unchanged paths |
+| **React Compiler** (enabled via Rspack 2.1 `builtin:swc-loader`) | Auto-memoization — shell re-renders (theme, palette, kills) skip unchanged paths |
 | **Streaming SSR readiness** | Reduced UI churn if SSR is added later |
 
 ```tsx

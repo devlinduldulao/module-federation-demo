@@ -99,10 +99,9 @@ React 19 changed Suspense: siblings in the **same** boundary render sequentially
 
 ```tsx
 // createResource already follows "render-as-you-fetch" (React 19 best practice)
-const resource = getResource("records-initial", 2500);  // ← hoisted outside component
-
 const StreamingMedicalRecords = () => {
-  resource.read();  // just reads — doesn't initiate fetch
+  const resource = getResource("records-initial", 2500); // module-level cache — created once
+  resource.read();  // subsequent renders just read — never re-initiate the fetch
   return <MedicalRecords />;
 };
 
@@ -116,7 +115,7 @@ const StreamingMedicalRecords = () => {
 | React 19 Feature | Benefit |
 |-----------------|---------|
 | **Suspense batching (19.2+)** | Skeleton → content transitions grouped in single render pass |
-| **Compiler optimizations** | Shell re-renders (theme, palette, kills) skip unchanged paths |
+| **React Compiler** (enabled — Rust port via Rspack 2.1 `builtin:swc-loader`) | Auto-memoization: shell re-renders (theme, palette, kills) skip unchanged paths |
 | **`use()` hook** | First-class replacement for throw-promise (migration optional) |
 
 ---
@@ -564,9 +563,9 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 |----------|--------------|----------|
 | **Instant** | Chunk fetched lazily, no streaming delay | Home |
 | **Eager** | Preloaded the moment the shell mounts, no streaming delay | Records |
+| **Hover** | Prefetched when user hovers a tab | Prescriptions, Analytics |
 
 > **Why `lazy()` for eager modules?** Module Federation remotes are separate builds on separate servers — you can't use a static `import`. The eager pattern fires `import()` at shell init to warm the browser's module cache; when `lazy()` later calls the same `import()`, it resolves instantly. This is confirmed by the test: *"renders records immediately without a skeleton (eager strategy)"*.
-| **Hover** | Prefetched when user hovers a tab | Prescriptions, Analytics |
 
 ---
 

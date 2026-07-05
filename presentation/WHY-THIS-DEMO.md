@@ -175,7 +175,7 @@ This demo is **designed to be unaffected**:
 | Same-boundary contention | Each module has its own `<Suspense>` |
 | throw-promise deprecation | Still works; `use()` migration is optional |
 | Skeleton smoothness | React 19 batching = smoother transitions |
-| Shell interactivity | Compiler optimizations = faster re-renders |
+| Shell interactivity | React Compiler (enabled via Rspack 2.1) = auto-memoized re-renders |
 
 This is worth calling out during the talk because the audience **will** ask "Doesn't React 19 break Suspense for micro-frontends?" The answer is no — but only if you follow the patterns this demo implements: separate boundaries, route-based rendering, and pre-fetching.
 
@@ -252,7 +252,7 @@ Two themes (dark and light) switch at runtime by rewriting CSS custom properties
 
 ## 8. The Test Suite Proves It Works
 
-209 tests across 21 files. All green.
+210 tests across 21 files. All green.
 
 ```
 packages/shell/src/App.test.tsx                    — 21 tests
@@ -309,7 +309,7 @@ The demo has a natural flow for a 30-minute talk:
 5. **Open the Federation Lab** → Kill a remote live, watch it fail gracefully
 6. **Toggle A/B deployment** → Show independent versioning
 7. **Switch themes** → CSS variables cascade across all remotes
-8. **Run the test suite** → 209 tests, all green, no dev servers needed
+8. **Run the test suite** → 210 tests, all green, no dev servers needed
 
 Each step demonstrates a different micro-frontend concept. The audience sees real behavior, not diagrams.
 

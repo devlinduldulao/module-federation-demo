@@ -61,7 +61,7 @@ React 19 introduced a behavioral change that concerns many developers: sibling c
 
 **React 19 actively benefits the architecture:**
 - **Suspense batching (19.2+)** — smoother skeleton → content transitions, no "popping in" effect
-- **Compiler optimizations** — shell re-renders (theme, palette, kill switches) skip unchanged paths
+- **React Compiler** — enabled via Rspack 2.1's Rust port in `builtin:swc-loader`; shell re-renders (theme, palette, kill switches) skip unchanged paths automatically
 - **Render-as-you-fetch alignment** — the `createResource` pattern already hoists data outside components, exactly as React 19 recommends
 - **`use()` hook readiness** — the throw-promise pattern still works, and migration to the first-class `use()` API is straightforward
 
@@ -84,7 +84,7 @@ This talk bridges both.
 
 **What makes this different from other MF talks:**
 
-- **It's not theoretical.** Every claim is demonstrated in a running application with 5 independent packages, 209 passing tests, and a CI/CD pipeline that deploys to production. The audience can clone the repo and run it after the talk.
+- **It's not theoretical.** Every claim is demonstrated in a running application with 5 independent packages, 210 passing tests, and a CI/CD pipeline that deploys to production. The audience can clone the repo and run it after the talk.
 - **It names the real motivation.** Most talks justify micro-frontends with "independent deployment" or "technology diversity." This talk starts with the human problem — what happens to your development culture when 50 engineers share one `package.json` — and shows how the architecture solves it.
 - **It doesn't ignore UX.** The live demo shows three distinct loading strategies (Instant, Eager, Streamed) with per-module skeleton fallbacks. The audience sees the difference between a naively federated app (blank screens, spinners) and one where each remote owns its loading choreography through Suspense.
 - **It proves fault isolation live.** The Federation Lab panel lets the speaker kill a remote mid-demo and show the audience that the rest of the app keeps running. This is the moment that makes micro-frontends click for skeptics.
