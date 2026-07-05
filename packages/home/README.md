@@ -15,7 +15,7 @@ exposes: {
 
 The shell imports `Home` directly (the instant loading strategy) — no streaming delay, the landing page renders the moment the chunk arrives.
 
-This package now runs on **Rspack 2**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, and Rspack's built-in CSS handling for the module stylesheet.
+This package runs on **Rspack 2.1**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, Rspack's built-in CSS handling for the module stylesheet, the Rust React Compiler (`reactCompiler: true` in `builtin:swc-loader`), and persistent caching with automatic cleanup.
 
 Because `Home.tsx` is an exposed runtime entrypoint, it imports the module stylesheet directly. `bootstrap.tsx` is only for standalone mounting and should not be the only place that loads `index.css`.
 

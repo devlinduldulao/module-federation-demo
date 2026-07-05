@@ -360,8 +360,8 @@ new rspack.container.ModuleFederationPlugin({
     "./StreamingMedicalRecords": "./src/StreamingMedicalRecords.tsx",
   },
   shared: {
-    react:       { singleton: true, requiredVersion: "^19.2.5" },
-    "react-dom": { singleton: true, requiredVersion: "^19.2.5" },
+    react:       { singleton: true, requiredVersion: "^19.2.7" },
+    "react-dom": { singleton: true, requiredVersion: "^19.2.7" },
   },
 });
 ```

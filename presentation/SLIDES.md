@@ -1,7 +1,7 @@
 # From 5 Devs to 200: Micro-Frontends That Scale Your Team and Stream Your UI
 
 > A 30-minute conference talk with live demo  
-> Built with: React 19 · Rspack 2 · Module Federation · TypeScript 6 · Tailwind CSS v4
+> Built with: React 19 · Rspack 2.1 · Module Federation · TypeScript 6 · Tailwind CSS v4
 
 ---
 
@@ -151,7 +151,7 @@ Without this: white screen + `loadShareSync` error. With this: standalone HMR wo
 | Technology | Version | Why |
 |---|---|---|
 | **React** | 19.2 | Streaming Suspense as a first-class primitive |
-| **Rspack** | 2.0 | Native Module Federation, explicit runtime tooling, sub-second HMR |
+| **Rspack** | 2.1 | Native Module Federation, Rust React Compiler (auto-memoization), sub-second HMR |
 | **TypeScript** | 6.0 | Strict mode, type-safe event contracts |
 | **Tailwind CSS** | v4 | `@theme` tokens for the design system |
 | **Vitest** | 4.1 | Fast component tests with jsdom |
@@ -664,7 +664,7 @@ Remotes can ask for navigation with `navigateToModule`, but only the shell mutat
 `.catch()` on lazy imports + `ErrorBoundary` per module = one broken remote never kills the app.
 
 ### 6. Rspack makes this fast
-Sub-second HMR in a monorepo with 4 applications. Module Federation is a first-class citizen.
+Sub-second HMR in a monorepo with 4 applications. Module Federation is a first-class citizen. Rspack 2.1 also ships the Rust port of React Compiler in `builtin:swc-loader` — automatic memoization with zero Babel overhead — and persistent caching that makes cached production builds and dev restarts dramatically faster.
 
 ### 7. Not every module should load the same way
 ```tsx

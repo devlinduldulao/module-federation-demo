@@ -48,6 +48,7 @@ export default defineConfig((_env, argv = {}) => {
       rules: [
         {
           test: /\.(?:js|mjs|jsx|ts|tsx)$/,
+          exclude: /node_modules/,
           use: {
             loader: "builtin:swc-loader",
             options: {
@@ -59,6 +60,9 @@ export default defineConfig((_env, argv = {}) => {
                     development: isDev,
                     refresh: isDev,
                   },
+                  // Rspack 2.1: Rust port of React Compiler — auto-memoization
+                  // at build time, 7-13x faster than the Babel plugin.
+                  reactCompiler: true,
                 },
               },
             },
@@ -100,19 +104,19 @@ export default defineConfig((_env, argv = {}) => {
           react: {
             singleton: true,
             strictVersion: false,
-            requiredVersion: "^19.2.5",
+            requiredVersion: "^19.2.7",
             eager: false,
           },
           "react-dom": {
             singleton: true,
             strictVersion: false,
-            requiredVersion: "^19.2.5",
+            requiredVersion: "^19.2.7",
             eager: false,
           },
           "react-dom/client": {
             singleton: true,
             strictVersion: false,
-            requiredVersion: "^19.2.5",
+            requiredVersion: "^19.2.7",
             eager: false,
           },
         },
@@ -156,8 +160,6 @@ export default defineConfig((_env, argv = {}) => {
           },
         },
       },
-      usedExports: true,
-      sideEffects: false,
     },
 
     devServer: {
@@ -184,7 +186,9 @@ export default defineConfig((_env, argv = {}) => {
     },
 
     devtool: isDev ? "cheap-module-source-map" : "source-map",
-    cache: true,
+    // Rspack 2.1: persistent cache with automatic cleanup
+    // (maxAge defaults to 7 days, maxVersions defaults to 3).
+    cache: { type: "persistent" },
     stats: "errors-only",
     performance: {
       hints: isDev ? false : "warning",

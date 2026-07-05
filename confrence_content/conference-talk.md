@@ -88,7 +88,7 @@ This talk bridges both.
 - **It names the real motivation.** Most talks justify micro-frontends with "independent deployment" or "technology diversity." This talk starts with the human problem — what happens to your development culture when 50 engineers share one `package.json` — and shows how the architecture solves it.
 - **It doesn't ignore UX.** The live demo shows three distinct loading strategies (Instant, Eager, Streamed) with per-module skeleton fallbacks. The audience sees the difference between a naively federated app (blank screens, spinners) and one where each remote owns its loading choreography through Suspense.
 - **It proves fault isolation live.** The Federation Lab panel lets the speaker kill a remote mid-demo and show the audience that the rest of the app keeps running. This is the moment that makes micro-frontends click for skeptics.
-- **It's current.** React 19.2, TypeScript 6, Rspack 2.0, Tailwind v4 — this is the stack teams are adopting right now, not a legacy Webpack 4 setup with outdated patterns.
+- **It's current.** React 19.2, TypeScript 6, Rspack 2.1, Tailwind v4 — this is the stack teams are adopting right now, not a legacy Webpack 4 setup with outdated patterns. The demo even enables Rspack 2.1's Rust port of React Compiler for build-time auto-memoization.
 
 **The audience will leave with:**
 1. A mental model for when micro-frontends are worth the complexity (team size, not app size)

@@ -15,7 +15,7 @@ exposes: {
 
 The shell imports `MedicalRecords` directly (the eager loading strategy) — the chunk is preloaded on shell mount so it's cached before the user navigates to Records.
 
-This package now runs on **Rspack 2**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, and Rspack's built-in CSS handling for the module stylesheet.
+This package runs on **Rspack 2.1**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, Rspack's built-in CSS handling for the module stylesheet, the Rust React Compiler (`reactCompiler: true` in `builtin:swc-loader`), and persistent caching with automatic cleanup.
 
 Because the shell imports `MedicalRecords` directly, `MedicalRecords.tsx` is also where the module's stylesheet must be imported. `bootstrap.tsx` is standalone-only and cannot be the only place that loads `index.css`.
 

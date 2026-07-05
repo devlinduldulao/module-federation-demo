@@ -1,5 +1,16 @@
 _April 22, 2026_
 
+> **Update (June 26, 2026):** [Rspack 2.1 has been released](https://rspack.rs/blog/announcing-2-1) — the latest stable release is now **v2.1.2**. Highlights on top of 2.0:
+>
+> - **Rust port of React Compiler** in `builtin:swc-loader` (`jsc.transform.reactCompiler: true`) — 7–13x faster than the Babel version. This demo enables it in every package.
+> - **~16% faster production builds** and ~5% faster HMR versus 2.0.
+> - **TypeScript 7 (tsgo) support** in `ts-checker-rspack-plugin` — up to ~60% faster type-checked builds.
+> - **`import.meta.glob`** support, aligned with Vite/Turbopack.
+> - **Automatic persistent cache cleanup** via `cache.maxAge` (default 7 days) and `cache.maxVersions` (default 3).
+> - **`pureFunctions` stabilized** — side-effect-free function analysis is now on by default in production.
+> - New `css/global` module type, `createRequire` parsing, `rspack`-prefixed magic comments, source phase imports for Wasm, `CircularCheckRspackPlugin`, and the `rspack-merge` package.
+> - Since 2.1.2, module variables are exposed via `import.meta` (e.g. `import.meta.rspackHash`), aligning better with the ESM spec.
+
 # Announcing Rspack 2.0
 
 ![Rspack 2.0 banner](https://assets.rspack.rs/rspack/rspack-banner-v2.0.png)

@@ -15,7 +15,7 @@ exposes: {
 
 `ClinicalAnalytics.tsx` imports the module stylesheet directly because the shell loads the exposed component from `remoteEntry.js`. `bootstrap.tsx` is only the standalone mount path.
 
-This package now runs on **Rspack 2**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, and Rspack's built-in CSS handling for the module stylesheet.
+This package runs on **Rspack 2.1**, so its `rspack.config.ts` uses `defineConfig`, the explicit `@module-federation/runtime-tools` and `@rspack/dev-server` dependencies, Rspack's built-in CSS handling for the module stylesheet, the Rust React Compiler (`reactCompiler: true` in `builtin:swc-loader`), and persistent caching with automatic cleanup.
 
 ## File Structure
 

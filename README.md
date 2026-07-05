@@ -183,13 +183,13 @@ module-federation-demo/
 
 | Tool | Version | Role |
 |------|---------|------|
-| React | ^19.2.5 | UI library |
+| React | ^19.2.7 | UI library |
 | TypeScript | ^6.0.3 | Type safety |
-| Rspack | ^2.0.0 | Bundler + Module Federation |
+| Rspack | ^2.1.2 | Bundler + Module Federation + Rust React Compiler |
 | Tailwind CSS | v4 | Utility-first CSS via `@theme` |
-| PostCSS | ^8.5.10 | CSS pipeline (`@tailwindcss/postcss`) |
-| Vitest | ^4.1.5 | Unit + component testing |
-| concurrently | ^9.2.1 | Dev server orchestration |
+| PostCSS | ^8.5.16 | CSS pipeline (`@tailwindcss/postcss`) |
+| Vitest | ^4.1.9 | Unit + component testing |
+| concurrently | ^10.0.3 | Dev server orchestration |
 
 ## Design System — "Noir Editorial"
 
@@ -259,12 +259,14 @@ One practical rule follows from that: if a file is listed under `exposes`, treat
 
 ## Rspack 2 Notes
 
-This repository now runs on **Rspack 2**. A few setup details matter for anyone copying this setup:
+This repository runs on **Rspack 2.1**. A few setup details matter for anyone copying this setup:
 
 - Local development scripts use `rspack dev`, backed by an explicit `@rspack/dev-server` dependency in each package that runs a dev server.
 - `ModuleFederationPlugin` now requires an explicit `@module-federation/runtime-tools` dependency in each federated package.
 - The configs use `rspack.config.ts` + `defineConfig` and Rspack 2's cleaner defaults: `target: ["web", "es2020"]` and `detectSyntax: "auto"` on `builtin:swc-loader`.
 - CSS now uses Rspack's built-in CSS handling with `type: "css"` and keeps `postcss-loader` only for Tailwind/PostCSS transforms.
+- **Rspack 2.1: Rust React Compiler.** Every package enables `jsc.transform.reactCompiler: true` in `builtin:swc-loader` — build-time auto-memoization (no manual `useMemo`/`useCallback`/`React.memo`) at 7–13x the speed of the Babel plugin.
+- **Rspack 2.1: persistent cache with automatic cleanup.** Every config uses `cache: { type: "persistent" }`, which speeds up cold dev-server starts and cached production builds. 2.1 cleans up stale cache versions automatically (`maxAge` defaults to 7 days, `maxVersions` to 3).
 
 ### Shell (Host)
 
