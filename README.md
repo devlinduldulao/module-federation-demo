@@ -1,6 +1,6 @@
 # Module Federation Demo
 
-A micro-frontend architecture demo built with **Rspack Module Federation**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. Five independent applications compose into a single shell — each deployable, scalable, and maintainable on its own.
+A micro-frontend architecture demo built with **Rspack Module Federation**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. Five independently runnable applications compose into a single shell. The module boundaries support independent builds and deployment topologies; the included GitHub Pages workflow deliberately assembles one demo site.
 
 Built for conference talks and technical demonstrations.
 
@@ -114,7 +114,7 @@ Do **not** rely on `bootstrap.tsx` to load remote CSS. `bootstrap.tsx` only runs
 
 The shell uses a **two-tier preloading strategy**:
 
-1. **Eager preload** — modules with `loadStrategy: "eager"` (Records) are preloaded the moment the shell mounts, so their chunks and streaming data are likely cached before the user navigates.
+1. **Eager preload** — modules with `loadStrategy: "eager"` (Records) are preloaded the moment the shell mounts, so their remote code is likely cached before the user navigates.
 2. **Hover prefetch** — remaining modules are prefetched when the user hovers a navigation tab, using a `PREFETCHERS` map of bare `import()` calls.
 
 ## Project Structure
@@ -685,18 +685,18 @@ The full-repo [ci.yml](.github/workflows/ci.yml) still exists as a safety net fo
 
 ### Why per-module workflows matter
 
-This is the **independent deploy** promise of micro-frontends in action:
+This demonstrates the **independent build and CI** side of micro-frontends:
 
 - **Records team** pushes a fix → only `ci-records.yml` runs → only Records is linted, typechecked, tested, and built
 - **Shell team** pushes a feature → only `ci-shell.yml` runs → other modules are untouched
 - A PR that touches `packages/prescriptions/` does NOT trigger CI for analytics, records, or home
-- Each module's build artifact is uploaded independently and can be deployed to its own CDN/S3 bucket
+- Each module's build artifact is uploaded independently and can be deployed to its own CDN/S3 bucket in a production topology
 
 In a production multi-repo setup, each of these workflows would live in its own repository and deploy to its own origin. The shell discovers remotes at runtime via `remoteEntry.js` URLs — it never needs to build the remotes itself.
 
-## React Suspense Streaming Pattern
+## Client-Side Suspense Fallback Pattern
 
-Each remote uses a Resource-based Suspense pattern to simulate network streaming:
+Each remote uses a Resource-based Suspense pattern to simulate a delayed client-side resource. This is not streaming SSR.
 
 ```typescript
 function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
@@ -718,32 +718,30 @@ function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
 
 The shell wraps each lazy-loaded remote in `<Suspense fallback={<Skeleton />}>` and `<ErrorBoundary>`, giving each module independent loading and error states. The shell uses three distinct loading strategies:
 
-- **Instant** (Home) — imports the standalone component via `home/Home`, no streaming delay
-- **Eager** (Records) — imports the streaming wrapper but preloads it on shell mount
+- **Instant** (Home) — imports the standalone component via `home/Home`, with no artificial resource delay
+- **Eager** (Records) — imports the standalone component and preloads it on shell mount
 - **Streamed** (Prescriptions, Analytics) — loaded on demand with skeleton fallbacks
 
 ## Why React 19 (Not 18) for Module Federation + Suspense
 
-React 19 introduced a behavioral change in Suspense: sibling components inside the **same** `<Suspense>` boundary now render sequentially instead of in parallel. If the first sibling suspends, subsequent siblings wait — creating a potential waterfall. This raised concerns in the community about whether React 19 is safe for streaming micro-frontends.
+React 19 changed how Suspense commits fallbacks: when a component suspends, React can commit the nearest fallback immediately, then pre-warm lazy requests in the suspended sibling tree. That makes fallback behavior faster and more predictable, but boundary design and cached data still matter.
 
-**This architecture is unaffected.** Here's why:
+**This demo keeps the behavior easy to reason about:**
 
 | Concern | This demo's architecture | Impact |
 |---------|--------------------------|--------|
-| Sibling waterfall | Route-based rendering — only **one** module renders at a time | Not affected |
-| Same-boundary siblings | Each module has its own `<Suspense>` + `<ErrorBoundary>` | Parallel preserved |
-| throw-promise pattern | `createResource` still works in React 19 (legacy, not broken) | No breakage |
-| Pre-fetching | Eager preload + hover prefetch = chunks cached before render | Waterfall impossible |
+| Route view | One remote is the primary route view at a time | One deliberate fallback per route |
+| Boundary ownership | The route view has its own `<Suspense>` + `<ErrorBoundary>` | A slow module affects only its view |
+| Cached resource | The demo resource is cached outside component render | Re-renders do not restart the delay |
+| Pre-fetching | Eager preload + hover prefetch can warm remote code | Less work at navigation time |
 
-**React 19 actively benefits this architecture:**
+**What React 19 contributes here:**
 
-1. **Suspense batching (19.2+)** — Instead of showing fallbacks one boundary at a time, React 19 groups multiple boundary transitions in a single render pass. This means skeleton → content transitions are smoother — no "popping in" effect when navigating between modules.
+1. **Immediate fallback commits plus lazy-request pre-warming** — a purpose-built skeleton can appear promptly while React still prepares suspended work.
 
-2. **Render-as-you-fetch** — React 19 encourages hoisting data calls outside components. The `createResource` pattern already does this — the resource is created at module evaluation time, not inside the component. The component just calls `resource.read()`.
+2. **`use()` for supported cached promises** — a production Suspense-compatible data layer can expose a cached promise that a component reads with `use()`.
 
-3. **Deterministic concurrent rendering** — The shell re-renders frequently (theme changes, command palette filtering, kill switch toggles). React 19's compiler optimizations skip entire update paths that haven't changed, making these interactions snappier.
-
-4. **Streaming SSR readiness** — React 19's improved batching in streaming SSR reduces "UI churn" (flickering). If this demo ever adds SSR, the skeleton → content transitions would look even better server-side.
+3. **Optional React Compiler integration** — it is enabled in the Rspack configuration, but its impact should be measured in the deployed app rather than assumed.
 
 ```tsx
 // This architecture avoids the waterfall by design:
@@ -770,7 +768,7 @@ const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
 for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }  // cached before render
 ```
 
-> **Bottom line:** React 19 is the right choice. The waterfall concern applies to sibling components in the same boundary — a pattern this architecture intentionally avoids. The batching and compiler improvements directly benefit the shell's UX.
+> **Bottom line:** React 19 is a good fit. This demo intentionally keeps one remote route view behind one focused fallback, and it preloads code where it is useful.
 
 ## Microservices vs Micro-frontends — Fault Isolation
 
@@ -788,7 +786,7 @@ A common question: "Is this like microservices where one broken service doesn't 
 1. **Per-module `ErrorBoundary`** — every remote is wrapped individually in `ModuleView`. If Records crashes, Prescriptions and Analytics keep working.
 2. **Per-module `Suspense`** — each remote has its own loading state. A slow remote only shows *its own* skeleton.
 3. **Route-based rendering** — only one module renders at a time, so a broken remote can't corrupt another module's DOM.
-4. **Independent deployment** — each remote has its own build and `remoteEntry.js`. A broken Records deploy doesn't touch Prescriptions.
+4. **Deployable module boundary** — each remote has its own build and `remoteEntry.js`. A production deployment topology can update Records without rebuilding Prescriptions; the included Pages workflow assembles the demo together.
 5. **`.catch()` on `lazy()`** — if a remote's `remoteEntry.js` fails to load (server down, network error), the import resolves to a `ModuleFallback` instead of crashing.
 
 ### The one gap vs microservices
@@ -799,10 +797,10 @@ All modules share one browser tab. If a remote has an infinite loop or massive m
 
 This project demonstrates these micro-frontend concepts during a live talk:
 
-1. **Independent deployment** — each remote starts on its own port with its own build
+1. **Independent development and builds** — each remote starts on its own port with its own build
 2. **Fault isolation** — kill a remote server and only that module shows a fallback (or use the Federation Lab kill switch)
 3. **Shared dependencies** — React is loaded once via singleton sharing
-4. **Suspense streaming** — skeleton screens appear during module load, then content streams in (for streamed and eager modules)
+4. **Suspense fallbacks** — skeleton screens appear while on-demand modules resolve their simulated resource
 5. **Loading strategy taxonomy** — instant (Home), eager (Records), streamed (Prescriptions/Analytics) — not every module should load the same way
 5. **Loose coupling** — modules communicate through events, not imports
 6. **Host-owned routing** — remotes can request navigation through `navigateToModule` without importing `react-router-dom`
@@ -814,7 +812,7 @@ This project demonstrates these micro-frontend concepts during a live talk:
 
 - Start `pnpm run dev`, open `:3000` — Home loads **instantly** (no skeleton delay, status strip shows INSTANT)
 - Click Records — loads fast because it was **eagerly preloaded** on shell mount (status strip shows EAGER)
-- Click Prescriptions — observe skeleton **streaming** in (status strip shows STREAMING)
+- Click Prescriptions — observe the skeleton fallback (status strip shows STREAMING)
 - Navigate to `/records`, add a prescription, then use the prescriptions empty-state CTA to show remote-requested host navigation
 - Open the Federation Lab (click **Lab** in the header) and kill the records remote — records shows `ModuleFallback`, prescriptions and analytics continue working
 - Restore the remote from the Lab panel — records comes back

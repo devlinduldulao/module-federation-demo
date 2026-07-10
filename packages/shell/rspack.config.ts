@@ -185,7 +185,8 @@ export default defineConfig((_env, argv = {}) => {
       },
     },
 
-    devtool: isDev ? "cheap-module-source-map" : "source-map",
+    // Keep source maps useful locally without publishing source to GitHub Pages.
+    devtool: isDev ? "cheap-module-source-map" : false,
     // Rspack 2.1: persistent cache with automatic cleanup
     // (maxAge defaults to 7 days, maxVersions defaults to 3).
     cache: { type: "persistent" },

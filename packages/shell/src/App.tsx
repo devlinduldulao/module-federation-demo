@@ -42,7 +42,7 @@ import { useKillSwitch, useVersionRegistry } from "./lib/demo";
 //                        Renders the moment the chunk arrives.
 //   EAGER:    Records  — standalone component, preloaded on shell mount.
 //                        Chunk is already cached before the user clicks.
-//   STREAMED: Prescriptions, Analytics — loaded on demand with skeleton streaming.
+//   STREAMED: Prescriptions, Analytics — loaded on demand with skeleton fallbacks.
 // ---------------------------------------------------------------------------
 
 // INSTANT — Home loads without a streaming delay. We import the standalone

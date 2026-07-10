@@ -43,7 +43,8 @@ function getResource(key: string, delayMs: number): Resource<void> {
 }
 
 const StreamingClinicalAnalytics = () => {
-    const resource = getResource("analytics-initial", 0); // 0 means no delay, you can adjust this value as needed
+    // Deliberate demo latency makes the route-level Suspense fallback observable.
+    const resource = getResource("analytics-initial", 4000);
     resource.read();
     return <ClinicalAnalytics />;
 };

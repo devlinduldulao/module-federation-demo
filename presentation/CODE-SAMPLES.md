@@ -4,11 +4,11 @@ Annotated code snippets for projection during the talk. Each block is self-conta
 
 > **Two pillars in this demo:**
 > - **DX (Developer Experience)** — Module Federation gives growing teams independent builds, deploys, and onboarding. Sections 2, 4, 6, 7 show this.
-> - **UX (User Experience)** — Suspense streaming + skeletons give visitors instant perceived load. Sections 1, 2 (layers), 8 show this.
+> - **UX (User Experience)** — Suspense fallbacks + skeletons give visitors immediate visual feedback. Sections 1, 2 (layers), 8 show this.
 
 ---
 
-## 1. The Streaming Resource Pattern (UX Pillar)
+## 1. The Client-Side Suspense Resource Pattern (UX Pillar)
 
 The entire pattern that makes Suspense work inside federated remotes:
 
@@ -53,7 +53,7 @@ function getResource(key: string, delayMs: number): Resource<void> {
   return resourceCache.get(key)!;
 }
 
-// THE STREAMING WRAPPER — this is the only thing the shell imports
+// The Suspense wrapper — this is the only thing the shell imports
 const StreamingMedicalRecords = () => {
   const resource = getResource("records-initial", 2500);
   resource.read(); // Throws a Promise while pending → triggers Suspense
@@ -67,16 +67,16 @@ export default StreamingMedicalRecords;
 
 ## 1b. Why React 19 Doesn't Break This Pattern
 
-React 19 changed Suspense: siblings in the **same** boundary render sequentially. But this architecture is immune:
+React 19 can commit the nearest fallback as soon as a component suspends, then pre-warm suspended siblings. This route-based demo keeps a focused boundary for its primary view:
 
 ```tsx
-// ❌ VULNERABLE (React 19 waterfall) — two siblings in ONE boundary
+// One boundary reveals its children as one unit once they are ready.
 <Suspense fallback={<Spinner />}>
-  <MedicalRecords />          {/* suspends → blocks sibling */}
-  <PrescriptionOrders />      {/* waits for Records to resolve */}
+  <MedicalRecords />
+  <PrescriptionOrders />
 </Suspense>
 
-// ✅ THIS DEMO — route-based, separate boundaries, no siblings
+// This demo — one primary route view behind a focused boundary
 <Routes>
   <Route path="/records" element={
     <ErrorBoundary>           {/* own error boundary */}
@@ -95,28 +95,28 @@ React 19 changed Suspense: siblings in the **same** boundary render sequentially
 </Routes>
 ```
 
-**React 19 benefits:**
+**React 19 considerations:**
 
 ```tsx
-// createResource already follows "render-as-you-fetch" (React 19 best practice)
+// The demo cache prevents resource recreation during a re-render.
 const StreamingMedicalRecords = () => {
   const resource = getResource("records-initial", 2500); // module-level cache — created once
   resource.read();  // subsequent renders just read — never re-initiate the fetch
   return <MedicalRecords />;
 };
 
-// Optional future migration to use() hook (React 19 first-class API):
-const StreamingMedicalRecords = () => {
-  use(resource.promise);  // replaces throw-promise pattern
-  return <MedicalRecords />;
+// A Suspense-compatible data layer can expose a cached promise to use():
+const Comments = ({ commentsPromise }: { commentsPromise: Promise<Comment[]> }) => {
+  const comments = use(commentsPromise);
+  return <CommentsList comments={comments} />;
 };
 ```
 
 | React 19 Feature | Benefit |
 |-----------------|---------|
-| **Suspense batching (19.2+)** | Skeleton → content transitions grouped in single render pass |
-| **React Compiler** (enabled — Rust port via Rspack 2.1 `builtin:swc-loader`) | Auto-memoization: shell re-renders (theme, palette, kills) skip unchanged paths |
-| **`use()` hook** | First-class replacement for throw-promise (migration optional) |
+| **Fallback commit** | The nearest skeleton can appear promptly when a component suspends |
+| **React Compiler** (enabled via Rspack 2.1 `builtin:swc-loader`) | Measure the effect in the deployed app |
+| **`use()` hook** | Reads a cached promise from a supported data source |
 
 ---
 
@@ -561,8 +561,8 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 | Strategy | When it loads | Example |
 |----------|--------------|----------|
-| **Instant** | Chunk fetched lazily, no streaming delay | Home |
-| **Eager** | Preloaded the moment the shell mounts, no streaming delay | Records |
+| **Instant** | Chunk fetched lazily, no artificial resource delay | Home |
+| **Eager** | Preloaded the moment the shell mounts | Records |
 | **Hover** | Prefetched when user hovers a tab | Prescriptions, Analytics |
 
 > **Why `lazy()` for eager modules?** Module Federation remotes are separate builds on separate servers — you can't use a static `import`. The eager pattern fires `import()` at shell init to warm the browser's module cache; when `lazy()` later calls the same `import()`, it resolves instantly. This is confirmed by the test: *"renders records immediately without a skeleton (eager strategy)"*.
@@ -721,7 +721,7 @@ export function applyTheme(theme: ThemeName): void {
 }
 ```
 
-> **Key insight:** Remotes never import shell code. They style with Tailwind classes that reference CSS variables (`text-cream`, `bg-noir`). When the shell rewrites those variables, every remote re-paints automatically — zero coupling.
+> **Key insight:** Remotes never import shell code. They style with Tailwind classes that reference CSS variables (`text-cream`, `bg-noir`). When the shell rewrites those variables, every remote re-paints automatically without a direct runtime import.
 
 ### Commands — Data-driven command palette
 

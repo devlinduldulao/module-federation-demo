@@ -36,7 +36,7 @@ const pptx = new Pptxgen();
 pptx.defineLayout({ name: "WIDE", width: 13.33, height: 7.5 });
 pptx.layout = "WIDE";
 pptx.author = "Module Federation Demo";
-pptx.title = "From 5 Devs to 200 — Micro-Frontends That Scale Your Team and Stream Your UI";
+pptx.title = "From 5 Devs to 200 — Micro-Frontends That Scale Your Team and Keep the UI Responsive";
 
 let slideNo = 0;
 
@@ -142,7 +142,7 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     x: 0.6, y: 1.75, w: 12.1, h: 1.5,
     fontFace: SERIF, italic: true, fontSize: 66, color: C.cream,
   });
-  s.addText("Micro-Frontends That Scale Your Team and Stream Your UI", {
+  s.addText("Micro-Frontends That Scale Your Team and Keep the UI Responsive", {
     x: 0.7, y: 3.3, w: 12, h: 0.6,
     fontFace: BODY, fontSize: 22, color: C.stone,
   });
@@ -205,7 +205,7 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     "Without Suspense:  click tab → blank screen → spinner → content",
     "                   (terrible UX, even with great DX)",
     "",
-    "With Suspense:     click tab → skeleton instantly → content streams in",
+    "With Suspense:     click tab → skeleton instantly → content resolves",
     "                   (each remote owns its loading choreography)",
   ].join("\n"), { x: 0.6, y: 3.6, w: 12.1, h: 1.8, fontSize: 12.5, color: C.cream });
   quote(s, "The shell doesn't know or care how long a remote takes to load. It renders <Suspense> and moves on.", { y: 5.9, fontSize: 15 });
@@ -234,7 +234,7 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   table(s,
     ["Strategy", "Module", "Behavior"],
     [
-      ["Instant", "Home", "Lazy for code splitting, no streaming delay — renders when the chunk arrives"],
+      ["Instant", "Home", "Lazy for code splitting, no artificial resource delay — renders when the chunk arrives"],
       ["Eager", "Records", "Standalone component, preloaded on shell mount — cached before the click"],
       ["Streamed", "Prescriptions, Analytics", "On demand, per-module skeletons + error isolation"],
     ],
@@ -251,7 +251,7 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   table(s,
     ["Technology", "Version", "Why"],
     [
-      ["React", "19.2", "Streaming Suspense as a first-class primitive"],
+      ["React", "19.2", "Suspense fallbacks and lazy loading as first-class primitives"],
       ["Rspack", "2.1", "Native Module Federation, Rust React Compiler, sub-second HMR"],
       ["TypeScript", "6.0", "Strict mode, type-safe event contracts"],
       ["Tailwind CSS", "v4", "@theme tokens for the design system"],
@@ -322,8 +322,8 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
 {
   const s = newSlide({
     kicker: "UX Pillar",
-    title: "The resource pattern — how streaming works in a remote",
-    notes: "The streaming wrapper's ONLY job is to trigger Suspense. The actual UI lives in the standalone component. read() throws the promise while pending — Suspense in the shell catches it.",
+    title: "The resource pattern — a client-side Suspense fallback",
+    notes: "The wrapper's ONLY job is to trigger Suspense. The actual UI lives in the standalone component. read() throws the promise while pending — Suspense in the shell catches it. This demo delays a client-side promise; it does not use streaming SSR.",
   });
   code(s, [
     "function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {",
@@ -432,7 +432,7 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     '    default: () => <ModuleFallback title="Records Unavailable" />,',
     "  })));",
   ].join("\n"), { x: 0.6, y: 4.35, w: 7.6, h: 1.6, fontSize: 10.5 });
-  quote(s, "Crashes, network failures, bad deploys: fully isolated. Tab-level resource exhaustion: the accepted cost of a shared runtime.", { y: 6.2, fontSize: 13.5 });
+  quote(s, "Module-level crashes, network failures, and bad deploys are isolated at the boundary. Tab-level resource exhaustion remains a shared-runtime risk.", { y: 6.2, fontSize: 13.5 });
 }
 
 // ── 11 · Cross-Module Communication ─────────────────────────────────────────
@@ -440,7 +440,7 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   const s = newSlide({
     kicker: "DX Pillar",
     title: "Events > shared state",
-    notes: "Zero coupling — modules never import each other. Works across frameworks, survives independent deploys and version mismatches. The shell stays the only router owner.",
+    notes: "No direct imports between modules. Events are framework-agnostic, but the event payload is still a versioned contract. The shell stays the only router owner.",
   });
   code(s, [
     "// Records dispatches",
@@ -458,9 +458,9 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     "}, []);",
   ].join("\n"), { x: 0.6, y: 1.85, w: 8.2, h: 3.7, fontSize: 10 });
   bullets(s, [
-    "Zero coupling — no cross-module imports",
+    "No direct cross-module imports",
     "Shell stays the only router owner",
-    "Survives independent deployments",
+    "Works across deployments when the event contract stays compatible",
     "Framework-agnostic (React, Vue, Svelte)",
     "Typed via WindowEventMap augmentation",
   ], { x: 9.0, y: 2.0, w: 3.75, h: 3.6, fontSize: 12 });
@@ -636,7 +636,7 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   });
   bullets(s, [
     "1 · Micro-frontends solve a people problem, not just a code problem",
-    "2 · Suspense streaming solves the UX side — two separate pillars, one architecture",
+    "2 · Suspense fallbacks solve the UX side — two separate pillars, one architecture",
     "3 · Events > shared state — CustomEvents survive independent deploys",
     "4 · Host owns routing — remotes request navigation, only the shell mutates it",
     "5 · Fault isolation is a feature: .catch() + ErrorBoundary per module",
@@ -655,10 +655,10 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   table(s,
     ["Signal", "Pattern to adopt"],
     [
-      ["Teams ship the same SPA and block each other on releases", "Module Federation — independent builds & deploys"],
-      ["Users wait for a full bundle before seeing anything", "Suspense streaming — skeletons render instantly"],
+      ["Teams ship the same SPA and block each other on releases", "Module Federation — independent builds; deployment topology can follow"],
+      ["Users wait for a full bundle before seeing anything", "Suspense fallback — skeletons render instantly"],
       ["One broken feature takes down the whole page", "ErrorBoundary + lazy().catch() per module"],
-      ["Shared state libraries create invisible coupling", "CustomEvents on window — zero-import communication"],
+      ["Shared state libraries create invisible coupling", "CustomEvents on window — no direct imports, explicit contracts"],
       ["You need canary releases at the feature level", "Independent versioning per remote"],
       ["Testing one feature requires the full app running", "Vitest alias trick — isolation, no servers"],
     ],
@@ -683,11 +683,11 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     x: 0.7, y: 4.05, w: 12, h: 0.5,
     fontFace: BODY, fontSize: 20, color: C.stone,
   });
-  s.addText("github.com/<your-handle>/module-federation-demo", {
+  s.addText("Repository link in the session materials", {
     x: 0.7, y: 4.85, w: 12, h: 0.4,
     fontFace: MONO, fontSize: 13, color: C.citrine, charSpacing: 1,
   });
-  s.addNotes("Replace the repo URL with the real one before presenting. Invite questions about the React 19 Suspense waterfall — the answer is route-based boundaries.");
+  s.addNotes("Share the verified repository URL in the conference materials. Invite questions about React 19 Suspense: the nearest fallback can commit sooner, then React pre-warms suspended siblings.");
 }
 
 // ── Write file ───────────────────────────────────────────────────────────────

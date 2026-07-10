@@ -4,7 +4,7 @@ Quick reference for the live coding portion of the talk.
 
 > **Two pillars to demonstrate:**
 > 1. **DX** — Module Federation gives growing teams independent builds, deploys, and onboarding
-> 2. **UX** — Suspense streaming + skeletons give visitors instant perceived load
+> 2. **UX** — Suspense fallbacks + skeletons give visitors immediate visual feedback
 
 ---
 
@@ -65,18 +65,18 @@ Before diving into loading strategies, quickly orient the audience on the three 
 1. Open `http://localhost:3000`
 2. See the **Home** landing page — loads **instantly** (no skeleton delay). Status strip shows **INSTANT** with a green dot.
 3. Click **Records** → loads fast because it was **eagerly preloaded** on shell mount. Status strip shows **EAGER** with a yellow dot.
-4. Click **Prescriptions** tab → observe the **prescriptions skeleton** streaming in (3.5s delay). Status strip shows **STREAMING** with an orange dot.
-5. Click **Analytics** tab → analytics skeleton streams in (5s delay)
-6. Explain: "Three loading strategies for three content priorities. Home is instant — no streaming delay, the landing page renders the moment the chunk arrives. Records is eager — preloaded on shell mount so it's cached before you click. Prescriptions and Analytics are streamed — loaded on demand with skeleton fallbacks."
-7. Mention: "The DX pillar is what you can't see — each of these modules is a separate app, built and deployed by a separate team, running on its own dev server."
+4. Click **Prescriptions** tab → observe the **prescriptions skeleton fallback** (2.5s deliberate demo delay). Status strip shows **STREAMING** with an orange dot.
+5. Click **Analytics** tab → analytics skeleton fallback remains visible for 4s
+6. Explain: "Three loading strategies for three content priorities. Home is instant — the landing page renders when its chunk arrives. Records is eager — preloaded on shell mount so it is cached before you click. Prescriptions and Analytics are on demand — they show skeleton fallbacks while their simulated resources resolve."
+7. Mention: "The DX pillar is what you can't see — each of these modules is a separate app with its own dev server and build. The included Pages deployment assembles them together for the demo."
 
 ### Loading strategy taxonomy
 
 | Strategy | Module | When it loads | Status strip |
 |----------|--------|--------------|---------------|
-| **Instant** | Home | Chunk fetched lazily, no streaming delay | 🟢 INSTANT |
-| **Eager** | Records | Preloaded on shell mount via `EAGER_PRELOAD`, no streaming delay | 🟡 EAGER |
-| **Streamed** | Prescriptions, Analytics | On demand with skeleton streaming | 🟠 STREAMING |
+| **Instant** | Home | Chunk fetched lazily, no artificial resource delay | 🟢 INSTANT |
+| **Eager** | Records | Preloaded on shell mount via `EAGER_PRELOAD` | 🟡 EAGER |
+| **Streamed** | Prescriptions, Analytics | On demand with skeleton fallbacks | 🟠 STREAMING |
 
 > **Anticipate the question: "Why `lazy()` if it's eager?"** — Module Federation remotes are separate builds on separate servers, resolved at runtime via `import()`. You can't use a static `import`. The eager pattern fires `import()` at shell init to cache the chunk; `lazy()` later resolves from that cache instantly — no skeleton, no delay. The test *"renders records immediately without a skeleton"* proves it.
 
@@ -193,9 +193,9 @@ Then toggle to `packages/shell/rspack.config.ts` and show the mirror side: `remo
 ```
 packages/shell/src/App.tsx
 ```
-Show: Three strategies — `Home` imports `home/Home` directly (instant), `Records` imports `records/MedicalRecords` directly and is eagerly preloaded at shell init, `Prescriptions`/`Analytics` are streamed on demand
+Show: Three strategies — `Home` imports `home/Home` directly (instant), `Records` imports `records/MedicalRecords` directly and is eagerly preloaded at shell init, `Prescriptions`/`Analytics` resolve on demand behind skeleton fallbacks
 
-### UX story: the streaming pattern (12 lines)
+### UX story: the client-side Suspense fallback pattern (12 lines)
 ```
 packages/prescriptions/src/StreamingPrescriptionOrders.tsx
 ```
@@ -244,7 +244,7 @@ paths:
   - "packages/records/**"   # ← ONLY records changes trigger this
 ```
 
-Explain: "This is the independent deploy promise of micro-frontends applied to CI. Each module has its own workflow file. When the Records team pushes a fix, only records CI runs — analytics, prescriptions, home are completely untouched. This mirrors how microservices CI/CD works: each service has its own pipeline, its own build, its own deploy target. The shell discovers remotes at runtime via `remoteEntry.js` URLs — it never needs to build the remotes itself."
+Explain: "This is the independent CI promise of micro-frontends. Each module has its own workflow file. When the Records team pushes a fix, only records CI runs — analytics, prescriptions, and home are untouched. In a production topology, those artifacts can deploy independently. The shell discovers remotes at runtime via `remoteEntry.js` URLs."
 
 Then show the job dependency chain:
 ```

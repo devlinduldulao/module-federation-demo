@@ -1,4 +1,4 @@
-# From 5 Devs to 200: Micro-Frontends That Scale Your Team and Stream Your UI
+# From 5 Devs to 200: Micro-Frontends That Scale Your Team and Keep the UI Responsive
 
 > A 30-minute conference talk with live demo  
 > Built with: React 19 · Rspack 2.1 · Module Federation · TypeScript 6 · Tailwind CSS v4
@@ -9,7 +9,7 @@
 
 # From 5 Devs to 200
 
-### Micro-Frontends That Scale Your Team and Stream Your UI
+### Micro-Frontends That Scale Your Team and Keep the UI Responsive
 
 ```
 Shell (host)    :3000
@@ -50,7 +50,7 @@ Visitors don't care about your team structure. They care that the app feels fast
 
 > **This demo shows both pillars:**  
 > Module Federation → excellent **DX** for growing teams  
-> Suspense streaming → excellent **UX** for end users
+> Suspense fallbacks → responsive **UX** for end users
 
 ---
 
@@ -67,7 +67,7 @@ Visitors don't care about your team structure. They care that the app feels fast
 Without Suspense:  User clicks a tab → blank screen → spinner → content
                    (terrible UX, even with great DX)
 
-With Suspense:     User clicks a tab → skeleton instantly → content streams in
+With Suspense:     User clicks a tab → skeleton instantly → content resolves
                    (each remote owns its loading choreography)
 ```
 
@@ -111,9 +111,9 @@ With Suspense:     User clicks a tab → skeleton instantly → content streams 
 
 | Strategy | Module | Behavior |
 |----------|--------|----------|
-| **Instant** | Home | Lazy for code splitting, but no streaming delay. Renders the moment the chunk arrives. |
-| **Eager** | Records | Imports the standalone component directly, preloaded on shell mount — already cached before the user clicks. No skeleton, no streaming delay. |
-| **Streamed** | Prescriptions, Analytics | Loaded on demand with skeleton streaming. |
+| **Instant** | Home | Lazy for code splitting, with no artificial resource delay. Renders when the chunk arrives. |
+| **Eager** | Records | Imports the standalone component directly, preloaded on shell mount — already cached before the user clicks. |
+| **Streamed** | Prescriptions, Analytics | Loaded on demand with skeleton fallbacks. |
 
 ---
 
@@ -226,7 +226,7 @@ new rspack.container.ModuleFederationPlugin({
 
 ## Slide 7 — The Resource Pattern
 
-### How streaming works inside a federated remote
+### How a client-side Suspense fallback works inside a federated remote
 
 ```tsx
 // StreamingMedicalRecords.tsx
@@ -258,7 +258,7 @@ const StreamingMedicalRecords = () => {
 };
 ```
 
-> The streaming wrapper's ONLY job is to trigger Suspense.  
+> The wrapper's only job is to trigger Suspense. This demo delays a client-side promise; it does not use streaming SSR.
 > The actual UI lives in the standalone component.
 
 ---
@@ -303,7 +303,7 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 **Why `lazy()` even for eager modules?** You can't use a static `import` with Module Federation — the remote is a separate build on a separate server, resolved at runtime. `lazy()` + a pre-warmed `import()` cache is the standard pattern: the `import()` fires at shell init, the browser caches the resolved module, and when React later calls the same `import()` inside `lazy()`, it resolves instantly from cache. You get both code splitting *and* instant rendering.
 
-**Why different strategies?** Home is your landing page — users expect it instantly. Records is high-value content — preload it so it's ready when they click. Prescriptions and Analytics are secondary — stream them on demand.
+**Why different strategies?** Home is your landing page — users expect it quickly. Records is high-value content — preload it so it's ready when they click. Prescriptions and Analytics are secondary — show a skeleton fallback while they resolve on demand.
 
 ---
 
@@ -385,7 +385,7 @@ const MedicalRecords = lazy(() =>
 );
 ```
 
-> **The 99% case (crashes, network failures, bad deploys) is fully isolated — just like microservices. The 1% gap (tab-level resource exhaustion) is the inherent cost of sharing a browser tab, and virtually every MF architecture accepts this tradeoff.**
+> **Most module-level crashes, network failures, and bad deploys are isolated at the error boundary. Tab-level resource exhaustion remains an inherent cost of sharing a browser tab.**
 
 ---
 
@@ -610,7 +610,7 @@ it("dispatches addPrescription event on Add click", async () => {
 - Open `localhost:3000` — Home landing page loads **instantly** (no skeleton, no delay — it's the "instant" strategy)
 - Point out: "Home loads the moment the chunk arrives — no streaming delay. Watch the status strip: it says INSTANT."
 - Click **Records** — it loads fast because it was **eagerly preloaded** on shell mount. Status strip shows EAGER.
-- Click **Prescriptions** — observe the skeleton streaming in. Status strip shows STREAMING. "This is the streamed strategy — loaded on demand."
+- Click **Prescriptions** — observe the skeleton fallback. Status strip shows STREAMING. "This is the on-demand strategy — loaded behind a focused fallback."
 - Explain: "Three loading strategies for three content priorities. The shell decides *how* each module loads based on its importance."
 - Navigate to Records, add a prescription — toast notification + prescriptions sync
 - Empty the prescriptions list — use the CTA to prove a remote can request host navigation without importing the router
@@ -651,7 +651,7 @@ it("dispatches addPrescription event on Add click", async () => {
 ### 1. Micro-frontends solve a people problem, not just a code problem
 The #1 reason to adopt this architecture: your team is growing and your monolith can't keep up. Independent modules = independent teams = DX that scales to hundreds of developers.
 
-### 2. Suspense streaming solves the UX side
+### 2. Suspense fallbacks solve the UX side
 DX and UX are two separate pillars. Module Federation gives your team independence. Suspense + skeletons give your users instant perceived load. This demo shows both working together.
 
 ### 3. Events > Shared state
@@ -685,7 +685,7 @@ The landing page is instant. High-priority content is eager. Secondary content s
 |---|---|
 | Multiple teams ship the same SPA and block each other on releases | **Module Federation** — independent builds, independent deploys |
 | Your app has distinct domains (records, prescriptions, analytics, admin) | **Federated remotes** — one per domain, each owns its own data |
-| Users wait for a full bundle before they see anything | **Suspense streaming** — skeletons render instantly, content streams in |
+| Users wait for a full bundle before they see anything | **Suspense fallback** — skeletons render instantly while content resolves |
 | One broken feature takes down the whole page | **ErrorBoundary + lazy().catch()** — fault isolation per module |
 | Shared state libraries create invisible coupling between features | **CustomEvents on window** — zero-import communication |
 | You need A/B testing or canary releases at the feature level | **Independent versioning** — deploy one remote without touching others |
@@ -708,11 +708,11 @@ The landing page is instant. High-priority content is eager. Secondary content s
 
 ### The Waterfall Concern — And Why It Doesn't Apply Here
 
-React 19 changed Suspense: siblings in the **same** boundary now render sequentially, not in parallel.
+React 19 commits the nearest fallback promptly when a component suspends, then pre-warms lazy requests in the suspended sibling tree.
 
 ```
-React 18:  <Suspense>  →  [A fetches] [B fetches]  →  both render  (parallel)
-React 19:  <Suspense>  →  [A fetches] → [A renders] → [B fetches]  (sequential)
+React 18:  suspended work completes before the fallback commits
+React 19:  fallback commits promptly, then React pre-warms suspended siblings
 ```
 
 **But this architecture is immune:**
@@ -727,9 +727,9 @@ React 19:  <Suspense>  →  [A fetches] → [A renders] → [B fetches]  (sequen
 
 | Feature | Benefit for this demo |
 |---------|----------------------|
-| **Suspense batching (19.2+)** | Skeleton → content transitions are smoother — no "popping in" |
-| **Render-as-you-fetch** | `createResource` already follows this pattern — data hoisted outside component |
-| **React Compiler** (enabled via Rspack 2.1 `builtin:swc-loader`) | Auto-memoization — shell re-renders (theme, palette, kills) skip unchanged paths |
+| **Fallback commits** | The skeleton can appear promptly while React prepares suspended work |
+| **Cached resource** | The demo resource is not recreated on every render |
+| **React Compiler** (enabled via Rspack 2.1 `builtin:swc-loader`) | Profile the real app before claiming a performance gain |
 | **Streaming SSR readiness** | Reduced UI churn if SSR is added later |
 
 ```tsx
@@ -802,7 +802,7 @@ test ──┘
 
 | Resource | URL |
 |---|---|
-| This demo repo | *github.com/[your-handle]/module-federation-demo* |
+| This demo repo | _Replace with the published repository URL before presenting_ |
 | Module Federation docs | module-federation.io |
 | Rspack docs | rspack.dev |
 | React 19 Suspense RFC | github.com/reactjs/rfcs |

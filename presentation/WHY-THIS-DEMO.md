@@ -61,7 +61,7 @@ This is the part most architecture talks skip. When your frontend is federated:
 
 ### Why this matters more than any technical feature
 
-Fault isolation, Suspense streaming, independent deploys — those are all demonstrated in this demo and they're all important. But they're *consequences* of the real insight: **the architecture should match how your organization actually works.**
+Fault isolation, Suspense fallbacks, and independently buildable modules are all demonstrated in this demo and they're all important. But they're *consequences* of the real insight: **the architecture should match how your organization actually works.**
 
 Small, autonomous teams that own their module end-to-end — from local dev to production deploy — move faster, onboard people faster, and ship with more confidence than any team fighting over a shared monolith.
 
@@ -93,7 +93,7 @@ You can stop any remote, edit its code, restart it, and the shell picks up the c
 
 ## 3. Suspense Streaming Gives Visitors an Excellent UX (While MF Gives Developers an Excellent DX)
 
-Section 1 is about **developer experience** — how micro-frontends let your team scale. This section is the other half: **user experience** — how Suspense streaming makes the app feel fast to the people who actually use it.
+Section 1 is about **developer experience** — how micro-frontends let your team scale. This section is the other half: **user experience** — how Suspense fallbacks keep the interface responsive for the people who actually use it.
 
 These are the two pillars of this demo:
 
@@ -102,7 +102,7 @@ These are the two pillars of this demo:
 | **Module Federation** | Developers & teams | Independent builds, deploys, onboarding — DX at scale |
 | **Suspense + Skeletons** | End users & visitors | Instant perceived load, no blank screens, progressive content — UX at runtime |
 
-You could have micro-frontends with terrible loading UX — most demos do. You could have great Suspense streaming in a monolith. This demo shows both working together.
+You could have micro-frontends with terrible loading UX — most demos do. You could have well-designed Suspense fallbacks in a monolith. This demo shows both concerns working together.
 
 ### Not every module should load the same way
 
@@ -127,7 +127,7 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 **Why `lazy()` even for eager modules?** You can't use a static `import` with Module Federation — the remote is a separate build on a separate server, resolved at runtime. `lazy()` + a pre-warmed `import()` cache is the standard pattern: the shell fires `import()` at init, the browser caches the resolved module, and when React later calls the same `import()` inside `lazy()`, it resolves instantly from cache. You get both code splitting and instant rendering — no skeleton, no delay.
 
-### How streaming works (for streamed modules)
+### How the client-side fallback works (for on-demand modules)
 
 Every other demo lazy-loads a remote and calls it a day. This one goes further: each remote **owns its loading choreography** through the Resource pattern.
 
@@ -154,30 +154,29 @@ That's the real insight — Suspense isn't just for code splitting, it's a micro
 
 ## 3b. Why React 19 Is the Right Choice (Not React 18)
 
-React 19 introduced a controversial Suspense change: sibling components inside the **same** `<Suspense>` boundary now render sequentially instead of in parallel. The community raised concerns about "waterfall" effects.
+React 19 changed when Suspense commits a fallback: it can show the nearest fallback immediately, then pre-warm lazy requests in the suspended sibling tree. This makes boundary placement and caching worth discussing rather than treating every Suspense tree alike.
 
-This demo is **designed to be unaffected**:
+This demo keeps the behavior easy to reason about:
 
-1. **Route-based rendering** — `<Routes>` renders one module at a time. There are never two suspended siblings competing inside the same boundary.
-2. **Separate boundaries** — each module has its own `<Suspense>` + `<ErrorBoundary>` wrapper. Separate boundaries = independent parallel behavior preserved.
-3. **Pre-fetching** — eager modules preload at shell init, hover modules prefetch on mouse enter. By the time React renders the component, the chunk is already cached.
+1. **Route-based rendering** — `<Routes>` renders one primary module view at a time.
+2. **Focused boundaries** — each route view has its own `<Suspense>` + `<ErrorBoundary>` wrapper, so a slow route affects that view.
+3. **Pre-fetching** — eager modules preload at shell init, and hover modules prefetch on mouse enter when possible.
 
 **What React 19 adds that React 18 doesn't:**
 
-- **Suspense batching (19.2+)** — when the user navigates from Records to Prescriptions, React 19 groups the boundary transition in a single render pass. The skeleton → content transition is smoother — no elements "popping in" one by one.
-- **Deterministic concurrent rendering** — the shell re-renders frequently (theme toggles, command palette filtering, kill switch toggles). React 19's compiler skips unchanged paths, making these interactions snappier.
-- **Render-as-you-fetch alignment** — the `createResource` pattern hoists async calls outside the component. This is exactly what React 19 encourages. In React 18, this worked by accident. In React 19, it's the official best practice.
-- **`use()` hook readiness** — the throw-promise pattern (`resource.read()`) still works in React 19, but the `use()` hook is the first-class replacement. This demo can migrate to `use()` at any time with minimal changes.
+- **Prompt fallback commits** — React can show the nearest skeleton promptly, then pre-warm suspended sibling work.
+- **React Compiler is enabled** — profile this app before claiming a measurable improvement.
+- **Cached resource pattern** — this demo does not recreate its delayed promise on every render; production code should use a Suspense-compatible cached data layer.
+- **`use()` support** — a component can read a cached promise from a supported data source.
 
 | Concern | Architecture answer |
 |---------|--------------------|
-| Sibling waterfall | Route-based = one module at a time |
-| Same-boundary contention | Each module has its own `<Suspense>` |
-| throw-promise deprecation | Still works; `use()` migration is optional |
-| Skeleton smoothness | React 19 batching = smoother transitions |
-| Shell interactivity | React Compiler (enabled via Rspack 2.1) = auto-memoized re-renders |
+| Fallback timing | React can commit the nearest fallback promptly |
+| Route boundary | A slow module affects its own route view |
+| Cached resource | The demo does not recreate its delayed promise on every render |
+| React Compiler | Enabled in Rspack; profile before claiming a measurable gain |
 
-This is worth calling out during the talk because the audience **will** ask "Doesn't React 19 break Suspense for micro-frontends?" The answer is no — but only if you follow the patterns this demo implements: separate boundaries, route-based rendering, and pre-fetching.
+This is worth calling out if asked: React 19 commits fallbacks sooner and pre-warms suspended siblings. The relevant design choices are focused boundaries, caching, and prefetching where it is useful.
 
 ---
 
@@ -336,7 +335,7 @@ This isn't "cool tech you'll never ship." Every pattern demonstrated maps direct
 |---|---|
 | **Multiple teams shipping one SPA** and stepping on each other's releases | Module Federation — each team owns a remote with its own build pipeline, deploy cycle, and dev server |
 | **A monolith that's too big to refactor** all at once | Extract one feature (like a dashboard) into a remote. Keep the rest in the shell. Prove the pattern, then expand. |
-| **Users staring at a blank screen** while your 2MB bundle loads | Loading strategy taxonomy — instant for the landing page, eager preloading for high-priority content, Suspense streaming with skeletons for secondary modules |
+| **Users staring at a blank screen** while your 2MB bundle loads | Loading strategy taxonomy — instant for the landing page, eager preloading for high-priority content, Suspense fallbacks with skeletons for secondary modules |
 | **One crashed feature taking down the whole app** | ErrorBoundary + `lazy().catch()` per module. This demo proves it live — kill a remote, everything else keeps running. |
 | **Shared Redux/Zustand stores** creating invisible coupling between features | Replace with CustomEvents on `window`. Zero imports between modules. Survives independent deploys. |
 | **A/B tests or canary releases** that require redeploying the entire frontend | Deploy one remote at a canary version. The shell consumes whatever version is live. Other remotes don't know or care. |

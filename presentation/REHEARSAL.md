@@ -20,7 +20,7 @@ Repeat Pass 3 at least three times on different days. Then do the **failure dril
 - [ ] `pnpm run kill:ports` — clear stale dev servers
 - [ ] `pnpm run dev` — all five servers up; verify each in the terminal output
 - [ ] Open `http://localhost:3000` — Home renders, status strip shows **INSTANT**
-- [ ] ⚠️ **Streaming delays:** `StreamingPrescriptionOrders.tsx` and `StreamingClinicalAnalytics.tsx` currently use `getResource(…, 0)` — **zero delay means no visible skeleton on stage.** For the talk, set prescriptions to `2500` and analytics to `4000` so the audience actually sees the skeletons stream in. Records is already `2500`.
+- [ ] Verify the built-in demo delays: prescriptions is 2.5s and analytics is 4s. Those deliberate delays make the skeleton fallbacks visible on stage; do not change them during rehearsal.
 - [ ] Verify **⌘K** opens the command palette (code accepts both Ctrl+K and ⌘K)
 - [ ] Open the **Lab** once — all four health dots green
 - [ ] DevTools docked to the side, Network tab pre-selected, throttling **off**
@@ -73,14 +73,14 @@ Repeat Pass 3 at least three times on different days. Then do the **failure dril
 ### Beat A3 — Streamed (Prescriptions, then Analytics)
 
 - **ACTION:** Click **Prescriptions** tab. Don't talk over the skeleton — let it play.
-- **SAY (as skeleton shows):** *"And this is the third strategy. Prescriptions loads on demand — the skeleton renders instantly, content streams in when the remote resolves. The shell doesn't know or care how long this takes. It rendered a Suspense boundary and moved on."*
+- **SAY (as skeleton shows):** *"And this is the third strategy. Prescriptions loads on demand — the skeleton renders instantly, then the route content replaces it when its simulated resource resolves. The shell doesn't know that timing. It rendered a Suspense boundary and moved on."*
 - **ACTION:** Click **Analytics** — second skeleton, same story, no extra words needed.
-- **SAY:** *"Three strategies, three content priorities. The landing page is instant, high-value content is eager, secondary content streams. And the part you can't see: each of these is a separate app on a separate dev server, owned by a separate team."*
+- **SAY:** *"Three strategies, three content priorities. The landing page is instant, high-value content is eager, and secondary content shows a fallback while it resolves. And the part you can't see: each of these is a separate app on a separate dev server."*
 
 ### Beat A4 — Cross-module event
 
 - **ACTION:** Navigate to **Records** → click **Add →** on *Sarah Chen prescription* → toast appears → navigate to **Prescriptions** → the item is there.
-- **SAY:** *"Records just talked to Prescriptions — but Records has never imported a single line from Prescriptions. That was a typed CustomEvent on window. Zero coupling. It survives independent deploys, version mismatches, even a remote being rewritten in another framework."*
+- **SAY:** *"Records just talked to Prescriptions — but Records has never imported a line from Prescriptions. That was a typed CustomEvent on window. It avoids direct import coupling, provided the event payload stays backward-compatible. It can also cross framework boundaries."*
 - **ACTION:** Remove the items → click **Browse Records →**.
 - **SAY:** *"And navigation works the same way — the remote *asked* the shell to navigate. Only the shell owns the router."*
 
@@ -128,7 +128,7 @@ Walk your pre-opened editor tabs **left to right**. Never use the file explorer 
 
 - **ACTION:** Scroll slowly through the config once.
 - **SAY:** *"Everything here is a normal Rspack config — entry, rules, dev server. The ONE thing that makes this a micro-frontend is the ModuleFederationPlugin. `exposes` is the team's public API. `shared` with `singleton: true` means one React for everyone — remove that and hooks break."*
-- **BONUS (if asked about the build):** *"Rspack 2.1, with the Rust port of React Compiler enabled in the SWC loader and persistent caching — sub-second HMR across five apps."*
+- **BONUS (if asked about the build):** *"Rspack 2.1, with React Compiler enabled in the SWC loader and persistent caching. Profile the app to quantify the result in your environment."*
 
 ### Beat C3 — `shell/src/App.tsx` (tab 4)
 
@@ -137,7 +137,7 @@ Walk your pre-opened editor tabs **left to right**. Never use the file explorer 
 
 ### Beat C4 — `StreamingPrescriptionOrders.tsx` (tab 5)
 
-- **SAY:** *"The entire streaming pattern is ~40 lines. `read()` throws the promise while pending — Suspense catches it. The wrapper's only job is to trigger Suspense; the real UI lives in the standalone component. In React 19 you could swap this for the `use()` hook — same architecture."*
+- **SAY:** *"The entire client-side Suspense pattern is ~40 lines. `read()` throws the promise while pending — Suspense catches it. The wrapper's only job is to trigger Suspense; the real UI lives in the standalone component. In production, pair this with a Suspense-compatible cached data layer; React 19's `use()` can read its promise."*
 
 ### Beat C5 — `types.ts` (tab 6, 20 seconds)
 
@@ -166,7 +166,7 @@ Walk your pre-opened editor tabs **left to right**. Never use the file explorer 
 
 | Question you WILL get | Your rehearsed answer (short form) |
 |---|---|
-| "Doesn't React 19 break Suspense for MF?" | "Only if siblings share a boundary. We're route-based — one module, one boundary, no waterfall. React 19 actually helps: Suspense batching + the compiler." |
+| "What changed in React 19 Suspense?" | "React commits the nearest fallback sooner, then pre-warms suspended siblings. We keep the demo route-based and use one focused fallback per route." |
 | "Why not iframes for real isolation?" | "Iframes give you OS-level isolation but break shared context, theming, and routing. The ErrorBoundary model covers 99% of failures at a fraction of the cost." |
 | "Why CustomEvents and not a shared store?" | "A shared store is a shared dependency — version coupling between teams. Events survive independent deploys and even framework diversity." |
 | "How do you keep UI consistent across teams?" | "The shell owns design tokens as CSS variables; remotes inherit. Theme changes broadcast as events — no shared component library required to start." |
