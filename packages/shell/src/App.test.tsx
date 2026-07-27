@@ -108,7 +108,7 @@ describe("Shell App", () => {
       "true"
     );
     expect(document.documentElement.dataset.theme).toBe("light");
-    expect(document.documentElement.style.getPropertyValue("--color-noir")).toBe("#FFFFFF");
+    expect(document.documentElement.style.getPropertyValue("--color-noir")).toBe("#FBFAF6");
   });
 
   it("switches to the prescriptions route on click", async () => {

@@ -227,7 +227,7 @@ function MedicalRecords() {
 
       {/* Filters */}
       <nav
-        className="flex items-center gap-6 mb-10 border-b border-edge pb-4 animate-fade-in-up"
+        className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-10 border-b border-edge pb-4 animate-fade-in-up"
         style={{ animationDelay: "100ms" }}
         role="navigation"
         aria-label="Record category filters"
@@ -237,7 +237,7 @@ function MedicalRecords() {
             key={category}
             onClick={() => handleCategoryChange(category)}
             className={cn(
-              "font-mono text-xs tracking-wider uppercase pb-2 transition-all duration-300 relative",
+              "font-mono text-xs tracking-wider uppercase pb-2 transition-all duration-300 relative whitespace-nowrap",
               selectedCategory === category
                 ? "text-cream"
                 : "text-dim hover:text-stone"
@@ -250,7 +250,7 @@ function MedicalRecords() {
             )}
           </button>
         ))}
-        <span className="ml-auto font-mono text-[11px] text-dim">
+        <span className="ml-auto font-mono text-[11px] text-dim whitespace-nowrap">
           {filteredRecords.length} record{filteredRecords.length !== 1 ? "s" : ""}
         </span>
       </nav>

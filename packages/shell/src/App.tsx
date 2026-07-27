@@ -938,13 +938,13 @@ function ShellFrame(): React.JSX.Element {
                 <span className="text-edge">|</span>
                 <span>:{activeModule.port}</span>
               </div>
-              <div className="flex items-center gap-6 font-mono text-[11px] text-dim">
-                <span>React 19</span>
-                <span className="text-edge">|</span>
+              <div className="flex items-center gap-6 font-mono text-[11px] text-dim whitespace-nowrap">
+                <span className="hidden sm:inline">React 19</span>
+                <span className="hidden text-edge sm:inline">|</span>
                 <span className="hidden sm:inline">Suspense</span>
-                <span className="text-edge">|</span>
+                <span className="hidden text-edge sm:inline">|</span>
                 <span className="hidden sm:inline">Module Federation</span>
-                <span className="text-edge">|</span>
+                <span className="hidden text-edge sm:inline">|</span>
                 <span>{THEME_DEFINITIONS[theme].label}</span>
                 {Object.values(killed).some(Boolean) && (
                   <>
