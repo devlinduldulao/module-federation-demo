@@ -42,7 +42,7 @@ Repeat Pass 3 at least three times on different days. Then do the **failure dril
 ## 1 · Timing map (30-minute talk)
 
 ```
- 0:00 ─ Slides 1–3    Title · Problem · Two Pillars            (5 min)
+ 0:00 ─ Slides 1–3    Title · Problem · DX + UX concerns        (5 min)
  5:00 ─ Slides 4–6    Architecture · Stack · MF Config         (5 min)
 10:00 ─ DEMO Part A   Loading strategies + events              (3 min)
 13:00 ─ DEMO Part B   Federation Lab: kill + A/B + theme       (4 min)
@@ -61,28 +61,28 @@ Repeat Pass 3 at least three times on different days. Then do the **failure dril
 ### Beat A1 — Instant (Home)
 
 - **ACTION:** Switch from slides to browser, already at `localhost:3000`.
-- **SAY:** *"This is the shell — and everything you see is four separate React apps composed at runtime. Watch the status strip: Home says INSTANT. It rendered the moment its chunk arrived — no artificial delay, no skeleton."*
+- **SAY:** *"This is the shell, and everything you see is four separate React apps composed at runtime. Watch the status strip: Home says INSTANT. It rendered the moment its chunk arrived. No artificial delay, no skeleton."*
 - **WATCH FOR:** green dot + INSTANT in the status strip. Point at it physically.
 
 ### Beat A2 — Eager (Records)
 
 - **ACTION:** Click **Records** tab.
-- **SAY:** *"Records appears immediately too — but for a different reason. It was preloaded the moment the shell mounted. By the time I clicked, the chunk was already in the browser cache. Status strip says EAGER."*
-- **PAUSE BEAT:** let the instant render sink in — the *absence* of a skeleton is the demo here.
+- **SAY:** *"Records appears immediately too, but for a different reason. It was preloaded the moment the shell mounted. By the time I clicked, the chunk was already in the browser cache. Status strip says EAGER."*
+- **PAUSE BEAT:** let the instant render sink in. The *absence* of a skeleton is the demo here.
 
 ### Beat A3 — Streamed (Prescriptions, then Analytics)
 
 - **ACTION:** Click **Prescriptions** tab. Don't talk over the skeleton — let it play.
-- **SAY (as skeleton shows):** *"And this is the third strategy. Prescriptions loads on demand — the skeleton renders instantly, then the route content replaces it when its simulated resource resolves. The shell doesn't know that timing. It rendered a Suspense boundary and moved on."*
-- **ACTION:** Click **Analytics** — second skeleton, same story, no extra words needed.
-- **SAY:** *"Three strategies, three content priorities. The landing page is instant, high-value content is eager, and secondary content shows a fallback while it resolves. And the part you can't see: each of these is a separate app on a separate dev server."*
+- **SAY (as skeleton shows):** *"And this is the third strategy. Prescriptions loads on demand. The skeleton renders immediately, then the route content replaces it when its simulated resource resolves. The shell doesn't know that timing. It rendered a Suspense boundary and moved on."*
+- **ACTION:** Click **Analytics**. Second skeleton, same story, no extra words needed.
+- **SAY:** *"Three strategies, three content priorities. The landing page is instant, high-value content is eager, and secondary content shows a fallback while it resolves. What you can't see: each of these is a separate app on a separate dev server."*
 
 ### Beat A4 — Cross-module event
 
 - **ACTION:** Navigate to **Records** → click **Add →** on *Sarah Chen prescription* → toast appears → navigate to **Prescriptions** → the item is there.
-- **SAY:** *"Records just talked to Prescriptions — but Records has never imported a line from Prescriptions. That was a typed CustomEvent on window. It avoids direct import coupling, provided the event payload stays backward-compatible. It can also cross framework boundaries."*
+- **SAY:** *"Records just talked to Prescriptions, but Records has never imported a line from Prescriptions. That was a typed CustomEvent on window. It avoids direct import coupling, provided the event payload stays backward-compatible. It can also cross framework boundaries."*
 - **ACTION:** Remove the items → click **Browse Records →**.
-- **SAY:** *"And navigation works the same way — the remote *asked* the shell to navigate. Only the shell owns the router."*
+- **SAY:** *"Navigation works the same way. The remote *asked* the shell to navigate. Only the shell owns the router."*
 
 ---
 
@@ -91,27 +91,27 @@ Repeat Pass 3 at least three times on different days. Then do the **failure dril
 ### Beat B1 — Health monitor
 
 - **ACTION:** Press **⌘K** → type `lab` → Enter. (Keyboard, not mouse — it looks expert.)
-- **SAY:** *"This is the Federation Lab. Four remotes, four health dots — each one polls that module's remoteEntry.js every five seconds."*
+- **SAY:** *"This is the Federation Lab. Four remotes, four health dots. Each one polls that module's remoteEntry.js every five seconds."*
 
 ### Beat B2 — Kill switch 💥 (the money shot)
 
 - **ACTION:** Toggle the **Kill Switch** for Records. Navigate to **Records**.
 - **SAY:** *"The Records team just shipped a broken deploy. Their module is down…"*
 - **ACTION:** Click **Prescriptions**. Click **Analytics**. Both work.
-- **SAY:** *"…and nobody else noticed. This is where DX and UX meet: independent deploys are the DX win — contained failures are the UX win. One ErrorBoundary per module, a `.catch()` on every lazy import. Just like a microservice going down."*
-- **ANTICIPATE (someone will ask "so it's microservices?"):** *"Yes — for the 99% case. Crashes, network failures, bad deploys: fully contained. The 1% gap: all modules share one browser tab, so a true infinite loop freezes everything. That's the cost of a shared runtime, and virtually every MF architecture accepts it."*
+- **SAY:** *"…and nobody else noticed. Independent deploys are the DX win. Contained failures are the UX win. One ErrorBoundary per module, a `.catch()` on every lazy import. Same idea as a microservice going down."*
+- **ANTICIPATE (someone will ask "so it's microservices?"):** *"Yes, for the 99% case. Crashes, network failures, bad deploys: fully contained. The 1% gap: all modules share one browser tab, so a true infinite loop freezes everything. That is the cost of a shared runtime, and most MF setups accept it."*
 - **ACTION:** **Restore All** in the Lab.
 
 ### Beat B3 — A/B deployment
 
 - **ACTION:** In the Lab, toggle **Stable → Canary**.
-- **SAY:** *"Each remote can run a different version. In production, this toggle is a routing decision on remoteEntry URLs — canary one team's module while everything else stays stable."*
+- **SAY:** *"Each remote can run a different version. In production, this toggle is a routing decision on remoteEntry URLs: canary one team's module while everything else stays stable."*
 - **ACTION:** Toggle back to Stable. Close the Lab.
 
 ### Beat B4 — Theme (30 seconds, keep it brisk)
 
 - **ACTION:** ⌘K → type `light` → Enter. Then ⌘K → `dark` → Enter.
-- **SAY:** *"One more cross-cutting concern: theming. The shell rewrites CSS variables, persists to localStorage, broadcasts a typed event — every remote reacts with zero shared imports."*
+- **SAY:** *"One more cross-cutting concern: theming. The shell rewrites CSS variables, persists to localStorage, broadcasts a typed event. Every remote reacts with zero shared imports."*
 - **OPTIONAL (if ahead of schedule):** refresh the page to show persistence.
 
 ---
@@ -122,18 +122,18 @@ Walk your pre-opened editor tabs **left to right**. Never use the file explorer 
 
 ### Beat C1 — `index.tsx` + `bootstrap.tsx` (tabs 1–2)
 
-- **SAY:** *"The entire entry file of every module is one line: `import('./bootstrap')`. That dynamic import is an async boundary — Module Federation needs it to negotiate the shared React copy before any React code runs. Remove it and you get a white screen and a loadShareSync error."*
+- **SAY:** *"The entire entry file of every module is one line: `import('./bootstrap')`. That dynamic import is an async boundary. Module Federation needs it to negotiate the shared React copy before any React code runs. Remove it and you get a white screen and a loadShareSync error."*
 
 ### Beat C2 — `records/rspack.config.ts` (tab 3)
 
 - **ACTION:** Scroll slowly through the config once.
-- **SAY:** *"Everything here is a normal Rspack config — entry, rules, dev server. The ONE thing that makes this a micro-frontend is the ModuleFederationPlugin. `exposes` is the team's public API. `shared` with `singleton: true` means one React for everyone — remove that and hooks break."*
+- **SAY:** *"Everything here is a normal Rspack config: entry, rules, dev server. The one thing that makes this a micro-frontend is the ModuleFederationPlugin. `exposes` is the team's public API. `shared` with `singleton: true` means one React for everyone. Remove that and hooks break."*
 - **BONUS (if asked about the build):** *"Rspack 2.1, with React Compiler enabled in the SWC loader and persistent caching. Profile the app to quantify the result in your environment."*
 
 ### Beat C3 — `shell/src/App.tsx` (tab 4)
 
-- **SAY:** *"The host mirror: `remotes` maps a scope to a remoteEntry URL, resolved at runtime. And here are the three strategies as data — `loadStrategy: instant | eager | streamed` — plus three layers of resilience: `.catch()` on the import, Suspense for the skeleton, ErrorBoundary for runtime errors."*
-- **ANTICIPATE ("why lazy() if it's eager?"):** *"Because a remote is a separate build on a separate server — a static import can't exist at build time. The eager `import()` fires at shell init to warm the cache; `lazy()` resolves from that cache instantly. There's a test that proves Records renders with no skeleton."*
+- **SAY:** *"The host mirror: `remotes` maps a scope to a remoteEntry URL, resolved at runtime. And here are the three strategies as data: `loadStrategy: instant | eager | streamed`. Plus three layers of resilience: `.catch()` on the import, Suspense for the skeleton, ErrorBoundary for runtime errors."*
+- **ANTICIPATE ("why lazy() if it's eager?"):** *"Because a remote is a separate build on a separate server. A static import can't exist at build time. The eager `import()` fires at shell init to warm the cache; `lazy()` resolves from that cache. There's a test that proves Records renders with no skeleton."*
 
 ### Beat C4 — `StreamingPrescriptionOrders.tsx` (tab 5)
 
@@ -150,13 +150,13 @@ Walk your pre-opened editor tabs **left to right**. Never use the file explorer 
 ### Beat D1 — Tests
 
 - **ACTION:** Second terminal → `pnpm test` (starts while you talk).
-- **SAY:** *"Every module is tested in isolation — no dev servers running. The trick is a Vitest alias that resolves federated imports like `records/MedicalRecords` to the source file."*
+- **SAY:** *"Every module is tested in isolation. No dev servers running. The trick is a Vitest alias that resolves federated imports like `records/MedicalRecords` to the source file."*
 - **WATCH FOR:** `210 passed (210)` — point at it: *"210 tests, 21 files, all green."*
 
 ### Beat D2 — CI (tab 7)
 
 - **ACTION:** Show `ci-records.yml`, highlight the `paths:` filter.
-- **SAY:** *"One workflow per module. When the Records team pushes, only Records CI runs. One big workflow that rebuilds everything on every push couples your deploys — and defeats the entire point of micro-frontends."*
+- **SAY:** *"One workflow per module. When the Records team pushes, only Records CI runs. One big workflow that rebuilds everything on every push couples your deploys and defeats the entire point of micro-frontends."*
 
 **TRANSITION back to slides:** *"So what should you remember tomorrow morning?"* → Takeaways slide.
 
@@ -168,10 +168,10 @@ Walk your pre-opened editor tabs **left to right**. Never use the file explorer 
 |---|---|
 | "What changed in React 19 Suspense?" | "React commits the nearest fallback sooner, then pre-warms suspended siblings. We keep the demo route-based and use one focused fallback per route." |
 | "Why not iframes for real isolation?" | "Iframes give you OS-level isolation but break shared context, theming, and routing. The ErrorBoundary model covers 99% of failures at a fraction of the cost." |
-| "Why CustomEvents and not a shared store?" | "A shared store is a shared dependency — version coupling between teams. Events survive independent deploys and even framework diversity." |
+| "Why CustomEvents and not a shared store?" | "A shared store is a shared dependency: version coupling between teams. Events survive independent deploys and even framework diversity." |
 | "How do you keep UI consistent across teams?" | "The shell owns design tokens as CSS variables; remotes inherit. Theme changes broadcast as events — no shared component library required to start." |
 | "What about shared dependency version conflicts?" | "`shared` with `singleton: true` negotiates one React at runtime; `requiredVersion` warns on mismatch. Teams can still pin everything non-shared independently." |
-| "Is Module Federation production-ready?" | "It runs healthcare platforms, SaaS dashboards, enterprise portals today. Rspack ships it natively, and the runtime is a stable, separate package." |
+| "Is Module Federation production-ready?" | "Teams use it for multi-team SPAs: healthcare, SaaS dashboards, enterprise portals. Rspack ships it natively, and the runtime is a stable, separate package." |
 
 ---
 
@@ -188,7 +188,7 @@ Recovery: `pnpm run kill:ports` then `pnpm run dev`. Rehearse typing it without 
 Recovery: screenshots folder (pre-flight item). Narrate the flow over static images — you rehearsed the SAY lines, they work without the live app.
 
 **Drill 4 — You blank on a line.**
-Recovery rule: describe what the audience can SEE ("status strip says EAGER — preloaded at mount"). The UI is your teleprompter; every label on screen is a cue.
+Recovery rule: describe what the audience can SEE ("status strip says EAGER: preloaded at mount"). The UI is your teleprompter; every label on screen is a cue.
 
 ---
 

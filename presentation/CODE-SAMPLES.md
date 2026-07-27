@@ -2,13 +2,13 @@
 
 Annotated code snippets for projection during the talk. Each block is self-contained and presentation-ready.
 
-> **Two pillars in this demo:**
-> - **DX (Developer Experience)** — Module Federation gives growing teams independent builds, deploys, and onboarding. Sections 2, 4, 6, 7 show this.
-> - **UX (User Experience)** — Suspense fallbacks + skeletons give visitors immediate visual feedback. Sections 1, 2 (layers), 8 show this.
+> **Two concerns in this demo:**
+> - **DX (Developer Experience):** Module Federation gives growing teams independent builds, deploys, and onboarding. Sections 2, 4, 6, 7 show this.
+> - **UX (User Experience):** Suspense fallbacks + skeletons give visitors immediate visual feedback. Sections 1, 2 (layers), 8 show this.
 
 ---
 
-## 1. The Client-Side Suspense Resource Pattern (UX Pillar)
+## 1. The Client-Side Suspense Resource Pattern (Load UX)
 
 The entire pattern that makes Suspense work inside federated remotes:
 
@@ -258,7 +258,7 @@ The three layers above (`.catch()` on `lazy()`, `Suspense`, `ErrorBoundary`) giv
 
 ---
 
-## 3. Cross-Module Communication (DX Pillar)
+## 3. Cross-Module Communication (Team DX)
 
 Zero imports between modules — teams never depend on each other's code.
 
@@ -327,7 +327,7 @@ const handleBrowseRecords = () => {
 
 ---
 
-## 4. Module Federation Config (DX Pillar)
+## 4. Module Federation Config (Team DX)
 
 This is the infrastructure that lets each team own their own build, deploy, and dev server.
 
@@ -479,7 +479,7 @@ declare global {
 
 ---
 
-## 7. Testing Federated Components (DX Pillar)
+## 7. Testing Federated Components (Team DX)
 
 Each team tests their module in complete isolation — no dev servers needed, no cross-team dependencies.
 
@@ -569,7 +569,7 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 ---
 
-## 9. Per-Module CI Pipelines (DX Pillar)
+## 9. Per-Module CI Pipelines (Team DX)
 
 ### Best practice: one workflow file per micro-frontend
 

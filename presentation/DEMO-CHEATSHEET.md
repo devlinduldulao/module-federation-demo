@@ -2,9 +2,9 @@
 
 Quick reference for the live coding portion of the talk.
 
-> **Two pillars to demonstrate:**
-> 1. **DX** — Module Federation gives growing teams independent builds, deploys, and onboarding
-> 2. **UX** — Suspense fallbacks + skeletons give visitors immediate visual feedback
+> **Two concerns to demonstrate:**
+> 1. **DX:** Module Federation gives growing teams independent builds, deploys, and onboarding
+> 2. **UX:** Suspense fallbacks + skeletons give visitors immediate visual feedback
 
 ---
 
@@ -27,7 +27,7 @@ pnpm run dev
 
 ## 2. Shell controls walkthrough
 
-Before diving into loading strategies, quickly orient the audience on the three control surfaces in the header:
+Before the load-strategy walkthrough, orient the audience on the three control surfaces in the header:
 
 ### Settings button
 1. Click **Settings** in the header
@@ -49,18 +49,18 @@ Before diving into loading strategies, quickly orient the audience on the three 
 ### Lab button (Federation Lab)
 1. Click the **Lab** button (orange border) or press `Ctrl+K` → type "lab"
 2. Walk through the four sections:
-   - **Remote Health** — "Each dot polls `remoteEntry.js` every 5 seconds. Green means the remote is reachable."
-   - **Kill Switches** — "I can take down any remote from here. The shell renders a fallback, other modules keep running."
-   - **A/B Deployment** — "Toggle between stable and canary rings. Each module can be at a different version."
-   - **Hot Reload Guide** — "Step-by-step instructions for the real server kill demo."
+   - Remote Health: "Each dot polls `remoteEntry.js` every 5 seconds. Green means the remote is reachable."
+   - Kill Switches: "I can take down any remote from here. The shell renders a fallback, other modules keep running."
+   - A/B Deployment: "Toggle between stable and canary rings. Each module can be at a different version."
+   - Hot Reload Guide: "Step-by-step instructions for the real server kill demo."
 3. Close the panel
-4. Explain: "The Lab is the demo centerpiece. It proves fault isolation, health monitoring, and independent versioning — all live."
+4. Explain: "The Lab is the demo centerpiece. It proves fault isolation, health monitoring, and independent versioning, live."
 
-> **Pro tip:** Every Lab action is also available in the command palette. During the talk, use `Ctrl+K` for quick actions and the Lab panel for the visual walkthrough.
+> Every Lab action is also available in the command palette. During the talk, use `Ctrl+K` for quick actions and the Lab panel for the visual walkthrough.
 
 ---
 
-## 3. Show loading strategies in action (UX pillar)
+## 3. Show loading strategies in action (load UX)
 
 1. Open `http://localhost:3000`
 2. See the **Home** landing page — loads **instantly** (no skeleton delay). Status strip shows **INSTANT** with a green dot.
@@ -68,17 +68,17 @@ Before diving into loading strategies, quickly orient the audience on the three 
 4. Click **Prescriptions** tab → observe the **prescriptions skeleton fallback** (2.5s deliberate demo delay). Status strip shows **STREAMING** with an orange dot.
 5. Click **Analytics** tab → analytics skeleton fallback remains visible for 4s
 6. Explain: "Three loading strategies for three content priorities. Home is instant — the landing page renders when its chunk arrives. Records is eager — preloaded on shell mount so it is cached before you click. Prescriptions and Analytics are on demand — they show skeleton fallbacks while their simulated resources resolve."
-7. Mention: "The DX pillar is what you can't see — each of these modules is a separate app with its own dev server and build. The included Pages deployment assembles them together for the demo."
+7. Mention: "The DX side is what you can't see: each of these modules is a separate app with its own dev server and build. The included Pages deployment assembles them together for the demo."
 
-### Loading strategy taxonomy
+### Load strategies
 
 | Strategy | Module | When it loads | Status strip |
 |----------|--------|--------------|---------------|
-| **Instant** | Home | Chunk fetched lazily, no artificial resource delay | 🟢 INSTANT |
-| **Eager** | Records | Preloaded on shell mount via `EAGER_PRELOAD` | 🟡 EAGER |
-| **Streamed** | Prescriptions, Analytics | On demand with skeleton fallbacks | 🟠 STREAMING |
+| Instant | Home | Chunk fetched lazily, no artificial resource delay | 🟢 INSTANT |
+| Eager | Records | Preloaded on shell mount via `EAGER_PRELOAD` | 🟡 EAGER |
+| Streamed | Prescriptions, Analytics | On demand with skeleton fallbacks | 🟠 STREAMING |
 
-> **Anticipate the question: "Why `lazy()` if it's eager?"** — Module Federation remotes are separate builds on separate servers, resolved at runtime via `import()`. You can't use a static `import`. The eager pattern fires `import()` at shell init to cache the chunk; `lazy()` later resolves from that cache instantly — no skeleton, no delay. The test *"renders records immediately without a skeleton"* proves it.
+> **Anticipate: "Why `lazy()` if it's eager?"** Module Federation remotes are separate builds on separate servers, resolved at runtime via `import()`. You can't use a static `import`. The eager pattern fires `import()` at shell init to cache the chunk; `lazy()` later resolves from that cache. No skeleton, no delay. The test *"renders records immediately without a skeleton"* proves it.
 
 ---
 
@@ -106,11 +106,11 @@ Before diving into loading strategies, quickly orient the audience on the three 
 5. Navigate to Analytics → works fine
 6. Note the status bar showing "1 KILLED"
 7. Click **Restore All** in the Lab panel
-8. Explain: "This is where DX and UX meet. Each team deploys independently — that's the DX benefit. When one team's deploy breaks, the user still sees the rest of the app — that's the UX benefit. ErrorBoundary catches it and other modules keep running."
+8. Explain: "Each team deploys independently: that is the DX benefit. When one team's deploy breaks, the user still sees the rest of the app: that is the UX benefit. ErrorBoundary catches it and other modules keep running."
 
 ### Talking point: "Is this like microservices?"
 
-Say: "People always ask this. The answer is **yes, for the 99% case.** Microservices isolate at the OS level — separate processes, separate memory. We isolate at the React level — per-module ErrorBoundary, per-module Suspense, `.catch()` on lazy imports. Crashes, network failures, bad deploys — all contained, just like a microservice going down. The 1% gap is that all modules share a browser tab, so a true infinite loop freezes everything. That's the inherent cost of a shared runtime, and virtually every MF architecture accepts it."
+Say: "Yes, for the 99% case. Microservices isolate at the OS level: separate processes, separate memory. We isolate at the React level: per-module ErrorBoundary, per-module Suspense, `.catch()` on lazy imports. Crashes, network failures, bad deploys are contained. The 1% gap is that all modules share a browser tab, so a true infinite loop freezes everything. That is the cost of a shared runtime, and most MF setups accept it."
 
 ### Option B: Real server kill
 
@@ -189,7 +189,7 @@ Open `packages/records/rspack.config.ts` and scroll through it. Point out:
 
 Then toggle to `packages/shell/rspack.config.ts` and show the mirror side: `remotes` pointing to each `remoteEntry.js`.
 
-### UX story: loading strategy taxonomy
+### UX story: load strategies
 ```
 packages/shell/src/App.tsx
 ```

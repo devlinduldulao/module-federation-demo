@@ -25,9 +25,9 @@ Shell (host)    :3000
 
 ## Slide 2 — The Problem
 
-### The Real Bottleneck Isn't Your Framework — It's Your Team Size
+### Team size is the bottleneck
 
-Most frontend architecture talks start with bundle sizes or code splitting. But the actual pain that drives companies to micro-frontends is **developer experience at scale**.
+Most frontend architecture talks start with bundle sizes or code splitting. The pain that drives companies to micro-frontends is **developer experience at scale**.
 
 ```
   5 devs → everyone knows the codebase → fast, fun, productive
@@ -42,37 +42,36 @@ Most frontend architecture talks start with bundle sizes or code splitting. But 
 | Teams blocked by shared release cycles | Independent deployment per module |
 | One broken test blocks everyone's pipeline | Each team owns their own test suite |
 | Onboarding means learning the entire app | New devs learn one module, contribute day one |
-| Shared `package.json` — upgrade together or not at all | Each remote pins its own dependencies |
+| Shared `package.json`: upgrade together or not at all | Each remote pins its own dependencies |
 | 15-minute CI builds for a one-line change | Each remote builds in seconds |
 
-**But solving DX isn't enough.**  
-Visitors don't care about your team structure. They care that the app feels fast.
+DX alone is incomplete. Visitors don't care about your team structure. They care that the app feels fast.
 
-> **This demo shows both pillars:**  
-> Module Federation → excellent **DX** for growing teams  
-> Suspense fallbacks → responsive **UX** for end users
+> Module Federation gives growing teams better **DX**.  
+> Suspense fallbacks give end users better **UX**.  
+> This demo shows both working together.
 
 ---
 
 ## Slide 3 — The Insight
 
-### Two Pillars: DX for Your Team, UX for Your Users
+### Module Federation for teams, Suspense for load UX
 
-| Pillar | Who Benefits | What It Solves |
+| Concern | Who Benefits | What It Solves |
 |--------|-------------|---------------|
-| **Module Federation** | Developers & teams | Independent builds, deploys, onboarding — DX at scale |
-| **Suspense + Skeletons** | End users & visitors | Instant perceived load, no blank screens — UX at runtime |
+| **Module Federation** | Developers & teams | Independent builds, deploys, onboarding at scale |
+| **Suspense + Skeletons** | End users & visitors | Instant perceived load, no blank screens at runtime |
 
 ```
 Without Suspense:  User clicks a tab → blank screen → spinner → content
-                   (terrible UX, even with great DX)
+                   (slow UX even when team ownership is solid)
 
 With Suspense:     User clicks a tab → skeleton instantly → content resolves
                    (each remote owns its loading choreography)
 ```
 
-> **The shell doesn't know or care how long a remote takes to load.**  
-> It just renders `<Suspense>` and moves on. The user sees a skeleton immediately.
+> The shell does not know how long a remote takes to load.  
+> It renders `<Suspense>` and moves on. The user sees a skeleton immediately.
 
 ---
 
@@ -107,13 +106,13 @@ With Suspense:     User clicks a tab → skeleton instantly → content resolves
     └────────┘ └────────┘ └───────┘ └──────────┘
 ```
 
-**Loading strategy taxonomy — not every module loads the same way:**
+**Three load strategies. Not every module loads the same way.**
 
 | Strategy | Module | Behavior |
 |----------|--------|----------|
-| **Instant** | Home | Lazy for code splitting, with no artificial resource delay. Renders when the chunk arrives. |
-| **Eager** | Records | Imports the standalone component directly, preloaded on shell mount — already cached before the user clicks. |
-| **Streamed** | Prescriptions, Analytics | Loaded on demand with skeleton fallbacks. |
+| Instant | Home | Lazy for code splitting, with no artificial resource delay. Renders when the chunk arrives. |
+| Eager | Records | Imports the standalone component directly, preloaded on shell mount. Already cached before the user clicks. |
+| Streamed | Prescriptions, Analytics | Loaded on demand with skeleton fallbacks. |
 
 ---
 
@@ -150,25 +149,25 @@ Without this: white screen + `loadShareSync` error. With this: standalone HMR wo
 
 | Technology | Version | Why |
 |---|---|---|
-| **React** | 19.2 | Streaming Suspense as a first-class primitive |
-| **Rspack** | 2.1 | Native Module Federation, Rust React Compiler (auto-memoization), sub-second HMR |
-| **TypeScript** | 6.0 | Strict mode, type-safe event contracts |
-| **Tailwind CSS** | v4 | `@theme` tokens for the design system |
-| **Vitest** | 4.1 | Fast component tests with jsdom |
+| React | 19.2 | Streaming Suspense built into the runtime |
+| Rspack | 2.1 | Native Module Federation, Rust React Compiler (auto-memoization), sub-second HMR |
+| TypeScript | 6.0 | Strict mode, type-safe event contracts |
+| Tailwind CSS | v4 | `@theme` tokens for the design system |
+| Vitest | 4.1 | Fast component tests with jsdom |
 
 ---
 
 ## Slide 6 — Module Federation Config
 
-### The One Property That Makes It Work
+### `ModuleFederationPlugin`: exposes, remotes, shared
 
-Each `rspack.config.ts` is a normal bundler config. **The only thing that turns separate apps into a micro-frontend architecture** is the `ModuleFederationPlugin` — specifically three sub-properties:
+Each `rspack.config.ts` is a normal bundler config. The plugin that turns separate apps into a micro-frontend architecture is `ModuleFederationPlugin`, with three sub-properties:
 
 | Property | Where | Purpose |
 |----------|-------|---------|
-| **`exposes`** | Remotes | “What components do I share?” — the team's public API |
-| **`remotes`** | Host | “Where do I find each remote at runtime?” — `scope@URL` discovery |
-| **`shared`** | Both | “What do we deduplicate?” — `singleton: true` = one React for all |
+| `exposes` | Remotes | Public API: which components this team shares |
+| `remotes` | Host | Runtime discovery: `scope@URL` for each remote |
+| `shared` | Both | Deduplication: `singleton: true` means one React for all |
 
 ```
 Remote (records)                    Shell (host)
@@ -220,7 +219,7 @@ new rspack.container.ModuleFederationPlugin({
 });
 ```
 
-**Key:** `singleton: true` ensures one React instance across all modules — no "Invalid hook call" errors.
+**Key:** `singleton: true` ensures one React instance across all modules. Without it you get "Invalid hook call" errors.
 
 ---
 
@@ -296,22 +295,22 @@ const EAGER_MODULES = MODULES.filter((m) => m.loadStrategy === "eager");
 for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 ```
 
-**Three layers of resilience** (applied to every strategy):
+**Resilience on every strategy:**
 1. `lazy()` + `.catch()` → fallback if remote is unreachable
 2. `<Suspense>` → skeleton while loading
 3. `<ErrorBoundary>` → catches runtime errors in the remote
 
-**Why `lazy()` even for eager modules?** You can't use a static `import` with Module Federation — the remote is a separate build on a separate server, resolved at runtime. `lazy()` + a pre-warmed `import()` cache is the standard pattern: the `import()` fires at shell init, the browser caches the resolved module, and when React later calls the same `import()` inside `lazy()`, it resolves instantly from cache. You get both code splitting *and* instant rendering.
+**Why `lazy()` even for eager modules?** You can't use a static `import` with Module Federation. The remote is a separate build on a separate server, resolved at runtime. The usual pattern is `lazy()` plus a pre-warmed `import()` cache: `import()` fires at shell init, the browser caches the module, and when React later calls the same `import()` inside `lazy()`, it resolves from cache. You get code splitting and instant rendering.
 
-**Why different strategies?** Home is your landing page — users expect it quickly. Records is high-value content — preload it so it's ready when they click. Prescriptions and Analytics are secondary — show a skeleton fallback while they resolve on demand.
+**Why different strategies?** Home is the landing page, so users expect it quickly. Records is high-value content, so preload it before the click. Prescriptions and Analytics are secondary, so show a skeleton while they resolve on demand.
 
 ---
 
 ## Slide 9 — Shell Controls: Settings, Commands, and Federation Lab
 
-### Three Control Surfaces, Three Purposes
+### Settings, Commands, and the Federation Lab
 
-The shell header exposes three buttons that serve different roles during development and live demos:
+The shell header exposes three buttons for development and live demos:
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
@@ -322,26 +321,26 @@ The shell header exposes three buttons that serve different roles during develop
 
 | Button | Opens | Purpose |
 |--------|-------|---------|
-| **Settings** | Right slide-over drawer | Theme control — switch Dark/Light, see persistence, prove shell-owned theming across remotes |
-| **Commands** | Centered search overlay | VS Code–style command palette — navigate, theme, kill remotes, toggle rings — all from the keyboard |
-| **Lab** | Right slide-over panel | Federation Lab — health monitor, kill switches, A/B deployment, hot reload guide |
+| Settings | Right slide-over drawer | Theme control: Dark/Light, persistence, shell-owned theming across remotes |
+| Commands | Centered search overlay | VS Code–style palette: navigate, theme, kill remotes, toggle rings from the keyboard |
+| Lab | Right slide-over panel | Health monitor, kill switches, A/B deployment, hot reload guide |
 
-**Settings** answers: *"How does the shell share UI state across independent remotes?"*
+**Settings** (shell-owned UI state across remotes):
 - Selects a theme → rewrites CSS variables on `:root` → persists to `localStorage` → dispatches `themeChange` event
-- Every remote reacts immediately — no shared imports, no prop drilling
+- Every remote reacts immediately. No shared imports, no prop drilling.
 
-**Commands** answers: *"How do you control a micro-frontend demo without fumbling with a mouse?"*
+**Commands** (keyboard control of the demo):
 - `Ctrl+K` opens a searchable palette with navigation, theme, kill, and deployment commands
-- Type "kill records" or "canary" or "dark" — the list filters in real time
-- Every action in the Lab and Settings is also accessible here
+- Type "kill records" or "canary" or "dark" and the list filters in real time
+- Every Lab and Settings action is available here too
 
-**Lab** answers: *"What happens when things break?"*
-- **Health Monitor** — polls `remoteEntry.js` per remote every 5s, shows latency
-- **Kill Switches** — simulate remote failure. Shell renders `ModuleFallback`, other modules keep running
-- **A/B Deployment** — toggle Stable ↔ Canary ring, see per-module version/build hash
-- **Hot Reload Guide** — step-by-step: stop a server → show fallback → edit code → restart → click Retry
+**Lab** (when things break):
+- Health Monitor: polls `remoteEntry.js` per remote every 5s, shows latency
+- Kill Switches: simulate remote failure. Shell renders `ModuleFallback`, other modules keep running
+- A/B Deployment: toggle Stable ↔ Canary ring, see per-module version/build hash
+- Hot Reload Guide: stop a server → show fallback → edit code → restart → click Retry
 
-> **The command palette is the speaker's secret weapon.** You can kill a remote, switch themes, navigate modules, and toggle deployment rings without ever leaving the keyboard — keeping the audience focused on the demo, not on UI chrome.
+> From the keyboard you can kill a remote, switch themes, navigate modules, and toggle deployment rings. The audience stays on the demo, not on UI chrome.
 
 ---
 
@@ -358,10 +357,10 @@ The shell header exposes three buttons that serve different roles during develop
 
 ### What we do to get isolation
 
-1. Per-module `ErrorBoundary` — Records crashes, Prescriptions keeps working
-2. Per-module `Suspense` — slow remote shows only *its own* skeleton
-3. `.catch()` on `lazy()` — server down → graceful `ModuleFallback`, not a white screen
-4. Route-based rendering — one module at a time, no cross-module DOM corruption
+1. Per-module `ErrorBoundary`: Records crashes, Prescriptions keeps working
+2. Per-module `Suspense`: a slow remote shows only *its own* skeleton
+3. `.catch()` on `lazy()`: server down → `ModuleFallback` instead of a white screen
+4. Route-based rendering: one module at a time, no cross-module DOM corruption
 
 ### DEMO: Kill a remote with the Federation Lab
 
@@ -372,7 +371,7 @@ The shell header exposes three buttons that serve different roles during develop
 ```
 
 ```tsx
-// lazy() with .catch() — the secret sauce
+// lazy() with .catch() — fallback when the remote is down
 const MedicalRecords = lazy(() =>
   import("records/MedicalRecords").catch(() => ({
     default: () => (
@@ -385,13 +384,13 @@ const MedicalRecords = lazy(() =>
 );
 ```
 
-> **Most module-level crashes, network failures, and bad deploys are isolated at the error boundary. Tab-level resource exhaustion remains an inherent cost of sharing a browser tab.**
+> Module-level crashes, network failures, and bad deploys are isolated at the error boundary. Tab-level resource exhaustion is still a cost of sharing a browser tab.
 
 ---
 
 ## Slide 11 — Cross-Module Communication
 
-### Events > Shared State
+### Prefer events over shared state
 
 ```
 Records                 Shell               Prescriptions
@@ -425,10 +424,10 @@ window.dispatchEvent(new CustomEvent("navigateToModule", {
 ```
 
 **Why CustomEvents?**
-- Zero coupling — modules don't import each other
+- Zero coupling: modules don't import each other
 - The shell stays the only router owner
 - Survives independent deployments and version mismatches
-- Works across any framework (React, Vue, Svelte)
+- Works across frameworks (React, Vue, Svelte)
 - Easy to type with TypeScript's `WindowEventMap`
 
 ---
@@ -527,14 +526,14 @@ for (const m of EAGER_MODULES) { PREFETCHERS[m.id](); }
 
 | Strategy | When it loads | Example |
 |----------|--------------|----------|
-| **Instant** | Chunk fetched lazily, no streaming delay | Home |
-| **Eager** | Preloaded the moment the shell mounts, no streaming delay | Records |
-| **Hover** | Prefetched when user hovers a tab | Prescriptions, Analytics |
+| Instant | Chunk fetched lazily, no streaming delay | Home |
+| Eager | Preloaded the moment the shell mounts, no streaming delay | Records |
+| Hover | Prefetched when user hovers a tab | Prescriptions, Analytics |
 
 > Records is already cached by the time the user clicks.  
 > Prescriptions and Analytics start loading when the cursor touches the tab.
 
-**Audience Q: "Why `lazy()` for eager modules?"** — Module Federation remotes are separate builds on separate servers, resolved at runtime via `import()`. You can't use a static `import`. The eager pattern fires `import()` at shell init so the chunk is cached; `lazy()` later resolves from that cache instantly. This is confirmed by the test: *"renders records immediately without a skeleton (eager strategy)"*.
+**Audience Q: "Why `lazy()` for eager modules?"** Module Federation remotes are separate builds on separate servers, resolved at runtime via `import()`. You can't use a static `import`. The eager pattern fires `import()` at shell init so the chunk is cached; `lazy()` later resolves from that cache. Confirmed by the test: *"renders records immediately without a skeleton (eager strategy)"*.
 
 ---
 
@@ -579,7 +578,7 @@ it("dispatches addPrescription event on Add click", async () => {
 });
 ```
 
-**210 tests across 21 files — all passing.**
+**210 tests across 21 files. All passing.**
 
 ---
 
@@ -589,11 +588,11 @@ it("dispatches addPrescription event on Add click", async () => {
 
 | Element | Treatment |
 |---|---|
-| **Typography** | Instrument Serif (display) · DM Sans (body) · IBM Plex Mono (labels) |
-| **Grid** | `gap-[1px] bg-edge` — sharp 1px editorial grid lines |
-| **Accent** | Citrine `#D4FF00` — navigation, CTAs, active states |
-| **Animations** | `fadeInUp` with staggered delays, `shimmer` on skeletons |
-| **Grain** | SVG noise overlay at 2.5% opacity |
+| Typography | Instrument Serif (display) · DM Sans (body) · IBM Plex Mono (labels) |
+| Grid | `gap-[1px] bg-edge`: sharp 1px editorial grid lines |
+| Accent | Citrine `#D4FF00` for navigation, CTAs, active states |
+| Animations | `fadeInUp` with staggered delays, `shimmer` on skeletons |
+| Grain | SVG noise overlay at 2.5% opacity |
 
 ### Three palettes
 
@@ -607,24 +606,24 @@ it("dispatches addPrescription event on Add click", async () => {
 ## Slide 17 — Live Demo Script
 
 ### 1. Full federation + DX story (2 min)
-- Open `localhost:3000` — Home landing page loads **instantly** (no skeleton, no delay — it's the "instant" strategy)
-- Point out: "Home loads the moment the chunk arrives — no streaming delay. Watch the status strip: it says INSTANT."
-- Click **Records** — it loads fast because it was **eagerly preloaded** on shell mount. Status strip shows EAGER.
-- Click **Prescriptions** — observe the skeleton fallback. Status strip shows STREAMING. "This is the on-demand strategy — loaded behind a focused fallback."
+- Open `localhost:3000`. Home landing page loads instantly (no skeleton, no delay; "instant" strategy)
+- Point out: "Home loads the moment the chunk arrives. No streaming delay. Watch the status strip: it says INSTANT."
+- Click Records. It loads fast because it was eagerly preloaded on shell mount. Status strip shows EAGER.
+- Click Prescriptions. Observe the skeleton fallback. Status strip shows STREAMING. "On-demand strategy: loaded behind a focused fallback."
 - Explain: "Three loading strategies for three content priorities. The shell decides *how* each module loads based on its importance."
-- Navigate to Records, add a prescription — toast notification + prescriptions sync
-- Empty the prescriptions list — use the CTA to prove a remote can request host navigation without importing the router
+- Navigate to Records, add a prescription: toast notification + prescriptions sync
+- Empty the prescriptions list. Use the CTA to prove a remote can request host navigation without importing the router.
 
-### 2. Federation Lab — fault isolation (2 min)
-- Click **Lab** button in the header (or Ctrl+K → "Open Federation Lab")
-- Show the **Remote Health Monitor** — all 4 remotes showing green with latency
-- Toggle the **Kill Switch** for records — records shows `ModuleFallback`, other modules keep running
+### 2. Federation Lab: fault isolation (2 min)
+- Click Lab in the header (or Ctrl+K → "Open Federation Lab")
+- Show Remote Health Monitor: all 4 remotes green with latency
+- Toggle the Kill Switch for records: records shows `ModuleFallback`, other modules keep running
 - Navigate between prescriptions and analytics to prove they're unaffected
 - Restore records from the Lab panel
 - Optionally kill the real records server (`Ctrl+C`) and show the health monitor detect it going offline
 
 ### 3. A/B deployment (1 min)
-- In the Federation Lab, toggle from **Stable** to **Canary** ring
+- In the Federation Lab, toggle from Stable to Canary ring
 - Show version info changing per module (e.g., records 2.1.0 → 2.2.0-canary.1)
 - Note the status bar showing "CANARY" indicator
 - Explain: "In production, each remote could be deployed at a different version independently"
@@ -632,48 +631,48 @@ it("dispatches addPrescription event on Add click", async () => {
 ### 4. Theme switching (30 sec)
 - Toggle Dark → Light in the shell header
 - Watch CSS variables update across all remotes
-- Show localStorage persistence — refresh and theme persists
+- Show localStorage persistence: refresh and theme persists
 
 ### 5. Code walkthrough (3 min)
-- `StreamingPrescriptionOrders.tsx` — resource pattern (12 lines)
-- `App.tsx` — lazy + catch + Suspense + ErrorBoundary + kill switch check
+- `StreamingPrescriptionOrders.tsx`: resource pattern (12 lines)
+- `App.tsx`: lazy + catch + Suspense + ErrorBoundary + kill switch check
 - Cross-module `addPrescription` event flow
-- `lib/health.ts` — useRemoteHealth hook (HEAD requests to remoteEntry.js)
+- `lib/health.ts`: useRemoteHealth hook (HEAD requests to remoteEntry.js)
 
 ### 6. Testing (1 min)
-- Run `pnpm test` — 210 tests, all green
+- Run `pnpm test`: 210 tests, all green
 - Show vitest.config.ts alias trick for MF imports
 
 ---
 
 ## Slide 18 — Key Takeaways
 
-### 1. Micro-frontends solve a people problem, not just a code problem
-The #1 reason to adopt this architecture: your team is growing and your monolith can't keep up. Independent modules = independent teams = DX that scales to hundreds of developers.
+### 1. Micro-frontends solve a people problem
+Adopt this when your team is growing and the monolith can't keep up. Independent modules let independent teams ship without blocking each other, including orgs with hundreds of developers.
 
-### 2. Suspense fallbacks solve the UX side
-DX and UX are two separate pillars. Module Federation gives your team independence. Suspense + skeletons give your users instant perceived load. This demo shows both working together.
+### 2. Suspense fallbacks cover the UX side
+Module Federation gives your team independence. Suspense + skeletons give users instant perceived load. This demo runs both together.
 
-### 3. Events > Shared state
-`CustomEvent` on `window` gives you decoupled communication that survives independent deploys.
+### 3. Prefer events over shared state
+`CustomEvent` on `window` gives decoupled communication that survives independent deploys.
 
 ### 4. Host owns routing
 Remotes can ask for navigation with `navigateToModule`, but only the shell mutates router state.
 
-### 5. Fault isolation is a feature, not a side effect
-`.catch()` on lazy imports + `ErrorBoundary` per module = one broken remote never kills the app.
+### 5. Ship fault isolation on purpose
+`.catch()` on lazy imports plus `ErrorBoundary` per module keeps one broken remote from taking down the app.
 
-### 6. Rspack makes this fast
-Sub-second HMR in a monorepo with 4 applications. Module Federation is a first-class citizen. Rspack 2.1 also ships the Rust port of React Compiler in `builtin:swc-loader` — automatic memoization with zero Babel overhead — and persistent caching that makes cached production builds and dev restarts dramatically faster.
+### 6. Rspack keeps the monorepo fast
+Sub-second HMR across four applications. Module Federation is built in. Rspack 2.1 also ships the Rust port of React Compiler in `builtin:swc-loader` (automatic memoization without Babel) and persistent caching for faster production builds and dev restarts.
 
-### 7. Not every module should load the same way
+### 7. Match load strategy to content priority
 ```tsx
 // Three strategies in one shell:
 { id: "home",      loadStrategy: "instant"  }  // No streaming delay
 { id: "records",        loadStrategy: "eager"    }  // Preloaded on shell mount
 { id: "prescriptions",  loadStrategy: "streamed" }  // On demand with skeletons
 ```
-The landing page is instant. High-priority content is eager. Secondary content streams on demand. The shell decides based on content importance.
+The landing page is instant. High-priority content is eager. Secondary content streams on demand.
 
 ---
 
@@ -683,30 +682,30 @@ The landing page is instant. High-priority content is eager. Secondary content s
 
 | Signal | Pattern to Adopt |
 |---|---|
-| Multiple teams ship the same SPA and block each other on releases | **Module Federation** — independent builds, independent deploys |
-| Your app has distinct domains (records, prescriptions, analytics, admin) | **Federated remotes** — one per domain, each owns its own data |
-| Users wait for a full bundle before they see anything | **Suspense fallback** — skeletons render instantly while content resolves |
-| One broken feature takes down the whole page | **ErrorBoundary + lazy().catch()** — fault isolation per module |
-| Shared state libraries create invisible coupling between features | **CustomEvents on window** — zero-import communication |
-| You need A/B testing or canary releases at the feature level | **Independent versioning** — deploy one remote without touching others |
-| Designers struggle to keep UI consistent across team-owned features | **CSS variable theming** — shell owns tokens, remotes inherit |
-| Your test suite requires the full app running to test one feature | **Vitest alias trick** — test any remote in isolation, no servers |
+| Multiple teams ship the same SPA and block each other on releases | Module Federation: independent builds and deploys |
+| Your app has distinct domains (records, prescriptions, analytics, admin) | Federated remotes: one per domain, each owns its data |
+| Users wait for a full bundle before they see anything | Suspense fallback: skeletons while content resolves |
+| One broken feature takes down the whole page | ErrorBoundary + lazy().catch() per module |
+| Shared state libraries create invisible coupling between features | CustomEvents on window: no direct imports |
+| You need A/B testing or canary releases at the feature level | Independent versioning: deploy one remote without touching others |
+| Designers struggle to keep UI consistent across team-owned features | CSS variable theming: shell owns tokens, remotes inherit |
+| Your test suite requires the full app running to test one feature | Vitest alias trick: test any remote in isolation, no servers |
 
-### Where this runs in production today
+### Typical production domains
 
-- **Healthcare platforms** — patient records, prescriptions, analytics, scheduling each as federated remotes
-- **SaaS dashboards** — billing, analytics, settings, admin panels from different teams
-- **Enterprise portals** — HR, IT, finance modules stitched into one shell
-- **Media platforms** — content feeds, player, recommendations, user profiles
-- **Internal tools** — each ops team owns their module, shared shell provides auth and nav
+- Healthcare platforms: patient records, prescriptions, analytics, scheduling as federated remotes
+- SaaS dashboards: billing, analytics, settings, admin panels from different teams
+- Enterprise portals: HR, IT, finance modules stitched into one shell
+- Media platforms: content feeds, player, recommendations, user profiles
+- Internal tools: each ops team owns their module; shared shell provides auth and nav
 
-> **Start small.** Extract one slow-moving feature into a remote. Keep the rest in the shell. Prove the pattern. Then expand.
+> Extract one slow-moving feature into a remote. Keep the rest in the shell. Prove the pattern, then expand.
 
 ---
 
-## Slide 20 — Why React 19, Not 18?
+## Slide 20 — Why React 19
 
-### The Waterfall Concern — And Why It Doesn't Apply Here
+### Fallback timing in React 19
 
 React 19 commits the nearest fallback promptly when a component suspends, then pre-warms lazy requests in the suspended sibling tree.
 
@@ -715,7 +714,7 @@ React 18:  suspended work completes before the fallback commits
 React 19:  fallback commits promptly, then React pre-warms suspended siblings
 ```
 
-**But this architecture is immune:**
+**How this demo stays easy to reason about:**
 
 ```
 ✅ Route-based    → only ONE module renders at a time (no siblings)
@@ -723,14 +722,14 @@ React 19:  fallback commits promptly, then React pre-warms suspended siblings
 ✅ Pre-fetching    → eager preload + hover prefetch = chunks cached before render
 ```
 
-### What React 19 Gives Us
+### What React 19 adds here
 
 | Feature | Benefit for this demo |
 |---------|----------------------|
-| **Fallback commits** | The skeleton can appear promptly while React prepares suspended work |
-| **Cached resource** | The demo resource is not recreated on every render |
-| **React Compiler** (enabled via Rspack 2.1 `builtin:swc-loader`) | Profile the real app before claiming a performance gain |
-| **Streaming SSR readiness** | Reduced UI churn if SSR is added later |
+| Fallback commits | The skeleton can appear promptly while React prepares suspended work |
+| Cached resource | The demo resource is not recreated on every render |
+| React Compiler (via Rspack 2.1 `builtin:swc-loader`) | Profile the real app before claiming a performance gain |
+| Streaming SSR readiness | Less UI churn if SSR is added later |
 
 ```tsx
 // Our createResource already follows React 19 best practices:
@@ -743,12 +742,12 @@ const StreamingMedicalRecords = () => {
 
 // Future migration to use() hook (optional, not required):
 const StreamingMedicalRecords = () => {
-  use(resource.promise);  // first-class React 19 API, same behavior
+  use(resource.promise);  // React 19 API, same behavior
   return <MedicalRecords />;
 };
 ```
 
-> **The throw-promise pattern still works in React 19.** The `use()` hook is the recommended replacement, but migration is optional — no breakage.
+> The throw-promise pattern still works in React 19. The `use()` hook is the recommended replacement, but migration is optional and nothing breaks if you wait.
 
 ---
 
@@ -780,21 +779,21 @@ test ──┘
 |---|---|
 | Records change triggers analytics CI | Records change triggers only records CI |
 | All teams wait for the slowest module | Each team's pipeline is independent |
-| Coupled deploy — defeats the point of MF | Independent deploy — the whole point of MF |
+| Coupled deploy (defeats the point of MF) | Independent deploy (the point of MF) |
 
-> **This mirrors microservices CI/CD**: each service has its own pipeline, its own build, its own deploy. The shell discovers remotes at runtime — it never needs to build them.
+> Same idea as microservices CI/CD: each service has its own pipeline, build, and deploy. The shell discovers remotes at runtime and never needs to build them.
 
 ---
 
-## Slide 22 — What We Didn't Cover (But You Should Explore)
+## Slide 22 — What we left out (worth exploring)
 
-- **Server-side rendering** with streaming Suspense + Module Federation
-- **Shared design tokens** via a federated CSS module
-- **Version negotiation** when remotes have different React versions
-- **Dynamic remote URLs** — loading remotes from a manifest at runtime
-- **Real health checks** — replacing the demo's HEAD-request polling with production-grade liveness probes
-- **Feature flags** — extending the A/B ring concept with runtime feature toggles per module
-- **Nx/Turborepo** for build orchestration in larger monorepos
+- Server-side rendering with streaming Suspense + Module Federation
+- Shared design tokens via a federated CSS module
+- Version negotiation when remotes have different React versions
+- Dynamic remote URLs from a runtime manifest
+- Production health checks instead of the demo's HEAD-request polling
+- Feature flags that extend the A/B ring with per-module toggles
+- Nx/Turborepo for build orchestration in larger monorepos
 
 ---
 
@@ -825,15 +824,15 @@ Open `localhost:3000` and start exploring.
 ## Speaker Notes
 
 ### Timing Guide (30 min total)
-- **0:00–3:00** — Problem statement + architecture overview (slides 1–4)
-- **3:00–6:00** — Tech stack + MF config (slides 5–6)
-- **6:00–10:00** — Resource pattern + shell composition (slides 7–8)
-- **10:00–18:00** — Live demo (slide 16 script)
-- **18:00–22:00** — Cross-module communication + theme system (slides 10–13)
-- **22:00–25:00** — Testing + design system (slides 14–15)
-- **25:00–27:00** — When to apply this (slide 18)
-- **27:00–28:00** — Key takeaways (slide 17)
-- **28:00–30:00** — Questions
+- 0:00–3:00: Problem statement + architecture overview (slides 1–4)
+- 3:00–6:00: Tech stack + MF config (slides 5–6)
+- 6:00–10:00: Resource pattern + shell composition (slides 7–8)
+- 10:00–18:00: Live demo (slide 16 script)
+- 18:00–22:00: Cross-module communication + theme system (slides 10–13)
+- 22:00–25:00: Testing + design system (slides 14–15)
+- 25:00–27:00: When to apply this (slide 18)
+- 27:00–28:00: Key takeaways (slide 17)
+- 28:00–30:00: Questions
 
 ### Demo Prep Checklist
 - [ ] demo ports are free, or `pnpm run kill:ports` has been run
@@ -847,4 +846,4 @@ Open `localhost:3000` and start exploring.
 ### Audience Hooks
 - "How many of you have a monolithic SPA that's becoming hard to deploy?"
 - "Raise your hand if you've ever had a deploy break the entire app."
-- "What if I told you the shell doesn't need to know anything about how long a remote takes to load?"
+- "The shell only renders Suspense. Remotes own how long they take to load."

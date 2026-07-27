@@ -158,15 +158,15 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     fontFace: MONO, fontSize: 11, color: C.citrine, charSpacing: 2,
   });
   quote(s, "\u201CWhat happens when you stop treating Suspense and Module Federation as separate ideas?\u201D", { y: 6.5, fontSize: 14 });
-  s.addNotes("Hook: this talk is about both sides of the micro-frontend equation — DX for teams and UX for users. Everything shown is a running app the audience can clone.");
+  s.addNotes("Hook: DX for teams and UX for users in the same architecture. Everything shown is a running app the audience can clone.");
 }
 
 // ── 2 · The Problem ──────────────────────────────────────────────────────────
 {
   const s = newSlide({
     kicker: "The Problem",
-    title: "The real bottleneck isn't your framework — it's your team size",
-    notes: "Most architecture talks start with bundle sizes. The actual pain that drives companies to micro-frontends is developer experience at scale. Walk the ladder slowly — the audience will recognize where they are.",
+    title: "Team size is the bottleneck",
+    notes: "Most architecture talks start with bundle sizes. The pain that drives companies to micro-frontends is developer experience at scale. Walk the ladder slowly; the audience will recognize where they are.",
   });
   mono(s, [
     "  5 devs → everyone knows the codebase → fast, fun, productive",
@@ -181,34 +181,34 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
       ["Teams blocked by shared release cycles", "Independent deployment per module"],
       ["One broken test blocks everyone's pipeline", "Each team owns their own test suite"],
       ["Onboarding means learning the entire app", "New devs learn one module, ship day one"],
-      ["Shared package.json — upgrade together or never", "Each remote pins its own dependencies"],
+      ["Shared package.json: upgrade together or never", "Each remote pins its own dependencies"],
     ],
     { x: 0.6, y: 3.55, w: 12.1, colW: [6.05, 6.05], fontSize: 12 });
-  quote(s, "Solving DX isn't enough — visitors don't care about your team structure. They care that the app feels fast.", { y: 6.25, fontSize: 14 });
+  quote(s, "Visitors don't care about your team structure. They care that the app feels fast.", { y: 6.25, fontSize: 14 });
 }
 
 // ── 3 · The Insight ──────────────────────────────────────────────────────────
 {
   const s = newSlide({
     kicker: "The Insight",
-    title: "Two pillars: DX for your team, UX for your users",
-    notes: "This is the thesis slide. Module Federation and Suspense are usually presented separately — combined, each remote owns its own loading choreography while the shell stays ignorant.",
+    title: "Module Federation for teams, Suspense for load UX",
+    notes: "Thesis slide. Module Federation and Suspense are usually presented separately. Combined, each remote owns its loading choreography while the shell stays simple.",
   });
   table(s,
-    ["Pillar", "Who benefits", "What it solves"],
+    ["Concern", "Who benefits", "What it solves"],
     [
-      ["Module Federation", "Developers & teams", "Independent builds, deploys, onboarding — DX at scale"],
-      ["Suspense + skeletons", "End users & visitors", "Instant perceived load, no blank screens — UX at runtime"],
+      ["Module Federation", "Developers & teams", "Independent builds, deploys, onboarding at scale"],
+      ["Suspense + skeletons", "End users & visitors", "Instant perceived load, no blank screens at runtime"],
     ],
     { x: 0.6, y: 1.9, w: 12.1, colW: [3.1, 3.0, 6.0], fontSize: 13, rowH: 0.45 });
   mono(s, [
     "Without Suspense:  click tab → blank screen → spinner → content",
-    "                   (terrible UX, even with great DX)",
+    "                   (slow UX even when team ownership is solid)",
     "",
     "With Suspense:     click tab → skeleton instantly → content resolves",
     "                   (each remote owns its loading choreography)",
   ].join("\n"), { x: 0.6, y: 3.6, w: 12.1, h: 1.8, fontSize: 12.5, color: C.cream });
-  quote(s, "The shell doesn't know or care how long a remote takes to load. It renders <Suspense> and moves on.", { y: 5.9, fontSize: 15 });
+  quote(s, "The shell does not know how long a remote takes to load. It renders <Suspense> and moves on.", { y: 5.9, fontSize: 15 });
 }
 
 // ── 4 · Architecture Overview ────────────────────────────────────────────────
@@ -234,8 +234,8 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   table(s,
     ["Strategy", "Module", "Behavior"],
     [
-      ["Instant", "Home", "Lazy for code splitting, no artificial resource delay — renders when the chunk arrives"],
-      ["Eager", "Records", "Standalone component, preloaded on shell mount — cached before the click"],
+      ["Instant", "Home", "Lazy for code splitting, no artificial resource delay; renders when the chunk arrives"],
+      ["Eager", "Records", "Standalone component, preloaded on shell mount; cached before the click"],
       ["Streamed", "Prescriptions, Analytics", "On demand, per-module skeletons + error isolation"],
     ],
     { x: 0.6, y: 5.05, w: 12.1, colW: [1.7, 3.0, 7.4], fontSize: 11.5 });
@@ -251,7 +251,7 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   table(s,
     ["Technology", "Version", "Why"],
     [
-      ["React", "19.2", "Suspense fallbacks and lazy loading as first-class primitives"],
+      ["React", "19.2", "Suspense fallbacks and lazy loading built into the runtime"],
       ["Rspack", "2.1", "Native Module Federation, Rust React Compiler, sub-second HMR"],
       ["TypeScript", "6.0", "Strict mode, type-safe event contracts"],
       ["Tailwind CSS", "v4", "@theme tokens for the design system"],
@@ -285,9 +285,9 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   table(s,
     ["Property", "Where", "Purpose"],
     [
-      ["exposes", "Remotes", "\u201CWhat components do I share?\u201D — the team's public API"],
-      ["remotes", "Host", "\u201CWhere do I find each remote at runtime?\u201D — scope@URL discovery"],
-      ["shared", "Both", "\u201CWhat do we deduplicate?\u201D — singleton: true = one React for all"],
+      ["exposes", "Remotes", "Public API: which components this team shares"],
+      ["remotes", "Host", "Runtime discovery: scope@URL for each remote"],
+      ["shared", "Both", "Deduplication: singleton: true means one React for all"],
     ],
     { x: 0.6, y: 1.85, w: 12.1, colW: [1.7, 1.5, 8.9], fontSize: 12 });
   code(s, [
@@ -321,8 +321,8 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
 // ── 7 · The Resource Pattern ─────────────────────────────────────────────────
 {
   const s = newSlide({
-    kicker: "UX Pillar",
-    title: "The resource pattern — a client-side Suspense fallback",
+    kicker: "Load UX",
+    title: "The resource pattern: a client-side Suspense fallback",
     notes: "The wrapper's ONLY job is to trigger Suspense. The actual UI lives in the standalone component. read() throws the promise while pending — Suspense in the shell catches it. This demo delays a client-side promise; it does not use streaming SSR.",
   });
   code(s, [
@@ -379,11 +379,11 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     "  .catch(/* fallback */));",
   ].join("\n"), { x: 0.6, y: 1.85, w: 8.2, h: 3.6, fontSize: 10 });
   bullets(s, [
-    "Layer 1 — lazy() + .catch(): fallback if remote is unreachable",
-    "Layer 2 — <Suspense>: skeleton while loading",
-    "Layer 3 — <ErrorBoundary>: catches runtime errors",
+    "Layer 1: lazy() + .catch() if remote is unreachable",
+    "Layer 2: <Suspense> skeleton while loading",
+    "Layer 3: <ErrorBoundary> for runtime errors",
   ], { x: 9.0, y: 2.0, w: 3.75, h: 2.6, fontSize: 12 });
-  quote(s, "Why lazy() for eager modules? Remotes are separate builds resolved at runtime — the eager import() warms the cache, lazy() resolves from it instantly.", { y: 5.75, fontSize: 13.5 });
+  quote(s, "Why lazy() for eager modules? Remotes are separate builds resolved at runtime. Eager import() warms the cache; lazy() resolves from it.", { y: 5.75, fontSize: 13.5 });
 }
 
 // ── 9 · Shell Controls ───────────────────────────────────────────────────────
@@ -391,21 +391,21 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   const s = newSlide({
     kicker: "Live Demo Controls",
     title: "Settings · Commands · Federation Lab",
-    notes: "The command palette (Ctrl+K) is the speaker's secret weapon — kill a remote, switch themes, navigate modules without leaving the keyboard.",
+    notes: "Ctrl+K runs kill, theme, and nav from the keyboard so the audience stays on the demo.",
   });
   table(s,
-    ["Button", "Opens", "Answers the question"],
+    ["Button", "Opens", "Purpose"],
     [
-      ["Settings", "Right slide-over drawer", "\u201CHow does the shell share UI state across independent remotes?\u201D"],
-      ["Commands (Ctrl+K)", "Searchable palette", "\u201CHow do you control an MF demo without fumbling with a mouse?\u201D"],
-      ["Lab", "Federation Lab panel", "\u201CWhat happens when things break?\u201D"],
+      ["Settings", "Right slide-over drawer", "Shell-owned theme across remotes (CSS vars, localStorage, event)"],
+      ["Commands (Ctrl+K)", "Searchable palette", "Navigate, theme, kill remotes, toggle rings from the keyboard"],
+      ["Lab", "Federation Lab panel", "Health, kill switches, A/B rings when things break"],
     ],
     { x: 0.6, y: 1.9, w: 12.1, colW: [2.4, 3.0, 6.7], fontSize: 12, rowH: 0.5 });
   bullets(s, [
-    "Health Monitor — polls each remoteEntry.js every 5s, shows latency",
-    "Kill Switches — simulate remote failure; the rest keeps running",
-    "A/B Deployment — toggle Stable ↔ Canary ring, per-module versions",
-    "Theme — CSS variables + localStorage + themeChange event, zero shared imports",
+    "Health Monitor: polls each remoteEntry.js every 5s, shows latency",
+    "Kill Switches: simulate remote failure; the rest keeps running",
+    "A/B Deployment: toggle Stable ↔ Canary ring, per-module versions",
+    "Theme: CSS variables + localStorage + themeChange event, zero shared imports",
   ], { x: 0.6, y: 4.15, w: 12.1, h: 2.5, fontSize: 13 });
 }
 
@@ -413,8 +413,8 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
 {
   const s = newSlide({
     kicker: "Fault Isolation",
-    title: "Microservices for the frontend — the 99% case",
-    notes: "Kill the records remote live here. The one honest caveat: all modules share a browser tab, so an infinite loop freezes everything — the inherent cost of a shared runtime, and virtually every MF architecture accepts it.",
+    title: "Microservices for the frontend: the 99% case",
+    notes: "Kill the records remote live here. Honest caveat: all modules share a browser tab, so an infinite loop freezes everything. That is the cost of a shared runtime; most MF setups accept it.",
   });
   table(s,
     ["", "Microservices", "Micro-frontends (this demo)"],
@@ -426,20 +426,20 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     ],
     { x: 0.6, y: 1.85, w: 12.1, colW: [2.2, 4.6, 5.3], fontSize: 12 });
   code(s, [
-    "// lazy() with .catch() — the secret sauce",
+    "// lazy() with .catch() — fallback when the remote is down",
     "const MedicalRecords = lazy(() =>",
     '  import("records/MedicalRecords").catch(() => ({',
     '    default: () => <ModuleFallback title="Records Unavailable" />,',
     "  })));",
   ].join("\n"), { x: 0.6, y: 4.35, w: 7.6, h: 1.6, fontSize: 10.5 });
-  quote(s, "Module-level crashes, network failures, and bad deploys are isolated at the boundary. Tab-level resource exhaustion remains a shared-runtime risk.", { y: 6.2, fontSize: 13.5 });
+  quote(s, "Module-level crashes, network failures, and bad deploys are isolated at the boundary. Tab-level resource exhaustion is still a shared-runtime risk.", { y: 6.2, fontSize: 13.5 });
 }
 
 // ── 11 · Cross-Module Communication ─────────────────────────────────────────
 {
   const s = newSlide({
-    kicker: "DX Pillar",
-    title: "Events > shared state",
+    kicker: "Team DX",
+    title: "Prefer events over shared state",
     notes: "No direct imports between modules. Events are framework-agnostic, but the event payload is still a versioned contract. The shell stays the only router owner.",
   });
   code(s, [
@@ -507,7 +507,7 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     "  return { theme, label: THEME_LABELS[theme] };",
     "}",
   ].join("\n"), { x: 7.45, y: 1.85, w: 5.25, h: 3.6, fontSize: 9.5 });
-  quote(s, "Every remote reacts immediately — no shared imports, no prop drilling, no re-deploys.", { y: 5.9, fontSize: 15 });
+  quote(s, "Every remote reacts immediately. No shared imports, no prop drilling, no re-deploys.", { y: 5.9, fontSize: 15 });
 }
 
 // ── 13 · Prefetching + Eager Loading ─────────────────────────────────────────
@@ -577,14 +577,14 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
 {
   const s = newSlide({
     kicker: "Design System",
-    title: "Noir Editorial — not another pastel AI dashboard",
+    title: "Noir Editorial: serif display, 1px grid, citrine accent",
     notes: "Typography: Instrument Serif for display, DM Sans body, IBM Plex Mono labels. 1px grid gaps, citrine accent, staggered fadeInUp animations, SVG grain overlay.",
   });
   table(s,
     ["Element", "Treatment"],
     [
       ["Typography", "Instrument Serif (display) · DM Sans (body) · IBM Plex Mono (labels)"],
-      ["Grid", "gap-[1px] bg-edge — sharp 1px editorial grid lines"],
+      ["Grid", "gap-[1px] bg-edge: sharp 1px editorial grid lines"],
       ["Animations", "fadeInUp with staggered delays, shimmer on skeletons"],
       ["Grain", "SVG noise overlay at 2.5% opacity"],
     ],
@@ -635,13 +635,13 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
     notes: "Land takeaway #1 hardest: micro-frontends solve a people problem. Team size, not app size, is the signal.",
   });
   bullets(s, [
-    "1 · Micro-frontends solve a people problem, not just a code problem",
-    "2 · Suspense fallbacks solve the UX side — two separate pillars, one architecture",
-    "3 · Events > shared state — CustomEvents survive independent deploys",
-    "4 · Host owns routing — remotes request navigation, only the shell mutates it",
-    "5 · Fault isolation is a feature: .catch() + ErrorBoundary per module",
-    "6 · Rspack makes this fast — sub-second HMR, Rust React Compiler, persistent cache",
-    "7 · Not every module should load the same way: instant / eager / streamed",
+    "1 · Micro-frontends solve a people problem: team scale, not bundle size",
+    "2 · Suspense fallbacks cover load UX; Module Federation covers team DX",
+    "3 · Prefer events over shared state: CustomEvents survive independent deploys",
+    "4 · Host owns routing: remotes request navigation, only the shell mutates it",
+    "5 · Ship fault isolation on purpose: .catch() + ErrorBoundary per module",
+    "6 · Rspack keeps the monorepo fast: sub-second HMR, Rust React Compiler, cache",
+    "7 · Match load strategy to content: instant / eager / streamed",
   ], { x: 0.6, y: 1.95, w: 12.1, h: 4.8, fontSize: 15 });
 }
 
@@ -655,15 +655,15 @@ function quote(s, text, { x = 0.6, y, w = 12.1, h = 0.7, fontSize = 15 } = {}) {
   table(s,
     ["Signal", "Pattern to adopt"],
     [
-      ["Teams ship the same SPA and block each other on releases", "Module Federation — independent builds; deployment topology can follow"],
-      ["Users wait for a full bundle before seeing anything", "Suspense fallback — skeletons render instantly"],
+      ["Teams ship the same SPA and block each other on releases", "Module Federation: independent builds; deploys can follow"],
+      ["Users wait for a full bundle before seeing anything", "Suspense fallback: skeletons render immediately"],
       ["One broken feature takes down the whole page", "ErrorBoundary + lazy().catch() per module"],
-      ["Shared state libraries create invisible coupling", "CustomEvents on window — no direct imports, explicit contracts"],
+      ["Shared state libraries create invisible coupling", "CustomEvents on window: no direct imports, explicit contracts"],
       ["You need canary releases at the feature level", "Independent versioning per remote"],
-      ["Testing one feature requires the full app running", "Vitest alias trick — isolation, no servers"],
+      ["Testing one feature requires the full app running", "Vitest alias trick: isolation, no servers"],
     ],
     { x: 0.6, y: 1.9, w: 12.1, colW: [6.3, 5.8], fontSize: 11.5 });
-  s.addText("In production today: healthcare platforms · SaaS dashboards · enterprise portals · media platforms", {
+  s.addText("Typical domains: healthcare · SaaS dashboards · enterprise portals · media platforms", {
     x: 0.6, y: 6.35, w: 12.1, h: 0.4,
     fontFace: MONO, fontSize: 10.5, color: C.stone, charSpacing: 1,
   });
