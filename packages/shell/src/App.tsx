@@ -374,7 +374,7 @@ const SettingsDrawer = memo(function SettingsDrawer({
             <span className="mb-2 block font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
               Appearance Settings
             </span>
-            <h3 className="font-display text-3xl italic text-cream">Theme Control</h3>
+            <h3 className="font-display text-xl italic text-cream">Theme Control</h3>
           </div>
           <button
             type="button"
@@ -860,7 +860,7 @@ function ShellFrame(): React.JSX.Element {
           <div className="mx-auto max-w-screen-2xl px-4 py-5 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-baseline gap-2">
-                <span className="font-display text-2xl italic tracking-tight text-cream">MF</span>
+                <span className="font-display text-lg italic tracking-tight text-cream">MF</span>
                 <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">Demo</span>
               </div>
 

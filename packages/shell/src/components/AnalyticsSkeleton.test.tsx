@@ -28,8 +28,8 @@ describe("AnalyticsSkeleton", () => {
 
     it("renders 6 activity feed row skeletons", () => {
         const { container } = render(<AnalyticsSkeleton />);
-        // Each activity row has: flex items-start gap-4 py-4 border-b border-edge
-        const rows = container.querySelectorAll(".py-4.border-b.border-edge");
+        const rows = container.querySelectorAll(".py-3\\.5.border-b.border-edge");
         expect(rows).toHaveLength(6);
     });
 });
+

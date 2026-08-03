@@ -79,7 +79,7 @@ const DemoPanel = memo<DemoPanelProps>(
                                 <span className="mb-2 block font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
                                     Live Demo Controls
                                 </span>
-                                <h3 className="font-display text-3xl italic text-cream">
+                                <h3 className="font-display text-xl italic text-cream">
                                     Federation Lab
                                 </h3>
                             </div>

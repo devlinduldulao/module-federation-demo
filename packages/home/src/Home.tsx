@@ -49,30 +49,30 @@ const DestinationCard = memo<{
     aria-label={`Navigate to ${destination.label}`}
   >
     {/* Icon placeholder */}
-    <div className="aspect-[16/9] min-h-[220px] bg-elevated relative overflow-hidden flex items-center justify-center">
-      <span className="font-mono text-2xl text-dim tracking-widest group-hover:text-citrine transition-colors duration-500">
+    <div className="aspect-[16/9] min-h-[120px] max-h-[140px] bg-elevated relative overflow-hidden flex items-center justify-center">
+      <span className="font-mono text-sm text-dim tracking-widest group-hover:text-citrine transition-colors duration-500">
         {destination.icon}
       </span>
       {/* Citrine reveal line */}
       <div className="absolute bottom-0 left-0 w-full h-0.5 bg-citrine scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
     </div>
 
-    <div className="p-8 sm:p-10 flex flex-col flex-1 h-full min-h-[300px]">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-display text-3xl lg:text-4xl mb-4 italic text-cream group-hover:text-citrine transition-colors duration-300">
+    <div className="p-5 sm:p-6 flex flex-col flex-1 h-full">
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <h3 className="font-display text-lg sm:text-xl italic text-cream group-hover:text-citrine transition-colors duration-300">
           {destination.label}
         </h3>
-        <span className="font-mono text-[10px] tracking-[0.2em] text-dim">
+        <span className="font-mono text-[10px] tracking-[0.2em] text-dim shrink-0 pt-1">
           :{destination.port}
         </span>
       </div>
-      <p className="text-stone text-base leading-relaxed mb-10 flex-1">
+      <p className="text-stone text-xs sm:text-sm leading-relaxed mb-5 flex-1">
         {destination.description}
       </p>
 
       <button
         onClick={() => onNavigate(destination)}
-        className="w-full font-mono text-sm tracking-widest text-citrine border-2 border-edge px-6 py-4 hover:border-citrine hover:bg-citrine hover:text-ink transition-all duration-300 text-center uppercase mt-auto"
+        className="w-full font-mono text-[11px] tracking-wider text-citrine border border-edge px-4 py-2.5 hover:border-citrine hover:bg-citrine hover:text-ink transition-all duration-300 text-center uppercase mt-auto"
         aria-label={`Go to ${destination.label} module`}
       >
         Enter {destination.label} &rarr;
@@ -108,28 +108,30 @@ function Home() {
   }, []);
 
   return (
-    <div className="max-w-7xl w-full mx-auto px-6 sm:px-8 lg:px-12 py-12 lg:py-24 animate-fade-in" role="main">
+    <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 animate-fade-in" role="main">
       {/* Hero Section */}
-      <header className="mb-20 lg:mb-32 animate-fade-in-up">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+      <header className="mb-10 lg:mb-14 animate-fade-in-up">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-3">
+            <span className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase block mb-2">
               Micro-Frontend Architecture
             </span>
-            <h2 className="font-display text-6xl lg:text-8xl italic text-cream tracking-tight leading-tight mb-6">
+            <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl italic text-cream tracking-tight leading-snug mb-2">
               A Modular Federation Showcase
             </h2>
-            <h6>- Healthcare platform</h6>
-            <p className="text-stone text-base max-w-2xl leading-loose">
+            <p className="font-mono text-[11px] text-dim uppercase tracking-wider mb-3">
+              Healthcare platform
+            </p>
+            <p className="text-stone text-sm max-w-2xl leading-relaxed">
               A demonstration of Module Federation with independently deployed micro-frontends.
               Each module runs on its own port, ships its own bundle, and can be developed in isolation.
             </p>
           </div>
           <div className="flex items-center gap-3 self-start lg:self-auto">
-            <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
+            <span className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
               Theme
             </span>
-            <span className="border border-edge bg-surface/70 px-3 py-1.5 font-mono text-[10px] tracking-[0.2em] text-stone uppercase">
+            <span className="border border-edge bg-surface/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-stone uppercase">
               {themeLabel}
             </span>
           </div>
@@ -138,7 +140,7 @@ function Home() {
 
       {/* Architecture Stats */}
       <section
-        className="mb-16 animate-fade-in-up"
+        className="mb-10 animate-fade-in-up"
         style={{ animationDelay: "80ms" }}
         aria-label="Architecture overview"
       >
@@ -146,13 +148,13 @@ function Home() {
           {ARCHITECTURE_HIGHLIGHTS.map((item, index) => (
             <div
               key={item.label}
-              className="bg-noir p-8 sm:p-12 animate-fade-in-up flex flex-col justify-center min-h-[140px]"
+              className="bg-noir p-4 sm:p-5 animate-fade-in-up flex flex-col justify-center min-h-[88px]"
               style={{ animationDelay: `${(index + 1) * 80}ms` }}
             >
-              <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase block mb-2">
+              <span className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase block mb-1.5">
                 {item.label}
               </span>
-              <span className="font-display text-2xl lg:text-3xl italic text-cream mt-3">
+              <span className="font-display text-sm sm:text-base italic text-cream">
                 {item.value}
               </span>
             </div>
@@ -163,23 +165,23 @@ function Home() {
       {/* Module Destinations */}
       <section aria-label="Available modules">
         <div
-          className="flex items-center justify-between mb-8 animate-fade-in-up"
+          className="flex items-center justify-between mb-5 animate-fade-in-up"
           style={{ animationDelay: "160ms" }}
         >
           <div>
-            <span className="font-mono text-[11px] tracking-[0.3em] text-dim uppercase block mb-2">
+            <span className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase block mb-1.5">
               Explore Modules
             </span>
-            <h3 className="font-display text-3xl italic text-cream">
+            <h3 className="font-display text-lg sm:text-xl italic text-cream">
               Where would you like to go?
             </h3>
           </div>
-          <span className="font-mono text-[11px] text-dim hidden sm:block">
+          <span className="font-mono text-[10px] text-dim hidden sm:block">
             {MODULE_DESTINATIONS.length} module{MODULE_DESTINATIONS.length !== 1 ? "s" : ""} available
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
           {MODULE_DESTINATIONS.map((destination, index) => (
             <div key={destination.id} className="bg-edge p-px">
               <DestinationCard
@@ -194,20 +196,20 @@ function Home() {
 
       {/* Footer Note */}
       <section
-        className="mt-16 pt-8 border-t border-edge animate-fade-in-up"
+        className="mt-10 pt-6 border-t border-edge animate-fade-in-up"
         style={{ animationDelay: "400ms" }}
         aria-label="Architecture details"
       >
         <div className="text-center max-w-2xl mx-auto">
-          <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase block mb-3">
+          <span className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase block mb-2">
             How It Works
           </span>
-          <p className="text-stone text-sm leading-relaxed mb-6">
+          <p className="text-stone text-xs sm:text-sm leading-relaxed mb-4">
             Each module above is a standalone React application served from its own development server.
             The shell orchestrates routing, theme state, and inter-module communication through
             custom events and shared React context.
           </p>
-          <div className="flex flex-wrap justify-center gap-6 font-mono text-[10px] tracking-wider text-dim uppercase">
+          <div className="flex flex-wrap justify-center gap-4 font-mono text-[10px] tracking-wider text-dim uppercase">
             <span>Independent Builds</span>
             <span className="text-edge-bright">/</span>
             <span>Shared Dependencies</span>

@@ -12,17 +12,24 @@ interface ThemeDefinition {
 export const THEME_STORAGE_KEY = "mf-demo-theme";
 export const DEFAULT_THEME: ThemeName = "dark";
 
+/**
+ * Theme switcher only toggles `.dark` for shadcn semantic tokens
+ * (`--background`, `--primary`, etc. live in index.css).
+ *
+ * These variables are optional legacy brand utilities used by existing
+ * screens (bg-noir, text-citrine, …). They must NOT redefine shadcn names
+ * like --color-muted / --color-primary — those map to Lyra defaults in CSS.
+ */
 export const THEME_DEFINITIONS: Readonly<Record<ThemeName, ThemeDefinition>> = {
   dark: {
     label: "Dark",
-    description: "High-contrast editorial dark mode.",
+    description: "shadcn Lyra dark (neutral).",
     colorScheme: "dark",
     variables: {
       "--color-ink": "#0C0C0C",
       "--color-noir": "#0C0C0C",
       "--color-surface": "#141414",
       "--color-elevated": "#1C1C1C",
-      "--color-muted": "#252525",
       "--color-edge": "#2E2E2E",
       "--color-edge-bright": "#444444",
       "--color-cream": "#FAFAF9",
@@ -40,14 +47,13 @@ export const THEME_DEFINITIONS: Readonly<Record<ThemeName, ThemeDefinition>> = {
   },
   light: {
     label: "Light",
-    description: "Warm paper theme with accessible high-contrast accents.",
+    description: "shadcn Lyra light (neutral).",
     colorScheme: "light",
     variables: {
       "--color-ink": "#000000",
       "--color-noir": "#FBFAF6",
       "--color-surface": "#F2F0E9",
       "--color-elevated": "#EAE7DD",
-      "--color-muted": "#E2DFD5",
       "--color-edge": "#DCD9CE",
       "--color-edge-bright": "#C6C2B4",
       "--color-cream": "#1C1B17",
@@ -107,6 +113,7 @@ export function applyTheme(
 
   root.dataset.theme = theme;
   root.style.colorScheme = definition.colorScheme;
+  root.classList.toggle("dark", definition.colorScheme === "dark");
 
   for (const [variable, value] of Object.entries(definition.variables)) {
     root.style.setProperty(variable, value);

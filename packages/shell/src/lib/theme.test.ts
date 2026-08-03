@@ -95,6 +95,14 @@ describe("applyTheme", () => {
     expect(document.documentElement.style.colorScheme).toBe("light");
   });
 
+  it("toggles the .dark class for shadcn semantic tokens", () => {
+    applyTheme("dark");
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+
+    applyTheme("light");
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+  });
+
   it("applies all CSS variables from the theme definition", () => {
     applyTheme("dark");
     const root = document.documentElement;
@@ -102,6 +110,8 @@ describe("applyTheme", () => {
     for (const [variable, value] of Object.entries(vars)) {
       expect(root.style.getPropertyValue(variable)).toBe(value);
     }
+    // Must not stomp shadcn's --color-muted mapping
+    expect(vars).not.toHaveProperty("--color-muted");
   });
 
   it("persists to localStorage by default", () => {

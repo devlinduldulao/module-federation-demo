@@ -20,15 +20,14 @@ describe("PrescriptionsSkeleton", () => {
 
     it("renders 3 prescription row skeletons", () => {
         const { container } = render(<PrescriptionsSkeleton />);
-        // Each row has: flex items-center gap-4 py-5 border-b border-edge
-        const rows = container.querySelectorAll(".py-5.border-b.border-edge");
+        const rows = container.querySelectorAll(".py-3\\.5.border-b.border-edge");
         expect(rows).toHaveLength(3);
     });
 
     it("renders the summary sidebar skeleton", () => {
         const { container } = render(<PrescriptionsSkeleton />);
-        // Summary sidebar has a fixed width
-        const sidebar = container.querySelector(".lg\\:w-80");
+        const sidebar = container.querySelector(".lg\\:w-72");
         expect(sidebar).toBeInTheDocument();
     });
 });
+

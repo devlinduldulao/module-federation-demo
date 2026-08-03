@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "install:all": "pnpm install --force && (cd packages/shell && pnpm install --force) && (cd packages/records && pnpm install --force) && (cd packages/prescriptions && pnpm install --force) && (cd packages/analytics && pnpm install --force) && (cd packages/home && pnpm install --force)",
+    "install:all": "pnpm install --force --ignore-scripts && pnpm run install:packages",
     "dev": "concurrently \"pnpm:dev:*\"",
     "dev:shell": "cd packages/shell && pnpm run dev",
     "dev:records": "cd packages/records && pnpm run dev",
@@ -27,7 +27,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "postinstall": "pnpm run install:packages",
-    "install:packages": "cd packages/shell && pnpm install --force && cd ../records && pnpm install --force && cd ../prescriptions && pnpm install --force && cd ../analytics && pnpm install --force && cd ../home && pnpm install --force",
+    "install:packages": "pnpm --dir packages/shell install --force && pnpm --dir packages/records install --force && pnpm --dir packages/prescriptions install --force && pnpm --dir packages/analytics install --force && pnpm --dir packages/home install --force",
     "kill:ports": "pnpm exec kill-port 3000 3001 3002 3003 3004",
     "kill:records": "pnpm exec kill-port 3001",
     "kill:prescriptions": "pnpm exec kill-port 3002",
@@ -36,7 +36,6 @@
     "pptx": "node presentation/generate-pptx.mjs"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -45,7 +44,6 @@
     "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^4.1.9",
     "concurrently": "^10.0.3",
-    "eslint": "^10.6.0",
     "globals": "^17.7.0",
     "jsdom": "^29.1.1",
     "pptxgenjs": "^4.0.1",
@@ -54,7 +52,6 @@
     "react-router-dom": "^7.18.1",
     "sonner": "^2.0.7",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.62.1",
     "vitest": "^4.1.9"
   }
 }

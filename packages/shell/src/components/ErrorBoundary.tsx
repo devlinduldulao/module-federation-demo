@@ -28,19 +28,19 @@ class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         this.props.fallback || (
-          <div className="py-20 text-center max-w-lg mx-auto">
-            <div className="font-mono text-[11px] tracking-[0.3em] text-rose uppercase mb-6">ERROR</div>
-            <h2 className="font-display text-3xl italic text-cream mb-4">
+          <div className="py-12 text-center max-w-lg mx-auto">
+            <div className="font-mono text-[10px] tracking-[0.25em] text-rose uppercase mb-3">ERROR</div>
+            <h2 className="font-display text-xl italic text-cream mb-2">
               Something went wrong
             </h2>
-            <p className="text-stone text-sm mb-8 leading-relaxed">
+            <p className="text-stone text-sm mb-5 leading-relaxed">
               There was an error loading this module. The remote service may be unavailable.
             </p>
             <button
               onClick={() =>
                 this.setState({ hasError: false, error: undefined })
               }
-              className="px-6 py-2.5 bg-transparent border border-citrine text-citrine font-mono text-xs tracking-wider uppercase hover:bg-citrine hover:text-ink transition-all duration-300 focus:outline-hidden"
+              className="px-4 py-2 bg-transparent border border-citrine text-citrine font-mono text-[11px] tracking-wider uppercase hover:bg-citrine hover:text-ink transition-all duration-300 focus:outline-hidden"
             >
               Retry
             </button>
