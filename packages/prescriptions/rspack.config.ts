@@ -134,6 +134,10 @@ export default defineConfig((_env, argv = {}) => {
     // Rspack 2.1: persistent cache with automatic cleanup
     // (maxAge defaults to 7 days, maxVersions defaults to 3).
     cache: { type: "persistent" },
+    // Rspack 2.1 CLI defaults lazyCompilation.imports to true for browser targets.
+    // That proxies import("./bootstrap"), which races Module Federation shared React
+    // (eager: false) and leaves standalone remotes on a white screen.
+    lazyCompilation: false,
     stats: "errors-only",
     performance: {
       hints: isDev ? false : "warning",

@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useRef,
   useState,
+  type ComponentType,
 } from "react";
 import {
   BrowserRouter,
@@ -45,67 +46,63 @@ import { useKillSwitch, useVersionRegistry } from "./lib/demo";
 //   STREAMED: Prescriptions, Analytics — loaded on demand with skeleton fallbacks.
 // ---------------------------------------------------------------------------
 
+type RemoteModule = { default: ComponentType };
+
+function loadRemote(
+  importer: () => Promise<RemoteModule>,
+  label: string,
+  title: string,
+  message: string
+): Promise<RemoteModule> {
+  return importer().catch((error: unknown) => {
+    console.error(`Failed to load ${label}:`, error);
+    return {
+      default: () => <ModuleFallback title={title} message={message} />,
+    };
+  });
+}
+
 // INSTANT — Home loads without a streaming delay. We import the standalone
 // component (home/Home) instead of the streaming wrapper. Still lazy for code
 // splitting, but the user sees real content the moment the chunk arrives.
 const Home = lazy(() =>
-  import("home/Home").catch((error) => {
-    console.error("Failed to load Home:", error);
-    return {
-      default: () => (
-        <ModuleFallback
-          title="Home Module Unavailable"
-          message="The home service is currently unavailable."
-        />
-      ),
-    };
-  })
+  loadRemote(
+    () => import("home/Home"),
+    "Home",
+    "Home Module Unavailable",
+    "The home service is currently unavailable."
+  )
 );
 
 // EAGER — Records is preloaded immediately (see EAGER_PRELOAD below) and
 // imports the standalone component directly — no streaming delay. By the time
 // the user navigates here, the chunk is already cached.
 const MedicalRecords = lazy(() =>
-  import("records/MedicalRecords").catch((error) => {
-    console.error("Failed to load MedicalRecords:", error);
-    return {
-      default: () => (
-        <ModuleFallback
-          title="Records Module Unavailable"
-          message="The records service is currently unavailable."
-        />
-      ),
-    };
-  })
+  loadRemote(
+    () => import("records/MedicalRecords"),
+    "MedicalRecords",
+    "Records Module Unavailable",
+    "The records service is currently unavailable."
+  )
 );
 
 // STREAMED — Prescriptions and Analytics load on demand with skeleton fallbacks.
 const StreamingPrescriptionOrders = lazy(() =>
-  import("prescriptions/StreamingPrescriptionOrders").catch((error) => {
-    console.error("Failed to load StreamingPrescriptionOrders:", error);
-    return {
-      default: () => (
-        <ModuleFallback
-          title="Prescriptions Module Unavailable"
-          message="The prescriptions service is currently unavailable."
-        />
-      ),
-    };
-  })
+  loadRemote(
+    () => import("prescriptions/StreamingPrescriptionOrders"),
+    "StreamingPrescriptionOrders",
+    "Prescriptions Module Unavailable",
+    "The prescriptions service is currently unavailable."
+  )
 );
 
 const StreamingClinicalAnalytics = lazy(() =>
-  import("analytics/StreamingClinicalAnalytics").catch((error) => {
-    console.error("Failed to load StreamingClinicalAnalytics:", error);
-    return {
-      default: () => (
-        <ModuleFallback
-          title="Analytics Module Unavailable"
-          message="The analytics service is currently unavailable."
-        />
-      ),
-    };
-  })
+  loadRemote(
+    () => import("analytics/StreamingClinicalAnalytics"),
+    "StreamingClinicalAnalytics",
+    "Analytics Module Unavailable",
+    "The analytics service is currently unavailable."
+  )
 );
 
 type ModuleType = "home" | "records" | "prescriptions" | "analytics";
