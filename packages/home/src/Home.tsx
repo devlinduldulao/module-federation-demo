@@ -72,7 +72,7 @@ const DestinationCard = memo<{
 
       <button
         onClick={() => onNavigate(destination)}
-        className="w-full font-mono text-[11px] tracking-wider text-primary border border-border px-4 py-2.5 hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 text-center uppercase mt-auto"
+        className="w-full font-mono text-[11px] tracking-wider text-primary border border-border px-4 py-2.5 hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 text-center uppercase mt-auto rounded-md"
         aria-label={`Go to ${destination.label} module`}
       >
         Enter {destination.label} &rarr;
@@ -131,7 +131,7 @@ function Home() {
             <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase">
               Theme
             </span>
-            <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
+            <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase rounded-md">
               {themeLabel}
             </span>
           </div>

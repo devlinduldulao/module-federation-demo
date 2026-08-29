@@ -18,7 +18,7 @@ const ModuleFallback = memo<ModuleFallbackProps>(
       {onRetry && (
         <button
           onClick={onRetry}
-          className="px-4 py-2 bg-transparent border border-primary text-primary font-mono text-[11px] tracking-wider uppercase hover:bg-primary hover:text-primary-foreground transition-all duration-300 focus:outline-hidden"
+          className="px-4 py-2 bg-transparent border border-primary text-primary font-mono text-[11px] tracking-wider uppercase hover:bg-primary hover:text-primary-foreground transition-all duration-300 focus:outline-hidden rounded-md"
           aria-label="Retry loading module"
         >
           Retry Connection

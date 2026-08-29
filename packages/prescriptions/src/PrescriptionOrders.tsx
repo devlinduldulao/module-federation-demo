@@ -16,7 +16,7 @@ const PrescriptionRow = memo<{
         aria-label={`Prescription: ${item.patientName}`}
     >
         {/* Icon placeholder */}
-        <div className="w-11 h-11 bg-muted shrink-0 flex items-center justify-center">
+        <div className="w-11 h-11 bg-muted shrink-0 flex items-center justify-center rounded-md">
             <span className="font-mono text-[10px] text-muted-foreground/70">Rx</span>
         </div>
 
@@ -74,7 +74,7 @@ PrescriptionRow.displayName = "PrescriptionRow";
 
 // Empty state
 const EmptyPrescriptions = memo<{ onBrowseRecords: () => void }>(({ onBrowseRecords }) => (
-    <div className="text-center py-12 border border-border" role="region" aria-label="Empty prescriptions">
+    <div className="text-center py-12 border border-border rounded-md" role="region" aria-label="Empty prescriptions">
         <span className="font-mono text-xs text-muted-foreground/70 block mb-2">
             No active prescriptions
         </span>
@@ -87,7 +87,7 @@ const EmptyPrescriptions = memo<{ onBrowseRecords: () => void }>(({ onBrowseReco
         <button
             type="button"
             onClick={onBrowseRecords}
-            className="font-mono text-[11px] tracking-wider text-primary border border-border px-4 py-2 inline-block hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+            className="font-mono text-[11px] tracking-wider text-primary border border-border px-4 py-2 inline-block hover:bg-primary hover:text-primary-foreground transition-all duration-300 rounded-md"
             aria-label="Browse records from the shell"
         >
             Browse Records &rarr;
@@ -103,7 +103,7 @@ const PrescriptionSummary = memo<{
     totalRefills: number;
     onSubmit: () => void;
 }>(({ itemCount, totalRefills, onSubmit }) => (
-    <div className="border border-border p-5">
+    <div className="border border-border p-5 rounded-lg">
         <h3 className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase mb-5">
             Prescription Summary
         </h3>
@@ -133,7 +133,7 @@ const PrescriptionSummary = memo<{
 
         <button
             onClick={onSubmit}
-            className="w-full bg-primary text-primary-foreground font-mono text-[11px] tracking-wider py-2.5 hover:bg-primary/80 transition-colors duration-300"
+            className="w-full bg-primary text-primary-foreground font-mono text-[11px] tracking-wider py-2.5 hover:bg-primary/80 transition-colors duration-300 rounded-md"
             style={{ color: "var(--color-ink)" }}
             aria-label={`Submit ${itemCount} prescriptions with ${totalRefills} total refills`}
         >
@@ -238,7 +238,7 @@ function PrescriptionOrders() {
                         <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase">
                             Theme
                         </span>
-                        <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
+                        <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase rounded-md">
                             {themeLabel}
                         </span>
                     </div>

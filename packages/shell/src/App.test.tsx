@@ -108,7 +108,10 @@ describe("Shell App", () => {
       "true"
     );
     expect(document.documentElement.dataset.theme).toBe("light");
-    expect(document.documentElement.style.getPropertyValue("--color-noir")).toBe("#FBFAF6");
+    // shadcn switches palette purely by toggling `.dark` on <html>; the light
+    // theme is the absence of that class.
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(document.documentElement.style.colorScheme).toBe("light");
   });
 
   it("switches to the prescriptions route on click", async () => {

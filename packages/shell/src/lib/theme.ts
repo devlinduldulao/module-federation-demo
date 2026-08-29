@@ -13,60 +13,33 @@ export const THEME_STORAGE_KEY = "mf-demo-theme";
 export const DEFAULT_THEME: ThemeName = "dark";
 
 /**
- * Theme switcher only toggles `.dark` for shadcn semantic tokens
- * (`--background`, `--primary`, etc. live in index.css).
+ * Theming is shadcn's: every colour comes from the semantic tokens defined in
+ * `index.css` (`--background`, `--foreground`, `--primary`, `--muted`, …), and
+ * switching theme is nothing more than toggling the `.dark` class on <html>,
+ * which is what the `.dark { … }` block in that stylesheet keys off.
  *
- * These variables are optional legacy brand utilities used by existing
- * screens (bg-background, text-primary, …). They must NOT redefine shadcn names
- * like --color-muted / --color-primary — those map to Lyra defaults in CSS.
+ * `variables` therefore must NOT contain colour tokens. Anything named
+ * `--color-*`, `--background`, `--primary`, etc. would shadow shadcn's own
+ * definitions and desynchronise the palette from the components. The only
+ * entries here are non-shadcn decorative values that have no semantic token.
  */
 export const THEME_DEFINITIONS: Readonly<Record<ThemeName, ThemeDefinition>> = {
   dark: {
     label: "Dark",
-    description: "shadcn Lyra dark (neutral).",
+    description: "shadcn neutral dark.",
     colorScheme: "dark",
     variables: {
-      "--color-ink": "#0C0C0C",
-      "--color-noir": "#0C0C0C",
-      "--color-surface": "#141414",
-      "--color-elevated": "#1C1C1C",
-      "--color-edge": "#2E2E2E",
-      "--color-edge-bright": "#444444",
-      "--color-cream": "#FAFAF9",
-      "--color-stone": "#A8A29E",
-      "--color-dim": "#8C857D",
-      "--color-citrine": "#D4FF00",
-      "--color-citrine-dim": "#A8CC00",
-      "--color-burnt": "#FF6B35",
-      "--color-ice": "#60A5FA",
-      "--color-mint": "#34D399",
-      "--color-rose": "#F87171",
+      // Dot colour for the decorative background grid in App.tsx. Not a
+      // shadcn token — there is no semantic token for a decorative pattern.
       "--theme-grid-dot": "rgba(250, 250, 249, 0.5)",
-      "--theme-grain-opacity": "0.025",
     },
   },
   light: {
     label: "Light",
-    description: "shadcn Lyra light (neutral).",
+    description: "shadcn neutral light.",
     colorScheme: "light",
     variables: {
-      "--color-ink": "#000000",
-      "--color-noir": "#FBFAF6",
-      "--color-surface": "#F2F0E9",
-      "--color-elevated": "#EAE7DD",
-      "--color-edge": "#DCD9CE",
-      "--color-edge-bright": "#C6C2B4",
-      "--color-cream": "#1C1B17",
-      "--color-stone": "#57534A",
-      "--color-dim": "#6E6A5F",
-      "--color-citrine": "#4D7C0F",
-      "--color-citrine-dim": "#3F6211",
-      "--color-burnt": "#C2410C",
-      "--color-ice": "#2563EB",
-      "--color-mint": "#059669",
-      "--color-rose": "#DC2626",
       "--theme-grid-dot": "rgba(28, 27, 23, 0.1)",
-      "--theme-grain-opacity": "0.012",
     },
   },
 } as const;

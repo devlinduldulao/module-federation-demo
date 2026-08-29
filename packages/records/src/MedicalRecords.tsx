@@ -142,7 +142,7 @@ const RecordCard = memo<{
         </div>
         <button
           onClick={() => onAddPrescription(record)}
-          className="font-mono text-[11px] tracking-wider text-primary border border-border px-3 py-1.5 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+          className="font-mono text-[11px] tracking-wider text-primary border border-border px-3 py-1.5 hover:bg-primary hover:text-primary-foreground transition-all duration-300 rounded-md"
           aria-label={`Create prescription for ${record.patientName}`}
         >
           Prescribe &rarr;
@@ -218,7 +218,7 @@ function MedicalRecords() {
             <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase">
               Theme
             </span>
-            <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
+            <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase rounded-md">
               {themeLabel}
             </span>
           </div>
@@ -270,7 +270,7 @@ function MedicalRecords() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 border border-border">
+          <div className="text-center py-12 border border-border rounded-md">
             <span className="font-mono text-xs text-muted-foreground/70 block mb-2">
               No results
             </span>

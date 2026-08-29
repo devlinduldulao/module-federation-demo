@@ -480,7 +480,7 @@ const CommandPalette = memo(function CommandPalette({
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder="Search theme and navigation commands"
-            className="w-full border border-border bg-transparent px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-hidden"
+            className="w-full border border-border bg-transparent px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-hidden rounded-md"
             aria-label="Search commands"
           />
         </div>
@@ -877,7 +877,7 @@ function ShellFrame(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => setIsThemeDrawerOpen(true)}
-                    className="border border-border px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase transition-all duration-300 hover:border-foreground hover:text-foreground focus:outline-hidden"
+                    className="border border-border px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase transition-all duration-300 hover:border-foreground hover:text-foreground focus:outline-hidden rounded-md"
                     aria-label="Open appearance settings"
                   >
                     Settings
@@ -885,7 +885,7 @@ function ShellFrame(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => setIsCommandPaletteOpen(true)}
-                    className="border border-border px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase transition-all duration-300 hover:border-foreground hover:text-foreground focus:outline-hidden"
+                    className="border border-border px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase transition-all duration-300 hover:border-foreground hover:text-foreground focus:outline-hidden rounded-md"
                     aria-label="Open command palette"
                   >
                     Commands

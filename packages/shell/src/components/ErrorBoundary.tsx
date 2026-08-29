@@ -40,7 +40,7 @@ class ErrorBoundary extends Component<Props, State> {
               onClick={() =>
                 this.setState({ hasError: false, error: undefined })
               }
-              className="px-4 py-2 bg-transparent border border-primary text-primary font-mono text-[11px] tracking-wider uppercase hover:bg-primary hover:text-primary-foreground transition-all duration-300 focus:outline-hidden"
+              className="px-4 py-2 bg-transparent border border-primary text-primary font-mono text-[11px] tracking-wider uppercase hover:bg-primary hover:text-primary-foreground transition-all duration-300 focus:outline-hidden rounded-md"
             >
               Retry
             </button>
@@ -49,7 +49,7 @@ class ErrorBoundary extends Component<Props, State> {
                 <summary className="cursor-pointer font-mono text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors">
                   Stack trace
                 </summary>
-                <pre className="mt-3 p-4 bg-card border border-border font-mono text-[11px] text-muted-foreground overflow-auto leading-relaxed">
+                <pre className="mt-3 p-4 bg-card border border-border font-mono text-[11px] text-muted-foreground overflow-auto leading-relaxed rounded-lg">
                   {this.state.error.message}
                 </pre>
               </details>

@@ -9,11 +9,11 @@ const HomeSkeleton = memo(() => (
         <div className="mb-10 lg:mb-14">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
-                    <div className="h-2.5 w-36 bg-muted mb-2" />
-                    <div className="h-7 w-72 bg-muted mb-2" />
-                    <div className="h-2.5 w-32 bg-muted mb-3" />
-                    <div className="h-3 w-full max-w-xl bg-muted mb-1" />
-                    <div className="h-3 w-3/4 bg-muted" />
+                    <div className="h-2.5 w-36 bg-muted mb-2 rounded-md" />
+                    <div className="h-7 w-72 bg-muted mb-2 rounded-md" />
+                    <div className="h-2.5 w-32 bg-muted mb-3 rounded-md" />
+                    <div className="h-3 w-full max-w-xl bg-muted mb-1 rounded-md" />
+                    <div className="h-3 w-3/4 bg-muted rounded-md" />
                 </div>
             </div>
         </div>
@@ -23,8 +23,8 @@ const HomeSkeleton = memo(() => (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border">
                 {Array.from({ length: 4 }).map((_, index) => (
                     <div key={index} className="bg-background p-4 sm:p-5 min-h-[88px]">
-                        <div className="h-2.5 w-14 bg-muted mb-2" />
-                        <div className="h-4 w-28 bg-muted" />
+                        <div className="h-2.5 w-14 bg-muted mb-2 rounded-md" />
+                        <div className="h-4 w-28 bg-muted rounded-md" />
                     </div>
                 ))}
             </div>
@@ -33,10 +33,10 @@ const HomeSkeleton = memo(() => (
         {/* Section Header Skeleton */}
         <div className="flex items-center justify-between mb-5">
             <div>
-                <div className="h-2.5 w-24 bg-muted mb-2" />
-                <div className="h-5 w-48 bg-muted" />
+                <div className="h-2.5 w-24 bg-muted mb-2 rounded-md" />
+                <div className="h-5 w-48 bg-muted rounded-md" />
             </div>
-            <div className="h-2.5 w-24 bg-muted hidden sm:block" />
+            <div className="h-2.5 w-24 bg-muted hidden sm:block rounded-md" />
         </div>
 
         {/* Destination Cards Skeleton */}
@@ -51,12 +51,12 @@ const HomeSkeleton = memo(() => (
                         {/* Content */}
                         <div className="p-5 sm:p-6">
                             <div className="flex items-center justify-between mb-2">
-                                <div className="h-5 w-24 bg-muted" />
-                                <div className="h-2.5 w-10 bg-muted" />
+                                <div className="h-5 w-24 bg-muted rounded-md" />
+                                <div className="h-2.5 w-10 bg-muted rounded-md" />
                             </div>
-                            <div className="h-3 w-full bg-muted mb-1" />
-                            <div className="h-3 w-4/5 bg-muted mb-5" />
-                            <div className="h-8 w-full bg-muted" />
+                            <div className="h-3 w-full bg-muted mb-1 rounded-md" />
+                            <div className="h-3 w-4/5 bg-muted mb-5 rounded-md" />
+                            <div className="h-8 w-full bg-muted rounded-md" />
                         </div>
                     </div>
                 </div>
@@ -66,12 +66,12 @@ const HomeSkeleton = memo(() => (
         {/* Footer Note Skeleton */}
         <div className="mt-10 pt-6 border-t border-border">
             <div className="text-center max-w-2xl mx-auto">
-                <div className="h-2.5 w-20 bg-muted mx-auto mb-3" />
-                <div className="h-3 w-full bg-muted mb-1" />
-                <div className="h-3 w-3/4 bg-muted mx-auto mb-4" />
+                <div className="h-2.5 w-20 bg-muted mx-auto mb-3 rounded-md" />
+                <div className="h-3 w-full bg-muted mb-1 rounded-md" />
+                <div className="h-3 w-3/4 bg-muted mx-auto mb-4 rounded-md" />
                 <div className="flex flex-wrap justify-center gap-4">
                     {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="h-2.5 w-24 bg-muted" />
+                        <div key={i} className="h-2.5 w-24 bg-muted rounded-md" />
                     ))}
                 </div>
             </div>

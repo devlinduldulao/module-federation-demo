@@ -44,7 +44,7 @@ const StatCard = memo<{ stat: AnalyticsStat; index: number }>(({ stat, index }) 
 
     return (
         <article
-            className="border border-border p-4 sm:p-5 animate-fade-in-up flex flex-col justify-center min-h-[96px] shadow-sm"
+            className="border border-border p-4 sm:p-5 animate-fade-in-up flex flex-col justify-center min-h-[96px] shadow-sm rounded-lg"
             style={{ animationDelay: `${index * 100}ms` }}
             aria-label={`${stat.label}: ${stat.value}`}
         >
@@ -90,7 +90,7 @@ ActivityItem.displayName = "ActivityItem";
 
 // Welcome banner
 const WelcomeBanner = memo(() => (
-    <div className="border border-border p-4 sm:p-5 mb-8 animate-fade-in-up shadow-lg">
+    <div className="border border-border p-4 sm:p-5 mb-8 animate-fade-in-up shadow-lg rounded-lg">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
                 <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase block mb-1">
@@ -143,7 +143,7 @@ function ClinicalAnalytics() {
                         <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase">
                             Theme
                         </span>
-                        <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
+                        <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase rounded-md">
                             {themeLabel}
                         </span>
                     </div>
@@ -161,7 +161,7 @@ function ClinicalAnalytics() {
             </section>
 
             {/* Activity feed */}
-            <section className="border border-border p-4 sm:p-5 shadow-lg" aria-label="Clinical activity">
+            <section className="border border-border p-4 sm:p-5 shadow-lg rounded-lg" aria-label="Clinical activity">
                 <h3 className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase mb-3">
                     Recent Activity
                 </h3>
