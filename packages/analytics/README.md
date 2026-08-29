@@ -112,14 +112,13 @@ const StreamingClinicalAnalytics = () => {
 ```bash
 pnpm run dev    # Starts on :3003
 pnpm run build  # Production build
-pnpm run lint   # Lint analytics source through the workspace ESLint config
 pnpm run typecheck
 pnpm run test
 ```
 
 ## Testing
 
-`ClinicalAnalytics.test.tsx` covers stats display, trend percentages, activity stream rendering, welcome banner, Platinum badge, and accessibility roles. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
+`ClinicalAnalytics.test.tsx` covers stats display, trend percentages, activity stream rendering, welcome banner, Platinum badge, and accessibility roles. The package also exposes `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
 
 ```bash
 pnpm test

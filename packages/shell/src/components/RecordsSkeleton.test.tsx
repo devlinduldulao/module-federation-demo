@@ -15,7 +15,7 @@ describe("RecordsSkeleton", () => {
 
     it("renders 8 skeleton record cards", () => {
         const { container } = render(<RecordsSkeleton />);
-        const cards = container.querySelectorAll(".grid > .border.border-edge");
+        const cards = container.querySelectorAll(".grid > .border.border-border");
         expect(cards).toHaveLength(8);
     });
 
@@ -26,7 +26,7 @@ describe("RecordsSkeleton", () => {
 
     it("renders 4 filter button skeletons", () => {
         const { container } = render(<RecordsSkeleton />);
-        const filterSkeletons = container.querySelectorAll(".h-6.w-20.bg-elevated");
+        const filterSkeletons = container.querySelectorAll(".h-6.w-20.bg-muted");
         expect(filterSkeletons).toHaveLength(4);
     });
 });

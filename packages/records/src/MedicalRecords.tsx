@@ -94,9 +94,9 @@ const CATEGORY_LABELS: Record<RecordCategory, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  reviewed: "text-mint",
-  pending: "text-citrine",
-  critical: "text-rose",
+  reviewed: "text-chart-2",
+  pending: "text-primary",
+  critical: "text-destructive",
 };
 
 // Record card component
@@ -106,43 +106,43 @@ const RecordCard = memo<{
   onAddPrescription: (record: MedicalRecord) => void;
 }>(({ record, index, onAddPrescription }) => (
   <article
-    className="group bg-noir flex flex-col animate-fade-in-up"
+    className="group bg-background flex flex-col animate-fade-in-up"
     style={{ animationDelay: `${index * 80}ms` }}
     role="article"
     aria-label={`Record: ${record.patientName}`}
   >
     {/* Type indicator */}
-    <div className="aspect-3/1 bg-elevated relative overflow-hidden flex items-center justify-center">
-      <span className="font-mono text-sm text-dim tracking-wider">
+    <div className="aspect-3/1 bg-muted relative overflow-hidden flex items-center justify-center">
+      <span className="font-mono text-sm text-muted-foreground/70 tracking-wider">
         {record.recordType === "lab-results" ? "LAB" : record.recordType === "imaging" ? "IMG" : "CONSULT"}
       </span>
-      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-citrine scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
     </div>
 
     <div className="p-4 sm:p-5 flex flex-col flex-1">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase">
+        <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase">
           {CATEGORY_LABELS[record.recordType as RecordCategory] ?? record.recordType}
         </span>
-        <span className={cn("font-mono text-[10px] tracking-wider uppercase", STATUS_COLORS[record.status] ?? "text-dim")}>
+        <span className={cn("font-mono text-[10px] tracking-wider uppercase", STATUS_COLORS[record.status] ?? "text-muted-foreground/70")}>
           {record.status}
         </span>
       </div>
-      <h3 className="font-display text-base italic text-cream mb-1 group-hover:text-citrine transition-colors duration-300">
+      <h3 className="font-sans font-semibold text-base text-foreground mb-1 group-hover:text-primary transition-colors duration-300">
         {record.patientName}
       </h3>
-      <p className="text-stone text-xs leading-relaxed line-clamp-2 mb-3 flex-1">
+      <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2 mb-3 flex-1">
         {record.summary}
       </p>
 
-      <div className="flex items-end justify-between pt-3 border-t border-edge">
+      <div className="flex items-end justify-between pt-3 border-t border-border">
         <div>
-          <span className="font-mono text-[10px] text-dim block">{record.provider}</span>
-          <span className="font-mono text-[11px] text-stone">{record.date}</span>
+          <span className="font-mono text-[10px] text-muted-foreground/70 block">{record.provider}</span>
+          <span className="font-mono text-[11px] text-muted-foreground">{record.date}</span>
         </div>
         <button
           onClick={() => onAddPrescription(record)}
-          className="font-mono text-[11px] tracking-wider text-citrine border border-edge px-3 py-1.5 hover:bg-citrine hover:text-ink transition-all duration-300"
+          className="font-mono text-[11px] tracking-wider text-primary border border-border px-3 py-1.5 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
           aria-label={`Create prescription for ${record.patientName}`}
         >
           Prescribe &rarr;
@@ -204,21 +204,21 @@ function MedicalRecords() {
       <header className="mb-8 lg:mb-10 animate-fade-in-up">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <span className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase block mb-2">
+            <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase block mb-2">
               Patient Files
             </span>
-            <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl italic text-cream tracking-tight leading-snug mb-2">
+            <h2 className="font-sans font-semibold text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight leading-snug mb-2">
               Records
             </h2>
-            <p className="text-stone text-sm max-w-xl">
+            <p className="text-muted-foreground text-sm max-w-xl">
               Clinical records across lab results, imaging, and consultations for active patients.
             </p>
           </div>
           <div className="flex items-center gap-3 self-start lg:self-auto">
-            <span className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
+            <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase">
               Theme
             </span>
-            <span className="border border-edge bg-surface/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-stone uppercase">
+            <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
               {themeLabel}
             </span>
           </div>
@@ -227,7 +227,7 @@ function MedicalRecords() {
 
       {/* Filters */}
       <nav
-        className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6 border-b border-edge pb-3 animate-fade-in-up"
+        className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6 border-b border-border pb-3 animate-fade-in-up"
         style={{ animationDelay: "100ms" }}
         role="navigation"
         aria-label="Record category filters"
@@ -239,18 +239,18 @@ function MedicalRecords() {
             className={cn(
               "font-mono text-[11px] tracking-wider uppercase pb-1.5 transition-all duration-300 relative whitespace-nowrap",
               selectedCategory === category
-                ? "text-cream"
-                : "text-dim hover:text-stone"
+                ? "text-foreground"
+                : "text-muted-foreground/70 hover:text-muted-foreground"
             )}
             aria-pressed={selectedCategory === category}
           >
             {CATEGORY_LABELS[category]}
             {selectedCategory === category && (
-              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-citrine" />
+              <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary" />
             )}
           </button>
         ))}
-        <span className="ml-auto font-mono text-[10px] text-dim whitespace-nowrap">
+        <span className="ml-auto font-mono text-[10px] text-muted-foreground/70 whitespace-nowrap">
           {filteredRecords.length} record{filteredRecords.length !== 1 ? "s" : ""}
         </span>
       </nav>
@@ -260,7 +260,7 @@ function MedicalRecords() {
         {filteredRecords.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-5">
             {filteredRecords.map((record, index) => (
-              <div key={record.id} className="bg-edge p-px">
+              <div key={record.id} className="bg-border p-px">
                 <RecordCard
                   record={record}
                   index={index}
@@ -270,14 +270,14 @@ function MedicalRecords() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 border border-edge">
-            <span className="font-mono text-xs text-dim block mb-2">
+          <div className="text-center py-12 border border-border">
+            <span className="font-mono text-xs text-muted-foreground/70 block mb-2">
               No results
             </span>
-            <h3 className="font-display text-lg italic text-cream mb-1">
+            <h3 className="font-sans font-semibold text-lg text-foreground mb-1">
               Nothing found
             </h3>
-            <p className="text-stone text-sm">
+            <p className="text-muted-foreground text-sm">
               Try selecting a different category
             </p>
           </div>

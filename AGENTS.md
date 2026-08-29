@@ -105,11 +105,6 @@ Run these three, in this order:
 pnpm typecheck && pnpm test && pnpm build
 ```
 
-> **`pnpm lint` does not currently work.** No `eslint.config.*` is committed anywhere in
-> this repo and the `eslint` binary is not installed. Do not add a lint step to your
-> verification loop, do not "fix" lint errors you cannot reproduce, and do not silently
-> add an ESLint config unless you were asked to.
-
 ---
 
 ## The three properties that make this federated

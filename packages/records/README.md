@@ -98,7 +98,6 @@ The shell's `<Suspense fallback={<RecordsSkeleton />}>` catches the thrown promi
 ```bash
 pnpm run dev    # Starts on :3001
 pnpm run build  # Production build
-pnpm run lint   # Lint records source through the workspace ESLint config
 pnpm run typecheck
 pnpm run test
 ```
@@ -109,7 +108,7 @@ When changing styles, keep CSS ownership with the exposed component. If `index.c
 
 ## Testing
 
-`MedicalRecords.test.tsx` covers records grid rendering, category filtering, add-to-prescriptions event dispatch, notification events, and accessibility roles. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
+`MedicalRecords.test.tsx` covers records grid rendering, category filtering, add-to-prescriptions event dispatch, notification events, and accessibility roles. The package also exposes `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
 
 ```bash
 pnpm test

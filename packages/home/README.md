@@ -77,7 +77,6 @@ const StreamingHome = () => {
 ```bash
 pnpm run dev    # Starts on :3004
 pnpm run build  # Production build
-pnpm run lint   # Lint home source through the workspace ESLint config
 pnpm run typecheck
 pnpm run test
 ```

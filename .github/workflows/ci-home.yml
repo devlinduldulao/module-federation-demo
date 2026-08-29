@@ -11,7 +11,6 @@ on:
       - "packages/home/**"
       - "rstest.config.ts"
       - "rstest.setup.ts"
-      - "eslint.config.mjs"
       - "package.json"
   push:
     branches: [main]
@@ -19,7 +18,6 @@ on:
       - "packages/home/**"
       - "rstest.config.ts"
       - "rstest.setup.ts"
-      - "eslint.config.mjs"
       - "package.json"
 
 concurrency:
@@ -27,25 +25,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 11
-          run_install: false
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: |
-            pnpm-lock.yaml
-            packages/*/pnpm-lock.yaml
-      - run: pnpm install --force
-      - run: pnpm exec eslint packages/home/src
-
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
@@ -87,7 +66,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, test]
+    needs: [typecheck, test]
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v6

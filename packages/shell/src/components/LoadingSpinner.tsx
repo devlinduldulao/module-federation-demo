@@ -19,14 +19,14 @@ const LoadingSpinner = memo<LoadingSpinnerProps>(
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className={`${dotSize[size]} rounded-full bg-citrine`}
+              className={`${dotSize[size]} rounded-full bg-primary`}
               style={{
                 animation: `subtlePulse 1.4s ease-in-out ${i * 0.2}s infinite`,
               }}
             />
           ))}
         </div>
-        <p className="font-mono text-[11px] tracking-wider text-dim uppercase" aria-label={label}>
+        <p className="font-mono text-[11px] tracking-wider text-muted-foreground/70 uppercase" aria-label={label}>
           {label}
         </p>
       </div>

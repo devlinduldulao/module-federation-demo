@@ -45,8 +45,6 @@ If `pnpm run dev` fails, the most common cause is that one of the demo ports is 
 ### Quality Checks
 
 ```bash
-# Lint every package
-pnpm run lint
 
 # Run TypeScript checks across the workspace
 pnpm run typecheck
@@ -121,7 +119,6 @@ The shell uses a **two-tier preloading strategy**:
 
 ```
 module-federation-demo/
-├── eslint.config.mjs                  # Shared ESLint flat config
 ├── package.json                       # Workspace scripts (concurrently)
 └── packages/
     ├── shell/                         # Host application
@@ -738,9 +735,8 @@ Each micro-frontend has its own GitHub Actions workflow that triggers **only whe
 Each workflow runs four parallel-then-gated jobs:
 
 ```
-lint ──┐
-typecheck ──┼──► build (uploads artifact)
-test ──┘
+typecheck ──┐
+test ────► build (uploads artifact)
 ```
 
 All workflows also trigger when shared root configs change (`rstest.config.ts`, `rstest.setup.ts`, `package.json`).
@@ -751,7 +747,7 @@ The full-repo [ci.yml](.github/workflows/ci.yml) still exists as a safety net fo
 
 This demonstrates the **independent build and CI** side of micro-frontends:
 
-- **Records team** pushes a fix → only `ci-records.yml` runs → only Records is linted, typechecked, tested, and built
+- **Records team** pushes a fix → only `ci-records.yml` runs → only Records is typechecked, tested, and built
 - **Shell team** pushes a feature → only `ci-shell.yml` runs → other modules are untouched
 - A PR that touches `packages/prescriptions/` does NOT trigger CI for analytics, records, or home
 - Each module's build artifact is uploaded independently and can be deployed to its own CDN/S3 bucket in a production topology

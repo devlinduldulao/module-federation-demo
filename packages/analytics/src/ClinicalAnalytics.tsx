@@ -24,17 +24,17 @@ const MOCK_ACTIVITIES: readonly ClinicalActivity[] = [
 ] as const;
 
 const TREND_STYLES = {
-    up: { symbol: "↑", color: "text-mint" },
-    down: { symbol: "↓", color: "text-rose" },
-    stable: { symbol: "→", color: "text-stone" },
+    up: { symbol: "↑", color: "text-chart-2" },
+    down: { symbol: "↓", color: "text-destructive" },
+    stable: { symbol: "→", color: "text-muted-foreground" },
 } as const;
 
 const ACTIVITY_TYPE_LABELS: Record<ClinicalActivity["type"], { icon: string; color: string }> = {
-    admission: { icon: "→", color: "text-mint" },
-    discharge: { icon: "←", color: "text-citrine" },
-    alert: { icon: "!", color: "text-rose" },
-    prescription: { icon: "Rx", color: "text-stone" },
-    lab: { icon: "◉", color: "text-dim" },
+    admission: { icon: "→", color: "text-chart-2" },
+    discharge: { icon: "←", color: "text-primary" },
+    alert: { icon: "!", color: "text-destructive" },
+    prescription: { icon: "Rx", color: "text-muted-foreground" },
+    lab: { icon: "◉", color: "text-muted-foreground/70" },
 };
 
 // Stat card
@@ -44,18 +44,18 @@ const StatCard = memo<{ stat: AnalyticsStat; index: number }>(({ stat, index }) 
 
     return (
         <article
-            className="border border-edge p-4 sm:p-5 animate-fade-in-up flex flex-col justify-center min-h-[96px] shadow-sm"
+            className="border border-border p-4 sm:p-5 animate-fade-in-up flex flex-col justify-center min-h-[96px] shadow-sm"
             style={{ animationDelay: `${index * 100}ms` }}
             aria-label={`${stat.label}: ${stat.value}`}
         >
-            <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase block mb-2">
+            <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase block mb-2">
                 {stat.label}
             </span>
             <div className="flex items-end justify-between gap-2">
-                <span className="font-display text-2xl sm:text-3xl italic text-cream leading-none">
+                <span className="font-sans font-semibold text-2xl sm:text-3xl text-foreground leading-none">
                     {stat.value}
                 </span>
-                <span className={`font-mono text-[11px] ${isPositive ? "text-mint" : "text-rose"}`}>
+                <span className={`font-mono text-[11px] ${isPositive ? "text-chart-2" : "text-destructive"}`}>
                     {trend.symbol} {stat.trendValue}
                 </span>
             </div>
@@ -79,8 +79,8 @@ const ActivityItem = memo<{ activity: ClinicalActivity; index: number }>(({ acti
                 {typeLabel.icon}
             </span>
             <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm text-cream leading-relaxed">{activity.description}</p>
-                <span className="font-mono text-[10px] text-dim mt-0.5 block">{activity.timestamp}</span>
+                <p className="text-xs sm:text-sm text-foreground leading-relaxed">{activity.description}</p>
+                <span className="font-mono text-[10px] text-muted-foreground/70 mt-0.5 block">{activity.timestamp}</span>
             </div>
         </article>
     );
@@ -90,20 +90,20 @@ ActivityItem.displayName = "ActivityItem";
 
 // Welcome banner
 const WelcomeBanner = memo(() => (
-    <div className="border border-edge p-4 sm:p-5 mb-8 animate-fade-in-up shadow-lg">
+    <div className="border border-border p-4 sm:p-5 mb-8 animate-fade-in-up shadow-lg">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-                <span className="font-mono text-[10px] tracking-[0.2em] text-dim uppercase block mb-1">
+                <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase block mb-1">
                     Welcome back
                 </span>
-                <h3 className="font-display text-lg sm:text-xl italic text-cream">Dr. Thompson</h3>
+                <h3 className="font-sans font-semibold text-lg sm:text-xl text-foreground">Dr. Thompson</h3>
             </div>
-            <div className="flex items-center gap-3 font-mono text-[10px] text-dim">
+            <div className="flex items-center gap-3 font-mono text-[10px] text-muted-foreground/70">
                 <span>Shift: Day</span>
-                <span className="text-edge-bright">&middot;</span>
+                <span className="text-ring">&middot;</span>
                 <span>Ward: General</span>
-                <span className="text-edge-bright">&middot;</span>
-                <span className="text-mint">On Duty</span>
+                <span className="text-ring">&middot;</span>
+                <span className="text-chart-2">On Duty</span>
             </div>
         </div>
     </div>
@@ -126,24 +126,24 @@ function ClinicalAnalytics() {
     return (
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 animate-fade-in" role="main">
             {/* Header */}
-            <header className="mb-8 lg:mb-10 animate-fade-in-up border-b border-edge pb-6">
+            <header className="mb-8 lg:mb-10 animate-fade-in-up border-b border-border pb-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div className="max-w-2xl">
-                        <span className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase block mb-2">
+                        <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase block mb-2">
                             Clinical Overview
                         </span>
-                        <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl italic text-cream tracking-tight leading-snug mb-2">
+                        <h2 className="font-sans font-semibold text-2xl sm:text-3xl lg:text-4xl text-foreground tracking-tight leading-snug mb-2">
                             Analytics
                         </h2>
-                        <p className="text-stone text-sm">
+                        <p className="text-muted-foreground text-sm">
                             Real-time clinical metrics, patient activity, and operational insights.
                         </p>
                     </div>
                     <div className="flex items-center gap-3 self-start lg:self-auto">
-                        <span className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase">
+                        <span className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase">
                             Theme
                         </span>
-                        <span className="border border-edge bg-surface/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-stone uppercase">
+                        <span className="border border-border bg-card/70 px-2.5 py-1 font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
                             {themeLabel}
                         </span>
                     </div>
@@ -161,11 +161,11 @@ function ClinicalAnalytics() {
             </section>
 
             {/* Activity feed */}
-            <section className="border border-edge p-4 sm:p-5 shadow-lg" aria-label="Clinical activity">
-                <h3 className="font-mono text-[10px] tracking-[0.25em] text-dim uppercase mb-3">
+            <section className="border border-border p-4 sm:p-5 shadow-lg" aria-label="Clinical activity">
+                <h3 className="font-mono text-[10px] tracking-[0.25em] text-muted-foreground/70 uppercase mb-3">
                     Recent Activity
                 </h3>
-                <div className="divide-y divide-edge">
+                <div className="divide-y divide-border">
                     {activities.map((activity, index) => (
                         <ActivityItem key={activity.id} activity={activity} index={index} />
                     ))}

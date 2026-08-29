@@ -1,50 +1,32 @@
 /* =============================================================================
- * Global styles — shadcn/ui Base UI + Lyra (neutral)
+ * Global styles — shadcn/ui design system
  *
- * Style:  base-lyra
- * Colors: official neutral OKLCH tokens (ui.shadcn.com/docs/theming)
- * Font:   JetBrains Mono (Lyra preset default: font=jetbrains-mono, heading=inherit)
- * Radius: 0 (Lyra square corners)
+ * Colors: official shadcn neutral OKLCH tokens (ui.shadcn.com/docs/theming)
+ * Fonts:  Geist + Geist Mono — the families shadcn/ui itself uses
+ * Radius: 0.625rem (shadcn default)
+ *
+ * ONLY shadcn semantic tokens are defined here. There is deliberately no custom
+ * brand palette: use background/foreground/card/muted/primary/secondary/accent/
+ * destructive/border/input/ring and chart-1..5. See AGENTS.md.
  * ============================================================================= */
 
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/jetbrains-mono";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 
 @custom-variant dark (&:is(.dark *));
 
-/* Optional legacy brand utilities used by existing demo screens.
-   Do NOT redefine shadcn semantic names (muted, primary, background, …). */
 @theme {
-  --color-ink: #0c0c0c;
-  --color-noir: #0c0c0c;
-  --color-surface: #141414;
-  --color-elevated: #1c1c1c;
-  --color-edge: #2e2e2e;
-  --color-edge-bright: #444444;
-  --color-cream: #fafaf9;
-  --color-stone: #a8a29e;
-  --color-dim: #6b6560;
-  --color-citrine: #d4ff00;
-  --color-citrine-dim: #a8cc00;
-  --color-burnt: #ff6b35;
-  --color-ice: #60a5fa;
-  --color-mint: #34d399;
-  --color-rose: #f87171;
-
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* shadcn semantic tokens + Lyra font stack */
 @theme inline {
-  /* Lyra default font: JetBrains Mono for body, mono, and heading (inherit) */
-  --font-sans: "JetBrains Mono Variable", ui-monospace, monospace;
-  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
-  --font-heading: var(--font-sans);
-  /* Aliases so existing font-display / font-body utilities use Lyra fonts */
-  --font-display: var(--font-sans);
-  --font-body: var(--font-sans);
+  /* The two font families shadcn/ui uses. Geist for UI and body text,
+     Geist Mono for figures, codes, and metadata. */
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, monospace;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -87,9 +69,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Official neutral light theme. Lyra: --radius: 0 */
+/* Official shadcn neutral light theme */
 :root {
-  --radius: 0rem;
+  --radius: 0.625rem;
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -125,7 +107,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-/* Official neutral dark theme (toggle via .dark on <html>) */
+/* Official shadcn neutral dark theme (toggle via .dark on <html>) */
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -316,7 +298,7 @@ html {
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 0;
+  border-radius: var(--radius-sm);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);

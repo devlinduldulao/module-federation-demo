@@ -24,9 +24,6 @@ Run it after changing any of:
 pnpm typecheck && pnpm test && pnpm build
 ```
 
-All three must pass. Do **not** add `pnpm lint` — there is no ESLint config in this repo
-and the binary is not installed.
-
 ## Step 2 — Static invariants
 
 Check each by reading, not guessing. Every one of these is a runtime white screen if wrong.

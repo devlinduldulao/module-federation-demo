@@ -28,7 +28,7 @@ describe("AnalyticsSkeleton", () => {
 
     it("renders 6 activity feed row skeletons", () => {
         const { container } = render(<AnalyticsSkeleton />);
-        const rows = container.querySelectorAll(".py-3\\.5.border-b.border-edge");
+        const rows = container.querySelectorAll(".py-3\\.5.border-b.border-border");
         expect(rows).toHaveLength(6);
     });
 });

@@ -17,7 +17,7 @@ export const DEFAULT_THEME: ThemeName = "dark";
  * (`--background`, `--primary`, etc. live in index.css).
  *
  * These variables are optional legacy brand utilities used by existing
- * screens (bg-noir, text-citrine, …). They must NOT redefine shadcn names
+ * screens (bg-background, text-primary, …). They must NOT redefine shadcn names
  * like --color-muted / --color-primary — those map to Lyra defaults in CSS.
  */
 export const THEME_DEFINITIONS: Readonly<Record<ThemeName, ThemeDefinition>> = {

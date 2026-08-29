@@ -117,14 +117,13 @@ Same Resource pattern as other remotes — `getResource("prescriptions-initial",
 ```bash
 pnpm run dev    # Starts on :3002
 pnpm run build  # Production build
-pnpm run lint   # Lint prescriptions source through the workspace ESLint config
 pnpm run typecheck
 pnpm run test
 ```
 
 ## Testing
 
-`PrescriptionOrders.test.tsx` covers initial rendering, quantity controls, item removal, order summary calculations, `addPrescription` event listener, submit notification, and the empty-state navigation request. The package also exposes `lint`, `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
+`PrescriptionOrders.test.tsx` covers initial rendering, quantity controls, item removal, order summary calculations, `addPrescription` event listener, submit notification, and the empty-state navigation request. The package also exposes `typecheck`, and `test` scripts for isolated quality checks. Run from the repo root:
 
 ```bash
 pnpm test

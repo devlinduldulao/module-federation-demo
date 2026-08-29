@@ -225,7 +225,6 @@ Open with the **Lab** button in the header or via the command palette (`Ctrl+K` 
 ```bash
 pnpm run dev    # Starts rspack-dev-server on :3000
 pnpm run build  # Production build to dist/
-pnpm run lint   # Lint shell source through the workspace ESLint config
 pnpm run typecheck
 pnpm run test
 ```

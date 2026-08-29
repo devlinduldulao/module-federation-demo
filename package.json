@@ -17,7 +17,6 @@
     "build:prescriptions": "cd packages/prescriptions && pnpm run build",
     "build:analytics": "cd packages/analytics && pnpm run build",
     "build:home": "cd packages/home && pnpm run build",
-    "lint": "eslint .",
     "typecheck": "concurrently \"pnpm:typecheck:*\"",
     "typecheck:shell": "cd packages/shell && pnpm run typecheck",
     "typecheck:records": "cd packages/records && pnpm run typecheck",

@@ -271,7 +271,7 @@ const NavigationItem = memo(function NavigationItem({
       className={({ isActive }) =>
         cn(
           "relative px-5 py-2.5 font-mono text-sm tracking-wide transition-all duration-500 focus:outline-hidden",
-          isActive ? "text-citrine" : "text-stone hover:text-cream"
+          isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
         )
       }
       aria-label={`Navigate to ${module.label}`}
@@ -281,7 +281,7 @@ const NavigationItem = memo(function NavigationItem({
           <span className="relative z-10">{module.label.toUpperCase()}</span>
           <span
             className={cn(
-              "absolute bottom-0 left-0 h-0.5 bg-citrine transition-all duration-500",
+              "absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-500",
               isActive ? "w-full" : "w-0"
             )}
           />
@@ -315,7 +315,7 @@ const ThemeSelector = memo(function ThemeSelector({
   onSelect: (theme: ThemeName) => void;
 }) {
   return (
-    <div className="inline-flex items-center border border-edge" role="group" aria-label="Theme">
+    <div className="inline-flex items-center border border-border" role="group" aria-label="Theme">
       {THEME_OPTIONS.map((themeOption) => {
         const definition = THEME_DEFINITIONS[themeOption];
         const isActive = themeOption === theme;
@@ -328,8 +328,8 @@ const ThemeSelector = memo(function ThemeSelector({
             className={cn(
               "px-3 py-2 font-mono text-[10px] tracking-[0.2em] uppercase transition-all duration-300 focus:outline-hidden",
               isActive
-                ? "bg-citrine/15 text-citrine"
-                : "text-dim hover:text-cream"
+                ? "bg-primary/15 text-primary"
+                : "text-muted-foreground/70 hover:text-foreground"
             )}
             aria-label={`Switch theme to ${definition.label}`}
             aria-pressed={isActive}
@@ -361,29 +361,29 @@ const SettingsDrawer = memo(function SettingsDrawer({
     <>
       <button
         type="button"
-        className="fixed inset-0 z-40 bg-noir/60 backdrop-blur-sm"
+        className="fixed inset-0 z-40 bg-background/60 backdrop-blur-sm"
         aria-label="Close appearance settings"
         onClick={onClose}
       />
-      <aside className="fixed right-0 top-0 z-50 h-full w-full max-w-md border-l border-edge bg-noir/95 p-6 backdrop-blur-enhanced">
+      <aside className="fixed right-0 top-0 z-50 h-full w-full max-w-md border-l border-border bg-background/95 p-6 backdrop-blur-enhanced">
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
-            <span className="mb-2 block font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
+            <span className="mb-2 block font-mono text-[10px] tracking-[0.3em] text-muted-foreground/70 uppercase">
               Appearance Settings
             </span>
-            <h3 className="font-display text-xl italic text-cream">Theme Control</h3>
+            <h3 className="font-sans font-semibold text-xl text-foreground">Theme Control</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex size-10 items-center justify-center border border-edge font-mono text-xs text-dim transition-colors duration-200 hover:border-cream hover:text-cream"
+            className="flex size-10 items-center justify-center border border-border font-mono text-xs text-muted-foreground/70 transition-colors duration-200 hover:border-foreground hover:text-foreground"
             aria-label="Close theme settings"
           >
             ×
           </button>
         </div>
 
-        <p className="mb-6 text-sm leading-relaxed text-stone">
+        <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
           The shell owns theme state and broadcasts updates across the federation through shared CSS variables and the global theme event contract.
         </p>
 
@@ -400,8 +400,8 @@ const SettingsDrawer = memo(function SettingsDrawer({
                 className={cn(
                   "w-full border px-4 py-4 text-left transition-all duration-300 focus:outline-hidden",
                   isActive
-                    ? "border-citrine bg-citrine/10"
-                    : "border-edge hover:border-edge-bright hover:bg-surface/70"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:border-ring hover:bg-card/70"
                 )}
                 aria-label={`Apply ${definition.label} theme from settings`}
                 aria-pressed={isActive}
@@ -410,22 +410,22 @@ const SettingsDrawer = memo(function SettingsDrawer({
                   <span
                     className={cn(
                       "font-mono text-[11px] tracking-[0.3em] uppercase",
-                      isActive ? "text-citrine" : "text-dim"
+                      isActive ? "text-primary" : "text-muted-foreground/70"
                     )}
                   >
                     {definition.label}
                   </span>
-                  <span className="font-mono text-[10px] uppercase text-dim">
+                  <span className="font-mono text-[10px] uppercase text-muted-foreground/70">
                     {isActive ? "Active" : "Available"}
                   </span>
                 </div>
-                <p className="text-sm leading-relaxed text-stone">{definition.description}</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">{definition.description}</p>
               </button>
             );
           })}
         </div>
 
-        <div className="flex items-center justify-between gap-4 border-t border-edge pt-6 font-mono text-[10px] tracking-wider text-dim uppercase">
+        <div className="flex items-center justify-between gap-4 border-t border-border pt-6 font-mono text-[10px] tracking-wider text-muted-foreground/70 uppercase">
           <span>Persisted in localStorage</span>
           <span>{THEME_STORAGE_KEY}</span>
         </div>
@@ -463,24 +463,24 @@ const CommandPalette = memo(function CommandPalette({
     <>
       <button
         type="button"
-        className="fixed inset-0 z-40 bg-noir/65 backdrop-blur-sm"
+        className="fixed inset-0 z-40 bg-background/65 backdrop-blur-sm"
         aria-label="Close command palette"
         onClick={onClose}
       />
-      <div className="fixed inset-x-4 top-8 z-50 mx-auto w-full max-w-2xl border border-edge bg-noir/95 shadow-2xl backdrop-blur-enhanced">
-        <div className="border-b border-edge px-5 py-4">
+      <div className="fixed inset-x-4 top-8 z-50 mx-auto w-full max-w-2xl border border-border bg-background/95 shadow-2xl backdrop-blur-enhanced">
+        <div className="border-b border-border px-5 py-4">
           <div className="mb-3 flex items-center justify-between gap-4">
-            <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">
+            <span className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground/70 uppercase">
               Command Palette
             </span>
-            <span className="font-mono text-[10px] text-dim uppercase">Esc to close</span>
+            <span className="font-mono text-[10px] text-muted-foreground/70 uppercase">Esc to close</span>
           </div>
           <input
             ref={inputRef}
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder="Search theme and navigation commands"
-            className="w-full border border-edge bg-transparent px-4 py-3 font-mono text-sm text-cream placeholder:text-dim focus:outline-hidden"
+            className="w-full border border-border bg-transparent px-4 py-3 font-mono text-sm text-foreground placeholder:text-muted-foreground/70 focus:outline-hidden"
             aria-label="Search commands"
           />
         </div>
@@ -492,21 +492,21 @@ const CommandPalette = memo(function CommandPalette({
                 key={command.id}
                 type="button"
                 onClick={command.run}
-                className="w-full border-b border-edge px-5 py-4 text-left transition-colors duration-200 hover:bg-surface/70 focus:outline-hidden"
+                className="w-full border-b border-border px-5 py-4 text-left transition-colors duration-200 hover:bg-card/70 focus:outline-hidden"
                 aria-label={command.title}
               >
-                <span className="mb-1 block font-mono text-[11px] tracking-[0.2em] text-cream uppercase">
+                <span className="mb-1 block font-mono text-[11px] tracking-[0.2em] text-foreground uppercase">
                   {command.title}
                 </span>
-                <span className="text-sm text-stone">{command.subtitle}</span>
+                <span className="text-sm text-muted-foreground">{command.subtitle}</span>
               </button>
             ))
           ) : (
             <div className="px-5 py-10 text-center">
-              <span className="mb-3 block font-mono text-[11px] tracking-[0.3em] text-dim uppercase">
+              <span className="mb-3 block font-mono text-[11px] tracking-[0.3em] text-muted-foreground/70 uppercase">
                 No Matches
               </span>
-              <p className="text-sm text-stone">
+              <p className="text-sm text-muted-foreground">
                 Try searching for dark, light, prescriptions, records, home, or analytics.
               </p>
             </div>
@@ -791,7 +791,7 @@ function ShellFrame(): React.JSX.Element {
   }, [commandActions, commandQuery]);
 
   return (
-    <div className="relative min-h-screen bg-noir">
+    <div className="relative min-h-screen bg-background">
       <div
         className="pointer-events-none fixed inset-0 opacity-[0.03]"
         style={{
@@ -800,7 +800,7 @@ function ShellFrame(): React.JSX.Element {
           backgroundSize: "32px 32px",
         }}
       />
-      <div className="fixed left-0 right-0 top-0 z-50 h-px bg-linear-to-r from-transparent via-citrine/40 to-transparent" />
+      <div className="fixed left-0 right-0 top-0 z-50 h-px bg-linear-to-r from-transparent via-primary/40 to-transparent" />
 
       <Toaster
         position="bottom-right"
@@ -813,14 +813,14 @@ function ShellFrame(): React.JSX.Element {
           unstyled: true,
           classNames: {
             toast:
-              "pointer-events-auto w-[min(360px,calc(100vw-2rem))] border border-edge bg-noir/96 px-4 py-3 shadow-2xl backdrop-blur-enhanced",
-            title: "font-mono text-xs tracking-wide text-cream",
-            description: "font-mono text-[11px] leading-relaxed text-stone",
+              "pointer-events-auto w-[min(360px,calc(100vw-2rem))] border border-border bg-background/96 px-4 py-3 shadow-2xl backdrop-blur-enhanced",
+            title: "font-mono text-xs tracking-wide text-foreground",
+            description: "font-mono text-[11px] leading-relaxed text-muted-foreground",
             closeButton:
-              "border border-edge bg-transparent text-dim transition-colors duration-200 hover:border-cream hover:text-cream",
-            success: "border-mint/35 text-mint",
-            error: "border-rose/35 text-rose",
-            info: "border-edge text-stone",
+              "border border-border bg-transparent text-muted-foreground/70 transition-colors duration-200 hover:border-foreground hover:text-foreground",
+            success: "border-chart-2/35 text-chart-2",
+            error: "border-destructive/35 text-destructive",
+            info: "border-border text-muted-foreground",
           },
         }}
       />
@@ -853,12 +853,12 @@ function ShellFrame(): React.JSX.Element {
       />
 
       <div className="relative z-10 flex min-h-screen flex-col">
-        <header className="border-b border-edge">
+        <header className="border-b border-border">
           <div className="mx-auto max-w-screen-2xl px-4 py-5 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-baseline gap-2">
-                <span className="font-display text-lg italic tracking-tight text-cream">MF</span>
-                <span className="font-mono text-[10px] tracking-[0.3em] text-dim uppercase">Demo</span>
+                <span className="font-sans font-semibold text-lg tracking-tight text-foreground">MF</span>
+                <span className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground/70 uppercase">Demo</span>
               </div>
 
               <div className="flex flex-col gap-3 lg:items-end">
@@ -877,7 +877,7 @@ function ShellFrame(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => setIsThemeDrawerOpen(true)}
-                    className="border border-edge px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-dim uppercase transition-all duration-300 hover:border-cream hover:text-cream focus:outline-hidden"
+                    className="border border-border px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase transition-all duration-300 hover:border-foreground hover:text-foreground focus:outline-hidden"
                     aria-label="Open appearance settings"
                   >
                     Settings
@@ -885,7 +885,7 @@ function ShellFrame(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => setIsCommandPaletteOpen(true)}
-                    className="border border-edge px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-dim uppercase transition-all duration-300 hover:border-cream hover:text-cream focus:outline-hidden"
+                    className="border border-border px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-muted-foreground/70 uppercase transition-all duration-300 hover:border-foreground hover:text-foreground focus:outline-hidden"
                     aria-label="Open command palette"
                   >
                     Commands
@@ -893,12 +893,12 @@ function ShellFrame(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={() => setIsDemoPanelOpen(true)}
-                    className="border border-burnt/40 px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-burnt uppercase transition-all duration-300 hover:border-burnt hover:bg-burnt/10 focus:outline-hidden"
+                    className="border border-chart-4/40 px-3 py-2 font-mono text-[10px] tracking-[0.2em] text-chart-4 uppercase transition-all duration-300 hover:border-chart-4 hover:bg-chart-4/10 focus:outline-hidden"
                     aria-label="Open federation lab demo panel"
                   >
                     Lab
                   </button>
-                  <span className="hidden font-mono text-[10px] text-dim uppercase sm:inline">
+                  <span className="hidden font-mono text-[10px] text-muted-foreground/70 uppercase sm:inline">
                     {KEYBOARD_SHORTCUT_LABEL}
                   </span>
                 </div>
@@ -907,19 +907,19 @@ function ShellFrame(): React.JSX.Element {
           </div>
         </header>
 
-        <div className="border-b border-edge bg-surface/50">
+        <div className="border-b border-border bg-card/50">
           <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
             <div className="flex h-12 items-center justify-between">
-              <div className="flex items-center gap-6 font-mono text-[11px] text-dim">
+              <div className="flex items-center gap-6 font-mono text-[11px] text-muted-foreground/70">
                 <div className="flex items-center gap-2">
                   <span
                     className={cn(
                       "h-1.5 w-1.5 rounded-full",
                       activeModule.loadStrategy === "instant"
-                        ? "bg-mint"
+                        ? "bg-chart-2"
                         : activeModule.loadStrategy === "eager"
-                          ? "bg-citrine"
-                          : "bg-burnt"
+                          ? "bg-primary"
+                          : "bg-chart-4"
                     )}
                   />
                   <span>
@@ -930,31 +930,31 @@ function ShellFrame(): React.JSX.Element {
                         : "STREAMING"}
                   </span>
                 </div>
-                <span className="text-edge">|</span>
+                <span className="text-border">|</span>
                 <span>{activeModule.id}</span>
-                <span className="text-edge">|</span>
+                <span className="text-border">|</span>
                 <span>:{activeModule.port}</span>
               </div>
-              <div className="flex items-center gap-6 font-mono text-[11px] text-dim whitespace-nowrap">
+              <div className="flex items-center gap-6 font-mono text-[11px] text-muted-foreground/70 whitespace-nowrap">
                 <span className="hidden sm:inline">React 19</span>
-                <span className="hidden text-edge sm:inline">|</span>
+                <span className="hidden text-border sm:inline">|</span>
                 <span className="hidden sm:inline">Suspense</span>
-                <span className="hidden text-edge sm:inline">|</span>
+                <span className="hidden text-border sm:inline">|</span>
                 <span className="hidden sm:inline">Module Federation</span>
-                <span className="hidden text-edge sm:inline">|</span>
+                <span className="hidden text-border sm:inline">|</span>
                 <span>{THEME_DEFINITIONS[theme].label}</span>
                 {Object.values(killed).some(Boolean) && (
                   <>
-                    <span className="text-edge">|</span>
-                    <span className="text-rose">
+                    <span className="text-border">|</span>
+                    <span className="text-destructive">
                       {Object.values(killed).filter(Boolean).length} KILLED
                     </span>
                   </>
                 )}
                 {variant === "canary" && (
                   <>
-                    <span className="text-edge">|</span>
-                    <span className="text-burnt">CANARY</span>
+                    <span className="text-border">|</span>
+                    <span className="text-chart-4">CANARY</span>
                   </>
                 )}
               </div>
@@ -983,15 +983,15 @@ function ShellFrame(): React.JSX.Element {
           </div>
         </main>
 
-        <footer className="mt-auto border-t border-edge">
+        <footer className="mt-auto border-t border-border">
           <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 items-center justify-between font-mono text-[10px] tracking-wider text-dim uppercase">
+            <div className="flex h-16 items-center justify-between font-mono text-[10px] tracking-wider text-muted-foreground/70 uppercase">
               <span>Independent Deployment</span>
               <div className="flex items-center gap-4">
                 <span>Hot Reload</span>
-                <span className="text-edge-bright">/</span>
+                <span className="text-ring">/</span>
                 <span>Zero Coupling</span>
-                <span className="text-edge-bright">/</span>
+                <span className="text-ring">/</span>
                 <span>Fault Isolation</span>
               </div>
             </div>

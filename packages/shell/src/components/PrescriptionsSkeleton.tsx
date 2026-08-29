@@ -3,11 +3,11 @@ import { memo } from "react";
 const PrescriptionsSkeleton = memo(() => (
     <div role="status" className="w-full mx-auto animate-pulse">
         {/* Header Skeleton */}
-        <div className="mb-8 lg:mb-10 border-b border-edge pb-6">
+        <div className="mb-8 lg:mb-10 border-b border-border pb-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
                     <div className="h-2.5 w-24 bg-muted mb-2" />
-                    <div className="h-7 w-48 bg-elevated mb-2" />
+                    <div className="h-7 w-48 bg-muted mb-2" />
                     <div className="h-3 w-56 bg-muted" />
                 </div>
             </div>
@@ -16,7 +16,7 @@ const PrescriptionsSkeleton = memo(() => (
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
             {/* Prescriptions list skeleton */}
             <div className="flex-1 w-full">
-                <div className="hidden sm:flex items-center gap-3 pb-2 border-b border-edge mb-1">
+                <div className="hidden sm:flex items-center gap-3 pb-2 border-b border-border mb-1">
                     <div className="w-11 shrink-0" />
                     <div className="flex-1 h-2.5 w-14 bg-muted" />
                     <div className="w-[5.25rem] h-2.5 bg-muted" />
@@ -24,18 +24,18 @@ const PrescriptionsSkeleton = memo(() => (
                     <div className="w-4" />
                 </div>
                 {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 py-3.5 border-b border-edge">
-                        <div className="w-11 h-11 bg-elevated shrink-0" />
+                    <div key={i} className="flex items-center gap-3 py-3.5 border-b border-border">
+                        <div className="w-11 h-11 bg-muted shrink-0" />
                         <div className="flex-1">
-                            <div className="h-4 w-28 bg-elevated mb-1.5" />
+                            <div className="h-4 w-28 bg-muted mb-1.5" />
                             <div className="h-2.5 w-20 bg-muted" />
                         </div>
-                        <div className="flex items-center border border-edge">
-                            <div className="w-8 h-8 bg-surface" />
-                            <div className="w-9 h-8 bg-surface border-x border-edge" />
-                            <div className="w-8 h-8 bg-surface" />
+                        <div className="flex items-center border border-border">
+                            <div className="w-8 h-8 bg-card" />
+                            <div className="w-9 h-8 bg-card border-x border-border" />
+                            <div className="w-8 h-8 bg-card" />
                         </div>
-                        <div className="w-24 h-4 bg-elevated" />
+                        <div className="w-24 h-4 bg-muted" />
                         <div className="w-3 h-3 bg-muted" />
                     </div>
                 ))}
@@ -43,17 +43,17 @@ const PrescriptionsSkeleton = memo(() => (
 
             {/* Summary sidebar skeleton */}
             <div className="w-full lg:w-72">
-                <div className="border border-edge p-5">
+                <div className="border border-border p-5">
                     <div className="h-2.5 w-32 bg-muted mb-5" />
                     <div className="space-y-3 mb-5">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <div key={i} className="flex justify-between">
                                 <div className="h-3 w-16 bg-muted" />
-                                <div className="h-3 w-10 bg-elevated" />
+                                <div className="h-3 w-10 bg-muted" />
                             </div>
                         ))}
                     </div>
-                    <div className="h-8 w-full bg-elevated" />
+                    <div className="h-8 w-full bg-muted" />
                 </div>
             </div>
         </div>

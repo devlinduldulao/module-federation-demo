@@ -20,7 +20,7 @@ describe("PrescriptionsSkeleton", () => {
 
     it("renders 3 prescription row skeletons", () => {
         const { container } = render(<PrescriptionsSkeleton />);
-        const rows = container.querySelectorAll(".py-3\\.5.border-b.border-edge");
+        const rows = container.querySelectorAll(".py-3\\.5.border-b.border-border");
         expect(rows).toHaveLength(3);
     });
 
