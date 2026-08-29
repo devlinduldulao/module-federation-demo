@@ -105,10 +105,17 @@ should dispatch an event and let the shell decide.
   `prescriptions` and `analytics`.
 - Types live in `src/types.ts` (`ModuleDestination`); `src/global.d.ts` holds the CSS
   module declaration.
-- Design tokens are the "Noir Editorial" set defined in `src/index.css`: `cream`,
-  `citrine`, `stone`, `dim`, `edge`, `surface`, `elevated`, `mint`, `rose`. Use those
-  token classes, not raw Tailwind colors.
-- `font-display` italic for headings, `font-mono` for labels and metadata.
+- Design system is **shadcn/ui (neutral)**. Use only shadcn semantic tokens —
+  `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`,
+  `accent`, `destructive`, `border`, `input`, `ring`, and `chart-1`..`chart-5`.
+  **Do not introduce a brand colour or a new CSS variable.** shadcn has no success or
+  warning token: use `chart-2` for success/healthy and `chart-4` for warning, and
+  `destructive` for errors.
+- Fonts are the two shadcn/ui uses: **Geist** (`font-sans`, the default) and
+  **Geist Mono** (`font-mono`, for labels, ports, and figures). Headings are upright
+  `font-sans font-semibold` — no display serif, no italic.
+- Radius comes from `--radius` (shadcn default `0.625rem`): `rounded-lg` for card
+  surfaces, `rounded-md` for controls, badges, and skeleton blocks.
 
 ---
 

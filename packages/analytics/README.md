@@ -57,9 +57,9 @@ interface ActivityItem {
 
 ## Features
 
-- **Welcome banner** — gradient accent line (ice → citrine → mint) at top, serif italic greeting, status badge
-- **Stats grid** — 4-column layout with 1px editorial grid gaps. Large serif italic numbers in accent colors (ice, mint, citrine, burnt). Mono labels and trend percentages. Staggered `countUp` animation.
-- **Activity stream** — bordered card with divider rows. Colored status dots (mint/ice/burnt/rose). Message text promotes to cream on hover. Citrine left-accent bar appears on hover via CSS `::before`.
+- **Welcome banner** — gradient accent line (chart-3 → primary → chart-2) at top, Geist semibold greeting, status badge
+- **Stats grid** — 4-column layout with 1px editorial grid gaps. Large Geist semibold numbers in chart token colours. Mono labels and trend percentages. Staggered `countUp` animation.
+- **Activity stream** — bordered card with divider rows. Coloured status dots (chart-2 / chart-3 / chart-4 / destructive). Message text promotes to foreground on hover. Primary left-accent bar appears on hover via CSS `::before`.
 - **Architecture footer** — centered description of micro-frontend capabilities with mono labels
 
 ## Layout
@@ -67,7 +67,7 @@ interface ActivityItem {
 ```
 ┌──────────────────────────────────┐
 │ Analytics Overview (mono label)  │
-│ Analytics (serif italic, 6xl)    │
+│ Analytics (Geist semibold, 6xl)    │
 ├──────────────────────────────────┤
 │ Welcome banner with gradient top │
 │ Welcome back, Developer          │
@@ -93,7 +93,7 @@ The analytics `index.css` includes module-specific additions:
 
 - `@keyframes countUp` — `translateY(20px)` to `0` for stat card entry
 - `.animate-count-up` class
-- `.activity-item::before` — 2px citrine left bar that fades in on hover
+- `.activity-item::before` — 2px primary left bar that fades in on hover
 
 ## Streaming Pattern
 

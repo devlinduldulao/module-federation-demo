@@ -184,48 +184,68 @@ module-federation-demo/
 | TypeScript | ^6.0.3 | Type safety |
 | Rspack | ^2.1.2 | Bundler + Module Federation + Rust React Compiler |
 | Tailwind CSS | v4 | Utility-first CSS via `@theme` |
+| shadcn/ui | neutral | Design system — semantic tokens + components |
+| Geist / Geist Mono | ^5.3.0 | The two font families shadcn/ui uses |
 | PostCSS | ^8.5.16 | CSS pipeline (`@tailwindcss/postcss`) |
 | Rstest | ^0.11.10 | Unit + component testing (Rspack-native) |
 | concurrently | ^10.0.3 | Dev server orchestration |
 
-## Design System — "Noir Editorial"
+## Design System — shadcn/ui
 
-A typographic editorial design language that avoids generic pastel AI aesthetics. The default presentation is dark, and the shell can switch between `dark` and `light` palettes by updating shared CSS custom properties at runtime.
+The app uses the [shadcn/ui](https://ui.shadcn.com/) design system with the **neutral**
+base colour. There is no custom brand palette: every colour comes from a shadcn semantic
+token, so the hand-written screens and the vendored components in `src/components/ui/`
+are guaranteed to agree.
 
 ### Typography
 
-| Role | Font | Usage |
-|------|------|-------|
-| Display | Instrument Serif | Headlines, large numbers (italic) |
-| Body | DM Sans | Paragraphs, UI text |
-| Technical | IBM Plex Mono | Labels, prices, metadata, navigation |
+Only the two families shadcn/ui itself uses, loaded locally via Fontsource so no requests
+leave the machine:
+
+| Role | Font | Utility | Usage |
+|------|------|---------|-------|
+| Sans | Geist (`@fontsource-variable/geist`) | `font-sans` (default) | Headings, body, UI text |
+| Mono | Geist Mono (`@fontsource-variable/geist-mono`) | `font-mono` | Labels, ports, figures, metadata |
+
+Headings are upright Geist at `font-semibold`. There is no display serif and no italic.
 
 ### Color Tokens
 
-The values below are the default dark theme tokens. The shell persists the active theme in `localStorage` under `mf-demo-theme` and rewrites these CSS variables when the user changes themes.
+Defined once per package in `src/index.css` as OKLCH custom properties, copied verbatim
+from [ui.shadcn.com/docs/theming](https://ui.shadcn.com/docs/theming). Light values live
+in `:root`, dark values in `.dark`.
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `noir` | `#0C0C0C` | Canvas / page background |
-| `surface` | `#141414` | Hover / elevated cards |
-| `elevated` | `#1C1C1C` | Skeleton placeholders |
-| `edge` | `#2E2E2E` | Borders, 1px grid dividers |
-| `cream` | `#FAFAF9` | Primary text |
-| `stone` | `#A8A29E` | Secondary text |
-| `dim` | `#6B6560` | Tertiary / disabled text |
-| `citrine` | `#D4FF00` | Primary accent — CTAs, active nav |
-| `mint` | `#34D399` | Success states |
-| `ice` | `#60A5FA` | Info / cool data |
-| `burnt` | `#FF6B35` | Warnings / warm accent |
-| `rose` | `#F87171` | Errors / destructive |
+| Token | Usage |
+|-------|-------|
+| `background` / `foreground` | Page canvas and primary text |
+| `card` / `card-foreground` | Raised surfaces |
+| `popover` / `popover-foreground` | Overlays, dropdowns |
+| `primary` / `primary-foreground` | Accent — CTAs, active nav |
+| `secondary` / `secondary-foreground` | Secondary controls |
+| `muted` / `muted-foreground` | Skeletons, subdued text |
+| `accent` / `accent-foreground` | Hover surfaces |
+| `destructive` | Errors, kill switches, offline states |
+| `border` / `input` / `ring` | Borders, field outlines, focus rings |
+| `chart-1` … `chart-5` | Data-viz and non-destructive status colour |
+
+`--radius` is the shadcn default `0.625rem`, exposed as `rounded-sm` … `rounded-4xl`.
+
+shadcn has no `success` or `warning` token, so those states use chart colours:
+**`chart-2`** for success/healthy and **`chart-4`** for warning/canary. Errors use
+`destructive`. Nothing outside the shadcn token set is defined.
+
+### Theme switching
+
+The shell persists the active theme in `localStorage` under `mf-demo-theme` and switches
+palette the way shadcn does — by toggling the `.dark` class on `<html>`. It does **not**
+rewrite colour variables at runtime, so the palette cannot drift from the stylesheet.
+Remotes read the current theme through `window.__MF_THEME__` and the `themeChange` event.
 
 ### Key Visual Patterns
 
-- **1px grid gaps** — `gap-[1px] bg-edge` creates sharp editorial grid lines
+- **1px grid gaps** — `gap-[1px] bg-border` creates sharp grid lines
 - **Mono uppercase labels** — `font-mono text-[11px] tracking-[0.3em] uppercase`
-- **Serif italic headings** — `font-display italic` for display type
-- **Citrine underline navigation** — active tab gets a 2px citrine bottom bar
-- **Noise grain overlay** — subtle SVG noise on `body::after`
+- **Primary underline navigation** — active tab gets a 2px `bg-primary` bottom bar
 - **Staggered entry animations** — `fadeInUp` with incremental `animationDelay`
 
 ## Module Federation Setup

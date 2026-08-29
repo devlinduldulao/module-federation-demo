@@ -170,6 +170,21 @@ config before changing it.
   declarations — see `packages/shell/src/types.d.ts`.
 - **Tailwind CSS v4** via `@tailwindcss/postcss`. There is no `tailwind.config.js`;
   theming lives in each package's `src/index.css` as CSS custom properties.
+- **Design system is shadcn/ui (neutral).** Use **only** shadcn semantic tokens:
+  `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`,
+  `accent`, `destructive`, `border`, `input`, `ring`, `chart-1`..`chart-5`.
+  **Never add a brand colour or a new colour CSS variable** — the whole point is that the
+  hand-written screens and the vendored `components/ui/` cannot drift apart. shadcn has no
+  success/warning token: use `chart-2` for success, `chart-4` for warning, `destructive`
+  for errors.
+- **Fonts are Geist and Geist Mono**, the two families shadcn/ui uses, loaded from
+  `@fontsource-variable/geist` and `@fontsource-variable/geist-mono`. `font-sans` is the
+  default; `font-mono` is for labels, ports, and figures. Headings are upright
+  `font-sans font-semibold` — no display serif, no italic. Do not add a third family.
+- **Radius** comes from `--radius` (shadcn default `0.625rem`): `rounded-lg` for card
+  surfaces, `rounded-md` for controls, badges, and skeleton blocks.
+- **Theme switching toggles the `.dark` class on `<html>`** and nothing else.
+  `src/lib/theme.ts` must not write colour variables at runtime.
 - **shadcn-style components** built on `@base-ui/react`, in `src/components/ui/`. These
   are vendored source, not a dependency — edit them in place when needed.
 - **`cn()`** from `src/lib/utils.ts` is the only class-merging helper. Use it.

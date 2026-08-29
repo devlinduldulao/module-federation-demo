@@ -103,9 +103,17 @@ Standalone, `window.__MF_THEME__` is undefined and `useActiveTheme()` falls back
 - `isPositive` is metric-aware: for `Critical Alerts`, a **down** trend is good. Any new
   stat where "down is good" needs the same treatment — do not colour trends by direction
   alone.
-- Design tokens from `src/index.css`: `cream`, `citrine`, `stone`, `dim`, `edge`,
-  `surface`, `elevated`, `mint`, `rose`. `font-mono` for figures, `font-display` italic
-  for headings.
+- Design system is **shadcn/ui (neutral)**. Use only shadcn semantic tokens —
+  `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`,
+  `accent`, `destructive`, `border`, `input`, `ring`, and `chart-1`..`chart-5`.
+  **Do not introduce a brand colour or a new CSS variable.** shadcn has no success or
+  warning token: use `chart-2` for success/healthy and `chart-4` for warning, and
+  `destructive` for errors.
+- Fonts are the two shadcn/ui uses: **Geist** (`font-sans`, the default) and
+  **Geist Mono** (`font-mono`, for labels, ports, and figures). Headings are upright
+  `font-sans font-semibold` — no display serif, no italic.
+- Radius comes from `--radius` (shadcn default `0.625rem`): `rounded-lg` for card
+  surfaces, `rounded-md` for controls, badges, and skeleton blocks.
 - Numbers are mock data. Do not add live polling or a data-fetching layer to this demo
   module without being asked.
 

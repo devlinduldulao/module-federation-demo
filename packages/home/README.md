@@ -40,7 +40,7 @@ home/
 
 ## Features
 
-- **Hero section** — serif italic heading with "MF" badge, architecture subtitle
+- **Hero section** — Geist semibold heading with "MF" badge, architecture subtitle
 - **Architecture stats grid** — 4-column layout showing Pattern (Module Federation), Runtime (React 19), Bundler (Rspack), Modules (4 Remotes)
 - **Destination cards** — 3 navigation cards (Records, Prescriptions, Analytics) with port info, icon badges, descriptions, and hover effects
 - **Cross-module navigation** — cards dispatch `navigateToModule` CustomEvents so the shell handles routing

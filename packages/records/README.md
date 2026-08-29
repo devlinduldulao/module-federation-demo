@@ -55,9 +55,9 @@ type RecordCategory = "all" | "lab-results" | "imaging" | "clinical-notes";
 
 ## Features
 
-- **Category filter bar** — monospace uppercase tabs with citrine underline on active
+- **Category filter bar** — monospace uppercase tabs with primary underline on active
 - **1px editorial grid** — `gap-[1px] bg-edge` creates sharp dividing lines between cards
-- **Record cards** — aspect-square image placeholder, serif italic name, mono price, "Add →" button
+- **Record cards** — aspect-square image placeholder, Geist semibold name, mono price, "Add →" button
 - **Citrine hover line** — 2px bar scales in from left on card image hover
 - **Staggered animations** — each card fades in with incremental delay
 - **Add prescription** — dispatches `addPrescription` CustomEvent + `showNotification` for the shell toast

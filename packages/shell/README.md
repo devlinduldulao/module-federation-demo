@@ -40,7 +40,7 @@ shell/
     │   ├── ErrorBoundary.tsx      # Class component, catches JS errors per module
     │   ├── ModuleFallback.tsx     # Module unavailable card with retry
     │   ├── DemoPanel.tsx          # Federation Lab — health, kill switches, A/B deployment
-    │   ├── LoadingSpinner.tsx     # Three citrine dots with staggered pulse
+    │   ├── LoadingSpinner.tsx     # Three primary dots with staggered pulse
     │   ├── HomeSkeleton.tsx       # Home landing page skeleton
     │   ├── RecordsSkeleton.tsx   # Records grid skeleton with shimmer
     │   ├── PrescriptionsSkeleton.tsx       # Prescriptions table skeleton
@@ -121,7 +121,7 @@ interface ModuleConfig {
 }
 ```
 
-Each nav item is a real link, so the browser URL updates and users can bookmark or share any module directly. Active routes still get the citrine underline, and the status strip below the nav shows the current module name, port, and streaming status in monospace.
+Each nav item is a real link, so the browser URL updates and users can bookmark or share any module directly. Active routes still get the primary underline, and the status strip below the nav shows the current module name, port, and streaming status in monospace.
 
 When a tab is switched, the shell dispatches a `moduleChange` event:
 
@@ -151,7 +151,7 @@ The shell defines a `PREFETCHERS` map that maps each module to a bare `import()`
 
 The shell owns two themes:
 
-- `dark` — the default noir palette
+- `dark` — the default shadcn neutral dark palette
 - `light` — a clean white theme with crisp high-contrast text
 
 `bootstrap.tsx` calls `initializeTheme()` before mounting React, so the correct CSS variables are present on first paint. Theme changes are stored under `mf-demo-theme`, applied to `document.documentElement.dataset.theme`, and broadcast globally:

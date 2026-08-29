@@ -55,9 +55,9 @@ interface AddPrescriptionEvent extends CustomEvent {
 
 - **Table-like layout** — monospace column headers (Prescription, Qty, Total), bordered rows
 - **Inline quantity controls** — connected `−` / count / `+` cells with border dividers
-- **Order summary sidebar** — sticky panel with subtotal, shipping (free), tax, total in large serif italic
-- **Citrine submit button** — `bg-citrine text-ink` with full-width emphasis
-- **Empty state** — serif italic heading with a working "Browse Records →" CTA that requests host-owned navigation
+- **Order summary sidebar** — sticky panel with subtotal, shipping (free), tax, total in large Geist semibold
+- **Primary submit button** — `bg-primary text-primary-foreground` with full-width emphasis
+- **Empty state** — Geist semibold heading with a working "Browse Records →" CTA that requests host-owned navigation
 - **Cross-module event listening** — adds items when `addPrescription` fires from records
 
 ## Event Handling

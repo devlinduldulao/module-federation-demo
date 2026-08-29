@@ -96,9 +96,17 @@ the event flow inside the shell.
   Use relative imports (`./lib/utils`, `./types`). Adding an alias here without adding it
   to `tsconfig.json` will build but fail typecheck.
 - Mock data and types (`PrescriptionItem`, `AddPrescriptionEvent`) live in `src/types.ts`.
-- Design tokens from `src/index.css`: `cream`, `citrine`, `stone`, `dim`, `edge`,
-  `surface`, `elevated`, `mint`, `rose`. `font-display` italic for patient names,
-  `font-mono` for counts and metadata.
+- Design system is **shadcn/ui (neutral)**. Use only shadcn semantic tokens —
+  `background`, `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`,
+  `accent`, `destructive`, `border`, `input`, `ring`, and `chart-1`..`chart-5`.
+  **Do not introduce a brand colour or a new CSS variable.** shadcn has no success or
+  warning token: use `chart-2` for success/healthy and `chart-4` for warning, and
+  `destructive` for errors.
+- Fonts are the two shadcn/ui uses: **Geist** (`font-sans`, the default) and
+  **Geist Mono** (`font-mono`, for labels, ports, and figures). Headings are upright
+  `font-sans font-semibold` — no display serif, no italic.
+- Radius comes from `--radius` (shadcn default `0.625rem`): `rounded-lg` for card
+  surfaces, `rounded-md` for controls, badges, and skeleton blocks.
 - Refill controls are quantity-bounded (`disabled={item.quantity <= 1}`). Keep the guard
   when adding similar controls, and keep `aria-label` on every icon-only button.
 
