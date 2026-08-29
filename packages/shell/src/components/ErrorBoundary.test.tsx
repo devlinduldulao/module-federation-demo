@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, rs, afterEach } from "@rstest/core";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ErrorBoundary from "./ErrorBoundary";
@@ -25,7 +25,7 @@ describe("ErrorBoundary", () => {
     });
 
     it("renders default fallback when a child throws", () => {
-        vi.spyOn(console, "error").mockImplementation(() => { });
+        rs.spyOn(console, "error").mockImplementation(() => { });
 
         render(
             <ErrorBoundary>
@@ -39,11 +39,11 @@ describe("ErrorBoundary", () => {
         ).toBeInTheDocument();
         expect(screen.queryByText("Child content")).not.toBeInTheDocument();
 
-        vi.restoreAllMocks();
+        rs.restoreAllMocks();
     });
 
     it("renders custom fallback when provided", () => {
-        vi.spyOn(console, "error").mockImplementation(() => { });
+        rs.spyOn(console, "error").mockImplementation(() => { });
 
         render(
             <ErrorBoundary fallback={<div>Custom fallback UI</div>}>
@@ -56,12 +56,12 @@ describe("ErrorBoundary", () => {
             screen.queryByText("Something went wrong")
         ).not.toBeInTheDocument();
 
-        vi.restoreAllMocks();
+        rs.restoreAllMocks();
     });
 
     it("resets error state when Retry is clicked", async () => {
         const user = userEvent.setup();
-        vi.spyOn(console, "error").mockImplementation(() => { });
+        rs.spyOn(console, "error").mockImplementation(() => { });
 
         let shouldThrow = true;
         function ToggleChild() {
@@ -88,11 +88,11 @@ describe("ErrorBoundary", () => {
 
         expect(screen.getByText("Recovered content")).toBeInTheDocument();
 
-        vi.restoreAllMocks();
+        rs.restoreAllMocks();
     });
 
     it("shows the ERROR label", () => {
-        vi.spyOn(console, "error").mockImplementation(() => { });
+        rs.spyOn(console, "error").mockImplementation(() => { });
 
         render(
             <ErrorBoundary>
@@ -102,11 +102,11 @@ describe("ErrorBoundary", () => {
 
         expect(screen.getByText("ERROR")).toBeInTheDocument();
 
-        vi.restoreAllMocks();
+        rs.restoreAllMocks();
     });
 
     it("calls console.error with the error", () => {
-        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => { });
+        const errorSpy = rs.spyOn(console, "error").mockImplementation(() => { });
 
         render(
             <ErrorBoundary>
@@ -120,6 +120,6 @@ describe("ErrorBoundary", () => {
             expect.objectContaining({ componentStack: expect.any(String) })
         );
 
-        vi.restoreAllMocks();
+        rs.restoreAllMocks();
     });
 });

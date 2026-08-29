@@ -22,13 +22,13 @@ importers:
         version: 2.1.1
       cmdk:
         specifier: ^1.1.1
-        version: 1.1.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 1.1.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       input-otp:
         specifier: ^1.5.0
         version: 1.5.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       lucide-react:
-        specifier: ^1.33.0
-        version: 1.33.0(react@19.2.8)
+        specifier: ^1.37.0
+        version: 1.37.0(react@19.2.8)
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -55,38 +55,38 @@ importers:
         version: 1.4.0
     devDependencies:
       '@module-federation/runtime-tools':
-        specifier: ^2.8.2
-        version: 2.8.2
+        specifier: ^2.9.0
+        version: 2.9.0
       '@rspack/cli':
-        specifier: ^2.1.10
-        version: 2.1.10(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))(@rspack/dev-server@2.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2)))
+        specifier: ^2.2.1
+        version: 2.2.1(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))(@rspack/dev-server@2.2.1(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0)))
       '@rspack/core':
-        specifier: ^2.1.10
-        version: 2.1.10(@module-federation/runtime-tools@2.8.2)
+        specifier: ^2.2.1
+        version: 2.2.1(@module-federation/runtime-tools@2.9.0)
       '@rspack/dev-server':
         specifier: ^2.2.1
-        version: 2.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))
+        version: 2.2.1(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))
       '@rspack/plugin-react-refresh':
         specifier: ^2.0.2
-        version: 2.0.2(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))(react-refresh@0.18.0)
+        version: 2.0.2(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))(react-refresh@0.18.0)
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
       '@types/node':
-        specifier: ^26.2.0
-        version: 26.2.0
+        specifier: ^26.4.0
+        version: 26.4.0
       '@types/react':
         specifier: ^19.2.18
         version: 19.2.18
       '@types/react-dom':
-        specifier: ^19.2.4
-        version: 19.2.4(@types/react@19.2.18)
+        specifier: ^19.2.5
+        version: 19.2.5(@types/react@19.2.18)
       postcss:
         specifier: ^8.5.26
         version: 8.5.26
       postcss-loader:
         specifier: ^8.2.1
-        version: 8.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))(postcss@8.5.26)(typescript@7.0.2)
+        version: 8.2.1(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))(postcss@8.5.26)(typescript@7.0.2)
       react-refresh:
         specifier: ^0.18.0
         version: 0.18.0
@@ -329,23 +329,23 @@ packages:
       '@cfworker/json-schema':
         optional: true
 
-  '@module-federation/error-codes@2.8.2':
-    resolution: {integrity: sha512-8inlDv48QOjA//CLQ3epjoHEiMQGsz1Pmtu2N+s7gQVggn6AYHpjnMe8AsyGxtpaPg3wbX0HmBZtRFggpXUB9A==}
+  '@module-federation/error-codes@2.9.0':
+    resolution: {integrity: sha512-IGpd+VRlji3NyGOGGTsk7YEmPRKcDoBK4YHqIuP+OQwyb2YhHCUHO2vW9RXeQxCuKwi+c6xkTweRYG+Umy+0Zw==}
 
-  '@module-federation/runtime-core@2.8.2':
-    resolution: {integrity: sha512-PEkkK9MUp+nUCeQMS4ox3QGZfwwxgfjGA7P4umEnr5c3y8DLNDR+26tyHf/Gkjen2VsjlcyL+mEAQo1Zi4IE3g==}
+  '@module-federation/runtime-core@2.9.0':
+    resolution: {integrity: sha512-dLykRYfpbEJBTdk2NlbNoVVTB196O3qujawTBguLABJkPCWETJNk60NR1yZO34eI+DTH+eGwHU3m7FddAWnbnw==}
 
-  '@module-federation/runtime-tools@2.8.2':
-    resolution: {integrity: sha512-eW/yPvZB2LbpbyPXPTnOeF1ieWl165D9QcPV0y5Bj1QYGDjL2cb+dnzrBp0fmFtJhCYqmAdsVNoYItVa3yuJ3g==}
+  '@module-federation/runtime-tools@2.9.0':
+    resolution: {integrity: sha512-u2puqsaHiw1bVvLNk1uh98iPo6UzaBuci/aTvOFwKvbT/RF18C3vGGnm+ShHPKQEnoN6ctPtnygyOZDPR+8cgg==}
 
-  '@module-federation/runtime@2.8.2':
-    resolution: {integrity: sha512-SUoP+PD5EjSPSi6FxEPGIZoRkFifxdeYcVQbJE9mO0VEjF51gAk3/TgX8k0vzUryOBPmXekLr9SfQXU6DqUtvA==}
+  '@module-federation/runtime@2.9.0':
+    resolution: {integrity: sha512-3cyAav0hWP+dNvB7qrcK9CKxQn+JvkbRvLtZz3zS2g0EyxtDFDjgbHY0Afcf7oHf8IHhKeEdzb/3Kjr1Pjmr7A==}
 
-  '@module-federation/sdk@2.8.2':
-    resolution: {integrity: sha512-OPS/lbQjraLXoWniQpCwQ/vqgURHTrhsackSNcOPmcJHM3LyR+DabxUc0pl8jAqExsW2l+uepQq7+/Gkei871w==}
+  '@module-federation/sdk@2.9.0':
+    resolution: {integrity: sha512-IMjObgBGQTXd33jTTCYcxvz8iOQGLsZ2QIPOj90rDxuBtJsN4WJwYyXqligrhY/e5p/BipUPdbIgKmWL7zFhTw==}
 
-  '@module-federation/webpack-bundler-runtime@2.8.2':
-    resolution: {integrity: sha512-g4xQgfgMMCKgJjVMBh7nIYGjLGNDYwSZ4lfpTdkVyWDnxmR3SL6VPQTJEZHRYPyqvrTtZE1zdDhDd++yNRvLdA==}
+  '@module-federation/webpack-bundler-runtime@2.9.0':
+    resolution: {integrity: sha512-MdU6NQibT57MaJG3KPBjC30IVBrz5eU7IcjHoVDYnMh7OmASw3stagBu7hYjdMTP31luNdtzUn85s9axvdwTlw==}
 
   '@napi-rs/wasm-runtime@1.1.6':
     resolution: {integrity: sha512-ZLv/JdUfkvOy9eCnnBaGfiO+XimbjebAeO+MRQqD/B+FR1tnRN0tpKSJHRbE8sFfS6aqsXZ67TQjfwfsxULVbg==}
@@ -527,88 +527,88 @@ packages:
       '@types/react':
         optional: true
 
-  '@rspack/binding-darwin-arm64@2.1.10':
-    resolution: {integrity: sha512-DZlcTpbIb2mjeS1aSG4k01UH33Zj7T+k8ZylPK6HmsKs4JvK4wgpWFC78WVv3p/Aj3MZS6DwtDLwpZ2Ihj/fpg==}
+  '@rspack/binding-darwin-arm64@2.2.1':
+    resolution: {integrity: sha512-Y/Naw/7V76QiUYdYRuBzBZtzRjt/3fjDUuF8GK0+/BO7BP1RrpY4tk1ln+iiqegRUD8u9uGn08fi8No1rwfyUg==}
     cpu: [arm64]
     os: [darwin]
 
-  '@rspack/binding-darwin-x64@2.1.10':
-    resolution: {integrity: sha512-my/0h2LwxCRT6cg3oDDC2e0ZOxQLVajAdIcv0fqnQk5JRNvVuL89PuTutitnSqie1A0/JSL8OQz5XHwmoS3kow==}
+  '@rspack/binding-darwin-x64@2.2.1':
+    resolution: {integrity: sha512-rTIG/xZIW7RbEEuMR9hnNn5dv3fDBpX0N4FAQUwfhUYy3tN2+3vibTTq/Nj1Sd9Vn4yWydbWIEwBX6m/aGejig==}
     cpu: [x64]
     os: [darwin]
 
-  '@rspack/binding-linux-arm64-gnu@2.1.10':
-    resolution: {integrity: sha512-laevn9g+E5PAUEGqiKe6Ju5KApsuQYp+bPI17XS3Lkl8eqL5pS/BmHYU7QMlst4GzV8+wlruVTMh//+st6Vqzg==}
+  '@rspack/binding-linux-arm64-gnu@2.2.1':
+    resolution: {integrity: sha512-53rAMU6Hqiat21IMU1hTt4Si2F33h+ZbXOt+Y18W39AFjcwmleIBId2u7beqJeGXLJuBgIAm31jcbJj/PN7mWQ==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-arm64-musl@2.1.10':
-    resolution: {integrity: sha512-V71+Qz5G72+ROZXrJn5zxOszdG1AEbO8pcC/itXXtf4yRR6a3bVHKNKGhipBNxb8eI6cnD/01FH1h3ZG655jLw==}
+  '@rspack/binding-linux-arm64-musl@2.2.1':
+    resolution: {integrity: sha512-o7zFiWkt4MqSfSdTbxUdF27fcrWKpRizcuVB8H3yd2G6xW9V2OfYbhVGQnOlbKi+GK74RkCmoJtANB+QboIqKQ==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@rspack/binding-linux-ppc64-gnu@2.1.10':
-    resolution: {integrity: sha512-U7HlNzHcDtZ+LYOtOJmtx67kHEybZzUUAaP7aEXjGYO5WTCgh/176sW2UYP0rmZLrgUNFUuzn+B98RLaClNaVg==}
+  '@rspack/binding-linux-ppc64-gnu@2.2.1':
+    resolution: {integrity: sha512-pvx1oeg1z7cr8OcNt7PAt1SJTHzdsN/pvu7HkGnfks2fWE7GDs9DLL2KvN7tUkzQvJm6bGgUwqSCOrqV4uSwAg==}
     cpu: [ppc64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-riscv64-gnu@2.1.10':
-    resolution: {integrity: sha512-GMGTJpy9/ecE+5F5IfxZH4bXv0Wx/b2TiehTlCbTksbL+pKpLHYy0rwGdjWDKbmBkhxMMqPiC7PDnn9LbdnnLA==}
+  '@rspack/binding-linux-riscv64-gnu@2.2.1':
+    resolution: {integrity: sha512-WQ6P94Wz2tgwOsgifTWP2/bV63iZH5+rkxngQwF22FC8KmIXXy/Yug7lyMH1ld8Hzg4p1qXjBBr4i1cCyJTR+w==}
     cpu: [riscv64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-riscv64-musl@2.1.10':
-    resolution: {integrity: sha512-rkurnAWc04vIbzG1QCrPBWSJadZvaOt1mazFH3EdiJO8VUiu0I1T9zdiwuDOPrd50lOKIZlcTXbd5aaAkWEnvQ==}
+  '@rspack/binding-linux-riscv64-musl@2.2.1':
+    resolution: {integrity: sha512-GEFUFHQkjKU7OYyHXnrIo8wWcUHM7jeKov5z6Lxd3i+3hKo11yBOgb7b+uD94Rx2tPuWF4jyFdWmcNu46Njb/A==}
     cpu: [riscv64]
     os: [linux]
     libc: [musl]
 
-  '@rspack/binding-linux-s390x-gnu@2.1.10':
-    resolution: {integrity: sha512-X+DyxkriZEAF/wihI7ERDv+CAS0mbMv36aEuQ+vXzTlvS6cSmpou/r29AHbvIF3NlG1UeAbDVlOs9QrMBZjpUQ==}
+  '@rspack/binding-linux-s390x-gnu@2.2.1':
+    resolution: {integrity: sha512-Cqw2UjSmFGZaw1EjQXClKDud86ThynGEEIazy2PZfPzZG4WjICK1WjdeFCJd7xWsSbUQ3jGyzb7/EHiDVa+sKA==}
     cpu: [s390x]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-x64-gnu@2.1.10':
-    resolution: {integrity: sha512-Fat09V6jUuyo9qG7Wyj9cQ31VDfLmokXyBtGqKxY5OvSWHereB7QUub5btbPXHwbp6Iq4aAQyUbbLTzvR1YaBw==}
+  '@rspack/binding-linux-x64-gnu@2.2.1':
+    resolution: {integrity: sha512-QX+gRxg2CS9ri2fUG5eNurdsrOCWoJ56SsD2O7kcVGiRm+S2+muNb/QhkdkAdt/u/m++7Ve5TMIpHTnaKYCpCw==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@rspack/binding-linux-x64-musl@2.1.10':
-    resolution: {integrity: sha512-lhHOnIJ4ClpIlA1f1L8aoxEZivYLjnjq5A6jKKz7BKsm+cHK8kqqEm6lO5KqA5xQT0Lonq1o28bmKHEj6JHInw==}
+  '@rspack/binding-linux-x64-musl@2.2.1':
+    resolution: {integrity: sha512-mBZQl1NdGbEB3y5M9d0tkuF7RL1GLz3Hb3gqFa3QRZBymP9PCV83Jiji8s2PJimNUJIVcdZRIw8+VGYs/35c2A==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@rspack/binding-wasm32-wasi@2.1.10':
-    resolution: {integrity: sha512-KY5YbWbuvYcoaLXnV+vzZOvGRCeb6jt4EpVpKdph1h1IJjwX/ju15EQ+GOe3iecZEdf0OttQcNVcwBkLkFT9ag==}
+  '@rspack/binding-wasm32-wasi@2.2.1':
+    resolution: {integrity: sha512-/d2ImKDS+lT+FJ07MxKBeUkTat84tr2Nm2+nIRt8HmZK7/N8odkQml9vb4MHr8E7oYOp4B+jm6W5frdRzKrkJQ==}
     cpu: [wasm32]
 
-  '@rspack/binding-win32-arm64-msvc@2.1.10':
-    resolution: {integrity: sha512-z4GWzMLofaDGpAt9Z+MlN88LlUBDm+zM6R2GdOOPM6/4g/h3/+47OP7casmSL3AwTGYBEJqogwt08sRSosB6Cg==}
+  '@rspack/binding-win32-arm64-msvc@2.2.1':
+    resolution: {integrity: sha512-TfmaKPF3KC7uoZb6A+8ZUbLS8g8P5EdeXFGLCaJ+UgdkJ20TsapcfJXZXWNnKzFEkV8dUO/t5oNxNLYy2URusw==}
     cpu: [arm64]
     os: [win32]
 
-  '@rspack/binding-win32-ia32-msvc@2.1.10':
-    resolution: {integrity: sha512-7qcWdsZ+GuGtzKjqgy7wTN7Dso/ezIY8yhx1r2yIbcczdmXj4FhaEampMDp/25HwtKwIGBBoh6HHSt3JWxpTUg==}
+  '@rspack/binding-win32-ia32-msvc@2.2.1':
+    resolution: {integrity: sha512-rdBXayngvpQFMSUIC4b71FDZrSBJszSHNEkln/Nis3a17DMAE7IkgJcqe7SqLWbk2OPF/N920AOWmBEDQQCaMg==}
     cpu: [ia32]
     os: [win32]
 
-  '@rspack/binding-win32-x64-msvc@2.1.10':
-    resolution: {integrity: sha512-pgp23pLrzfhGnKycxzr7ifP17lAbWZEfnx1bX8gXtYrnpJ66DRNyTKSzxB6sa/HBWjS1L8PX5TjMZ44WfPydqQ==}
+  '@rspack/binding-win32-x64-msvc@2.2.1':
+    resolution: {integrity: sha512-l3K4s7nrQJc+3LacPFjZGjX8Jk1sf8Q4TK6IXAsdSucOjTqYSpD8PMl2NUXCBDXOl8T2V4v323z1LfxwW8BPmA==}
     cpu: [x64]
     os: [win32]
 
-  '@rspack/binding@2.1.10':
-    resolution: {integrity: sha512-vnu/UP5HnrND15lO9+VeG6eUrbTyycHNQNQ3XEiRiFojuoiGZkIZC3Hbzr8qQH44C6vScPODEPvvIVvLcO2LpQ==}
+  '@rspack/binding@2.2.1':
+    resolution: {integrity: sha512-56TqztuEMd+aHGv1jDXnkJQGSLTb4NoO146flFxJqPG8931UdXPO2pNR9M0Q2Pz+GvmO0fLHGPLYBHoRVrRlHw==}
 
-  '@rspack/cli@2.1.10':
-    resolution: {integrity: sha512-qkuQQ3PzD2sTS2tBAWyWNeOeZmPxRBzB+eNDBhCZmbm8DoMPujW2VQj0k9CulrkBq9sBxU8fQ+5Z/ELzbz5S8g==}
+  '@rspack/cli@2.2.1':
+    resolution: {integrity: sha512-Id6Jy9aHkKuLyYqxoDZt5P0y55/hQuUwoceSEBXloWdbRoKByxMJt+FHZdQHKKyfD0/8uA8p99DDMPe6vhypLg==}
     hasBin: true
     peerDependencies:
       '@rspack/core': ^2.0.0-0
@@ -617,8 +617,8 @@ packages:
       '@rspack/dev-server':
         optional: true
 
-  '@rspack/core@2.1.10':
-    resolution: {integrity: sha512-YSS2/Xxz8uiG/KXDkqOoA3dTetNo/vysk7bAexQOrU8iuq7JuzDTTAwLKvWZnwmvME8M8m5wcM4YvfIwYmidHA==}
+  '@rspack/core@2.2.1':
+    resolution: {integrity: sha512-EHFX2oWCY1HkHJkG/Ev8HXCcl4gQzgETyairdIlBkKaypuW8i7kowBxUFzpHHg/ObF70vB3focToel9Wwg4MRA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@module-federation/runtime-tools': ^0.24.1 || ^2.0.0
@@ -762,11 +762,11 @@ packages:
   '@tybys/wasm-util@0.10.3':
     resolution: {integrity: sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==}
 
-  '@types/node@26.2.0':
-    resolution: {integrity: sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==}
+  '@types/node@26.4.0':
+    resolution: {integrity: sha512-faiGnoIrLH/V8cibOMEAZ8pMw6oXqSukl29ra4mN8GdaB2ZewzeaLj+INpV5N+Z1eKWzY+IzaIZH2EIR6YZRNQ==}
 
-  '@types/react-dom@19.2.4':
-    resolution: {integrity: sha512-Bsc+QHgp+P/F02XDzNCY9jnZNCUuLki36KT7VKrTXXLdHf+vHMNZnW1rVu5DNW/rCK+fya3DATySbLM4yhtKUw==}
+  '@types/react-dom@19.2.5':
+    resolution: {integrity: sha512-fMPwH9v7r/pp43yUd2/Mbiex5KouJwwR3dzHkhLREUC6764VyDsqxhAxv6OFEYR1RhjOyD1naqba8ECDBe7ZQg==}
     peerDependencies:
       '@types/react': ^19.2.0
 
@@ -1608,8 +1608,8 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lucide-react@1.33.0:
-    resolution: {integrity: sha512-MTRwMy0ZlL8Ur/vOAiJ9XGHE+kFPC7brq6MxAm0GiGXEBj0qy0jA/pG4N675oSzciO/UCdX8T+5yUQdmDeTLxg==}
+  lucide-react@1.37.0:
+    resolution: {integrity: sha512-LPsB4rD1TD6wZu1djKOf9vUnS1jTNaHbolXebXDgiTdb6jeA1agIJhJsIybCmjKmQClcOaal1o1OaiYahEftyQ==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -2537,31 +2537,31 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@module-federation/error-codes@2.8.2': {}
+  '@module-federation/error-codes@2.9.0': {}
 
-  '@module-federation/runtime-core@2.8.2':
+  '@module-federation/runtime-core@2.9.0':
     dependencies:
-      '@module-federation/error-codes': 2.8.2
-      '@module-federation/sdk': 2.8.2
+      '@module-federation/error-codes': 2.9.0
+      '@module-federation/sdk': 2.9.0
 
-  '@module-federation/runtime-tools@2.8.2':
+  '@module-federation/runtime-tools@2.9.0':
     dependencies:
-      '@module-federation/runtime': 2.8.2
-      '@module-federation/webpack-bundler-runtime': 2.8.2
+      '@module-federation/runtime': 2.9.0
+      '@module-federation/webpack-bundler-runtime': 2.9.0
 
-  '@module-federation/runtime@2.8.2':
+  '@module-federation/runtime@2.9.0':
     dependencies:
-      '@module-federation/error-codes': 2.8.2
-      '@module-federation/runtime-core': 2.8.2
-      '@module-federation/sdk': 2.8.2
+      '@module-federation/error-codes': 2.9.0
+      '@module-federation/runtime-core': 2.9.0
+      '@module-federation/sdk': 2.9.0
 
-  '@module-federation/sdk@2.8.2': {}
+  '@module-federation/sdk@2.9.0': {}
 
-  '@module-federation/webpack-bundler-runtime@2.8.2':
+  '@module-federation/webpack-bundler-runtime@2.9.0':
     dependencies:
-      '@module-federation/error-codes': 2.8.2
-      '@module-federation/runtime': 2.8.2
-      '@module-federation/sdk': 2.8.2
+      '@module-federation/error-codes': 2.9.0
+      '@module-federation/runtime': 2.9.0
+      '@module-federation/sdk': 2.9.0
 
   '@napi-rs/wasm-runtime@1.1.6(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)':
     dependencies:
@@ -2596,18 +2596,18 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@radix-ui/react-dialog@1.1.23(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@radix-ui/react-dialog@1.1.23(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.7
       '@radix-ui/react-compose-refs': 1.1.5(@types/react@19.2.18)(react@19.2.8)
       '@radix-ui/react-context': 1.2.2(@types/react@19.2.18)(react@19.2.8)
-      '@radix-ui/react-dismissable-layer': 1.1.19(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-dismissable-layer': 1.1.19(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-focus-guards': 1.1.6(@types/react@19.2.18)(react@19.2.8)
-      '@radix-ui/react-focus-scope': 1.1.16(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-focus-scope': 1.1.16(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-id': 1.1.4(@types/react@19.2.18)(react@19.2.8)
-      '@radix-ui/react-portal': 1.1.17(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@radix-ui/react-presence': 1.1.10(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-portal': 1.1.17(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-presence': 1.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-slot': 1.3.3(@types/react@19.2.18)(react@19.2.8)
       '@radix-ui/react-use-controllable-state': 1.2.6(@types/react@19.2.18)(react@19.2.8)
       '@radix-ui/react-use-layout-effect': 1.1.4(@types/react@19.2.18)(react@19.2.8)
@@ -2617,20 +2617,20 @@ snapshots:
       react-remove-scroll: 2.7.2(@types/react@19.2.18)(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
-      '@types/react-dom': 19.2.4(@types/react@19.2.18)
+      '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
-  '@radix-ui/react-dismissable-layer@1.1.19(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@radix-ui/react-dismissable-layer@1.1.19(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/primitive': 1.1.7
       '@radix-ui/react-compose-refs': 1.1.5(@types/react@19.2.18)(react@19.2.8)
-      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-use-callback-ref': 1.1.4(@types/react@19.2.18)(react@19.2.8)
       '@radix-ui/react-use-effect-event': 0.0.5(@types/react@19.2.18)(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
-      '@types/react-dom': 19.2.4(@types/react@19.2.18)
+      '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
   '@radix-ui/react-focus-guards@1.1.6(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
@@ -2638,16 +2638,16 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@radix-ui/react-focus-scope@1.1.16(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@radix-ui/react-focus-scope@1.1.16(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-compose-refs': 1.1.5(@types/react@19.2.18)(react@19.2.8)
-      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-use-callback-ref': 1.1.4(@types/react@19.2.18)(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
-      '@types/react-dom': 19.2.4(@types/react@19.2.18)
+      '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
   '@radix-ui/react-id@1.1.4(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
@@ -2656,33 +2656,33 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@radix-ui/react-portal@1.1.17(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@radix-ui/react-portal@1.1.17(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-use-layout-effect': 1.1.4(@types/react@19.2.18)(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
-      '@types/react-dom': 19.2.4(@types/react@19.2.18)
+      '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
-  '@radix-ui/react-presence@1.1.10(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@radix-ui/react-presence@1.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-use-layout-effect': 1.1.4(@types/react@19.2.18)(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
-      '@types/react-dom': 19.2.4(@types/react@19.2.18)
+      '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
-  '@radix-ui/react-primitive@2.1.10(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@radix-ui/react-primitive@2.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@radix-ui/react-slot': 1.3.3(@types/react@19.2.18)(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
     optionalDependencies:
       '@types/react': 19.2.18
-      '@types/react-dom': 19.2.4(@types/react@19.2.18)
+      '@types/react-dom': 19.2.5(@types/react@19.2.18)
 
   '@radix-ui/react-slot@1.3.3(@types/react@19.2.18)(react@19.2.8)':
     dependencies:
@@ -2719,95 +2719,95 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@rspack/binding-darwin-arm64@2.1.10':
+  '@rspack/binding-darwin-arm64@2.2.1':
     optional: true
 
-  '@rspack/binding-darwin-x64@2.1.10':
+  '@rspack/binding-darwin-x64@2.2.1':
     optional: true
 
-  '@rspack/binding-linux-arm64-gnu@2.1.10':
+  '@rspack/binding-linux-arm64-gnu@2.2.1':
     optional: true
 
-  '@rspack/binding-linux-arm64-musl@2.1.10':
+  '@rspack/binding-linux-arm64-musl@2.2.1':
     optional: true
 
-  '@rspack/binding-linux-ppc64-gnu@2.1.10':
+  '@rspack/binding-linux-ppc64-gnu@2.2.1':
     optional: true
 
-  '@rspack/binding-linux-riscv64-gnu@2.1.10':
+  '@rspack/binding-linux-riscv64-gnu@2.2.1':
     optional: true
 
-  '@rspack/binding-linux-riscv64-musl@2.1.10':
+  '@rspack/binding-linux-riscv64-musl@2.2.1':
     optional: true
 
-  '@rspack/binding-linux-s390x-gnu@2.1.10':
+  '@rspack/binding-linux-s390x-gnu@2.2.1':
     optional: true
 
-  '@rspack/binding-linux-x64-gnu@2.1.10':
+  '@rspack/binding-linux-x64-gnu@2.2.1':
     optional: true
 
-  '@rspack/binding-linux-x64-musl@2.1.10':
+  '@rspack/binding-linux-x64-musl@2.2.1':
     optional: true
 
-  '@rspack/binding-wasm32-wasi@2.1.10':
+  '@rspack/binding-wasm32-wasi@2.2.1':
     dependencies:
       '@emnapi/core': 1.11.3
       '@emnapi/runtime': 1.11.3
       '@napi-rs/wasm-runtime': 1.1.6(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)
     optional: true
 
-  '@rspack/binding-win32-arm64-msvc@2.1.10':
+  '@rspack/binding-win32-arm64-msvc@2.2.1':
     optional: true
 
-  '@rspack/binding-win32-ia32-msvc@2.1.10':
+  '@rspack/binding-win32-ia32-msvc@2.2.1':
     optional: true
 
-  '@rspack/binding-win32-x64-msvc@2.1.10':
+  '@rspack/binding-win32-x64-msvc@2.2.1':
     optional: true
 
-  '@rspack/binding@2.1.10':
+  '@rspack/binding@2.2.1':
     optionalDependencies:
-      '@rspack/binding-darwin-arm64': 2.1.10
-      '@rspack/binding-darwin-x64': 2.1.10
-      '@rspack/binding-linux-arm64-gnu': 2.1.10
-      '@rspack/binding-linux-arm64-musl': 2.1.10
-      '@rspack/binding-linux-ppc64-gnu': 2.1.10
-      '@rspack/binding-linux-riscv64-gnu': 2.1.10
-      '@rspack/binding-linux-riscv64-musl': 2.1.10
-      '@rspack/binding-linux-s390x-gnu': 2.1.10
-      '@rspack/binding-linux-x64-gnu': 2.1.10
-      '@rspack/binding-linux-x64-musl': 2.1.10
-      '@rspack/binding-wasm32-wasi': 2.1.10
-      '@rspack/binding-win32-arm64-msvc': 2.1.10
-      '@rspack/binding-win32-ia32-msvc': 2.1.10
-      '@rspack/binding-win32-x64-msvc': 2.1.10
+      '@rspack/binding-darwin-arm64': 2.2.1
+      '@rspack/binding-darwin-x64': 2.2.1
+      '@rspack/binding-linux-arm64-gnu': 2.2.1
+      '@rspack/binding-linux-arm64-musl': 2.2.1
+      '@rspack/binding-linux-ppc64-gnu': 2.2.1
+      '@rspack/binding-linux-riscv64-gnu': 2.2.1
+      '@rspack/binding-linux-riscv64-musl': 2.2.1
+      '@rspack/binding-linux-s390x-gnu': 2.2.1
+      '@rspack/binding-linux-x64-gnu': 2.2.1
+      '@rspack/binding-linux-x64-musl': 2.2.1
+      '@rspack/binding-wasm32-wasi': 2.2.1
+      '@rspack/binding-win32-arm64-msvc': 2.2.1
+      '@rspack/binding-win32-ia32-msvc': 2.2.1
+      '@rspack/binding-win32-x64-msvc': 2.2.1
 
-  '@rspack/cli@2.1.10(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))(@rspack/dev-server@2.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2)))':
+  '@rspack/cli@2.2.1(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))(@rspack/dev-server@2.2.1(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0)))':
     dependencies:
-      '@rspack/core': 2.1.10(@module-federation/runtime-tools@2.8.2)
+      '@rspack/core': 2.2.1(@module-federation/runtime-tools@2.9.0)
     optionalDependencies:
-      '@rspack/dev-server': 2.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))
+      '@rspack/dev-server': 2.2.1(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))
 
-  '@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2)':
+  '@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0)':
     dependencies:
-      '@rspack/binding': 2.1.10
+      '@rspack/binding': 2.2.1
     optionalDependencies:
-      '@module-federation/runtime-tools': 2.8.2
+      '@module-federation/runtime-tools': 2.9.0
 
-  '@rspack/dev-middleware@2.0.3(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))':
+  '@rspack/dev-middleware@2.0.3(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))':
     optionalDependencies:
-      '@rspack/core': 2.1.10(@module-federation/runtime-tools@2.8.2)
+      '@rspack/core': 2.2.1(@module-federation/runtime-tools@2.9.0)
 
-  '@rspack/dev-server@2.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))':
+  '@rspack/dev-server@2.2.1(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))':
     dependencies:
-      '@rspack/core': 2.1.10(@module-federation/runtime-tools@2.8.2)
-      '@rspack/dev-middleware': 2.0.3(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))
+      '@rspack/core': 2.2.1(@module-federation/runtime-tools@2.9.0)
+      '@rspack/dev-middleware': 2.0.3(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))
 
-  '@rspack/plugin-react-refresh@2.0.2(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))(react-refresh@0.18.0)':
+  '@rspack/plugin-react-refresh@2.0.2(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))(react-refresh@0.18.0)':
     dependencies:
       react-refresh: 0.18.0
     optionalDependencies:
-      '@rspack/core': 2.1.10(@module-federation/runtime-tools@2.8.2)
+      '@rspack/core': 2.2.1(@module-federation/runtime-tools@2.9.0)
 
   '@sec-ant/readable-stream@0.4.1': {}
 
@@ -2893,11 +2893,11 @@ snapshots:
       tslib: 2.8.1
     optional: true
 
-  '@types/node@26.2.0':
+  '@types/node@26.4.0':
     dependencies:
       undici-types: 8.3.0
 
-  '@types/react-dom@19.2.4(@types/react@19.2.18)':
+  '@types/react-dom@19.2.5(@types/react@19.2.18)':
     dependencies:
       '@types/react': 19.2.18
 
@@ -3073,12 +3073,12 @@ snapshots:
 
   clsx@2.1.1: {}
 
-  cmdk@1.1.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  cmdk@1.1.1(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@radix-ui/react-compose-refs': 1.1.5(@types/react@19.2.18)(react@19.2.8)
-      '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-id': 1.1.4(@types/react@19.2.18)(react@19.2.8)
-      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@radix-ui/react-primitive': 2.1.10(@types/react-dom@19.2.5(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
     transitivePeerDependencies:
@@ -3586,7 +3586,7 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lucide-react@1.33.0(react@19.2.8):
+  lucide-react@1.37.0(react@19.2.8):
     dependencies:
       react: 19.2.8
 
@@ -3747,14 +3747,14 @@ snapshots:
     dependencies:
       find-up: 3.0.0
 
-  postcss-loader@8.2.1(@rspack/core@2.1.10(@module-federation/runtime-tools@2.8.2))(postcss@8.5.26)(typescript@7.0.2):
+  postcss-loader@8.2.1(@rspack/core@2.2.1(@module-federation/runtime-tools@2.9.0))(postcss@8.5.26)(typescript@7.0.2):
     dependencies:
       cosmiconfig: 9.0.1(typescript@7.0.2)
       jiti: 2.7.0
       postcss: 8.5.26
       semver: 7.7.4
     optionalDependencies:
-      '@rspack/core': 2.1.10(@module-federation/runtime-tools@2.8.2)
+      '@rspack/core': 2.2.1(@module-federation/runtime-tools@2.9.0)
     transitivePeerDependencies:
       - typescript
 

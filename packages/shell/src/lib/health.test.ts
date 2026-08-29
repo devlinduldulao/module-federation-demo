@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, rs, afterEach } from "@rstest/core";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useRemoteHealth } from "./health";
 
@@ -9,19 +9,19 @@ const REMOTES = [
 
 describe("useRemoteHealth", () => {
     afterEach(() => {
-        vi.restoreAllMocks();
-        vi.useRealTimers();
+        rs.restoreAllMocks();
+        rs.useRealTimers();
     });
 
     it("initializes all remotes with status checking", () => {
-        vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => { /* never resolves */ })));
+        rs.stubGlobal("fetch", rs.fn().mockReturnValue(new Promise(() => { /* never resolves */ })));
         const { result } = renderHook(() => useRemoteHealth(REMOTES));
         expect(result.current[0]!.status).toBe("checking");
         expect(result.current[1]!.status).toBe("checking");
     });
 
     it("initializes each remote with its correct id and port", () => {
-        vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
+        rs.stubGlobal("fetch", rs.fn().mockReturnValue(new Promise(() => {})));
         const { result } = renderHook(() => useRemoteHealth(REMOTES));
         expect(result.current[0]!.id).toBe("records");
         expect(result.current[0]!.port).toBe("3001");
@@ -30,16 +30,16 @@ describe("useRemoteHealth", () => {
     });
 
     it("initializes with null latencyMs and lastChecked", () => {
-        vi.stubGlobal("fetch", vi.fn().mockReturnValue(new Promise(() => {})));
+        rs.stubGlobal("fetch", rs.fn().mockReturnValue(new Promise(() => {})));
         const { result } = renderHook(() => useRemoteHealth(REMOTES));
         expect(result.current[0]!.latencyMs).toBeNull();
         expect(result.current[0]!.lastChecked).toBeNull();
     });
 
     it("sets status to online when fetch returns an opaque response", async () => {
-        vi.stubGlobal(
+        rs.stubGlobal(
             "fetch",
-            vi.fn().mockResolvedValue({ ok: false, type: "opaque" })
+            rs.fn().mockResolvedValue({ ok: false, type: "opaque" })
         );
         const { result } = renderHook(() => useRemoteHealth(REMOTES));
 
@@ -50,9 +50,9 @@ describe("useRemoteHealth", () => {
     });
 
     it("sets status to online when fetch returns ok: true", async () => {
-        vi.stubGlobal(
+        rs.stubGlobal(
             "fetch",
-            vi.fn().mockResolvedValue({ ok: true, type: "basic" })
+            rs.fn().mockResolvedValue({ ok: true, type: "basic" })
         );
         const { result } = renderHook(() => useRemoteHealth(REMOTES));
 
@@ -62,9 +62,9 @@ describe("useRemoteHealth", () => {
     });
 
     it("sets status to offline when fetch throws a network error", async () => {
-        vi.stubGlobal(
+        rs.stubGlobal(
             "fetch",
-            vi.fn().mockRejectedValue(new Error("Network error"))
+            rs.fn().mockRejectedValue(new Error("Network error"))
         );
         const { result } = renderHook(() => useRemoteHealth(REMOTES));
 
@@ -75,9 +75,9 @@ describe("useRemoteHealth", () => {
     });
 
     it("populates latencyMs as a non-negative number after check", async () => {
-        vi.stubGlobal(
+        rs.stubGlobal(
             "fetch",
-            vi.fn().mockResolvedValue({ ok: true, type: "basic" })
+            rs.fn().mockResolvedValue({ ok: true, type: "basic" })
         );
         const { result } = renderHook(() => useRemoteHealth(REMOTES));
 
@@ -88,9 +88,9 @@ describe("useRemoteHealth", () => {
     });
 
     it("populates lastChecked as a timestamp after check", async () => {
-        vi.stubGlobal(
+        rs.stubGlobal(
             "fetch",
-            vi.fn().mockResolvedValue({ ok: true, type: "basic" })
+            rs.fn().mockResolvedValue({ ok: true, type: "basic" })
         );
         const before = Date.now();
         const { result } = renderHook(() => useRemoteHealth(REMOTES));
@@ -102,8 +102,8 @@ describe("useRemoteHealth", () => {
     });
 
     it("does not call fetch when enabled is false", async () => {
-        const fetchMock = vi.fn();
-        vi.stubGlobal("fetch", fetchMock);
+        const fetchMock = rs.fn();
+        rs.stubGlobal("fetch", fetchMock);
 
         renderHook(() => useRemoteHealth(REMOTES, false));
 
@@ -116,10 +116,10 @@ describe("useRemoteHealth", () => {
     });
 
     it("calls fetch for each remote on mount", async () => {
-        const fetchMock = vi
+        const fetchMock = rs
             .fn()
             .mockResolvedValue({ ok: true, type: "basic" });
-        vi.stubGlobal("fetch", fetchMock);
+        rs.stubGlobal("fetch", fetchMock);
 
         renderHook(() => useRemoteHealth(REMOTES));
 
@@ -130,17 +130,17 @@ describe("useRemoteHealth", () => {
     });
 
     it("re-checks all remotes after the polling interval elapses", async () => {
-        vi.useFakeTimers();
-        const fetchMock = vi
+        rs.useFakeTimers();
+        const fetchMock = rs
             .fn()
             .mockResolvedValue({ ok: true, type: "basic" });
-        vi.stubGlobal("fetch", fetchMock);
+        rs.stubGlobal("fetch", fetchMock);
 
         renderHook(() => useRemoteHealth(REMOTES));
 
         // Flush the initial async runChecks() call (no timers involved — uses Promises)
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(0);
+            await rs.advanceTimersByTimeAsync(0);
         });
 
         const callsAfterInitial = fetchMock.mock.calls.length;
@@ -148,19 +148,19 @@ describe("useRemoteHealth", () => {
 
         // Advance by one interval tick (5000ms) and flush the resulting async work
         await act(async () => {
-            await vi.advanceTimersByTimeAsync(5001);
+            await rs.advanceTimersByTimeAsync(5001);
         });
 
         expect(fetchMock.mock.calls.length).toBeGreaterThan(callsAfterInitial);
 
-        vi.useRealTimers();
+        rs.useRealTimers();
     });
 
     it("builds the correct health-check URL for each remote", async () => {
-        const fetchMock = vi
+        const fetchMock = rs
             .fn()
             .mockResolvedValue({ ok: true, type: "basic" });
-        vi.stubGlobal("fetch", fetchMock);
+        rs.stubGlobal("fetch", fetchMock);
 
         renderHook(() => useRemoteHealth([{ id: "records", port: "3001" }]));
 

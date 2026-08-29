@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, rs, afterEach } from "@rstest/core";
 import { render, screen, cleanup, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DemoPanel from "./DemoPanel";
@@ -58,22 +58,22 @@ const RENDER_BENCHMARKS = [
 
 const defaults = {
     isOpen: true,
-    onClose: vi.fn(),
+    onClose: rs.fn(),
     health: HEALTH,
     killed: KILLED,
-    onToggleKill: vi.fn(),
-    onKillAll: vi.fn(),
-    onRestoreAll: vi.fn(),
+    onToggleKill: rs.fn(),
+    onKillAll: rs.fn(),
+    onRestoreAll: rs.fn(),
     versions: VERSIONS,
     variant: "stable" as const,
-    onToggleVariant: vi.fn(),
+    onToggleVariant: rs.fn(),
     renderBenchmarks: RENDER_BENCHMARKS,
 };
 
 describe("DemoPanel", () => {
     afterEach(() => {
         cleanup();
-        vi.clearAllMocks();
+        rs.clearAllMocks();
     });
 
     it("returns null when isOpen is false", () => {

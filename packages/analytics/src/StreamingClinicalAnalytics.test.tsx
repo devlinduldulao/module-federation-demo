@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, rs, beforeEach, afterEach } from "@rstest/core";
 import { render, screen, act } from "@testing-library/react";
 import { Suspense } from "react";
 import StreamingClinicalAnalytics, {
     __resetAnalyticsStreamingResourceCache,
 } from "./StreamingClinicalAnalytics";
 
-vi.mock("./index.css", () => ({}));
-vi.mock("./lib/utils", () => ({
+rs.mock("./index.css", () => ({}));
+rs.mock("./lib/utils", () => ({
     cn: (...args: unknown[]) =>
         args
             .flat()
@@ -20,12 +20,12 @@ function Fallback() {
 
 describe("StreamingClinicalAnalytics", () => {
     beforeEach(() => {
-        vi.useFakeTimers();
+        rs.useFakeTimers();
         __resetAnalyticsStreamingResourceCache();
     });
 
     afterEach(() => {
-        vi.useRealTimers();
+        rs.useRealTimers();
     });
 
     it("shows the Suspense fallback while the resource is pending", () => {
@@ -55,7 +55,7 @@ describe("StreamingClinicalAnalytics", () => {
         );
 
         await act(async () => {
-            await vi.runAllTimersAsync();
+            await rs.runAllTimersAsync();
         });
 
         expect(screen.getByText("Analytics")).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe("StreamingClinicalAnalytics", () => {
         expect(screen.getByText("Analytics loading skeleton")).toBeInTheDocument();
 
         await act(async () => {
-            await vi.runAllTimersAsync();
+            await rs.runAllTimersAsync();
         });
 
         expect(screen.queryByText("Analytics loading skeleton")).not.toBeInTheDocument();

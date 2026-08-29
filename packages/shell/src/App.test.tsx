@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, rs, beforeEach, afterEach } from "@rstest/core";
 import { render, screen, act, cleanup, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
@@ -6,9 +6,9 @@ import { THEME_STORAGE_KEY } from "./lib/theme";
 import { __resetPrescriptionsStreamingResourceCache } from "prescriptions/StreamingPrescriptionOrders";
 import { __resetAnalyticsStreamingResourceCache } from "analytics/StreamingClinicalAnalytics";
 
-vi.mock("./index.css", () => ({}));
+rs.mock("./index.css", () => ({}));
 
-vi.mock("./lib/utils", () => ({
+rs.mock("./lib/utils", () => ({
   cn: (...args: unknown[]) =>
     args
       .flat()
@@ -20,14 +20,14 @@ function createStorageMock() {
   const store = new Map<string, string>();
 
   return {
-    getItem: vi.fn((key: string) => store.get(key) ?? null),
-    setItem: vi.fn((key: string, value: string) => {
+    getItem: rs.fn((key: string) => store.get(key) ?? null),
+    setItem: rs.fn((key: string, value: string) => {
       store.set(key, value);
     }),
-    removeItem: vi.fn((key: string) => {
+    removeItem: rs.fn((key: string) => {
       store.delete(key);
     }),
-    clear: vi.fn(() => {
+    clear: rs.fn(() => {
       store.clear();
     }),
   };
@@ -46,7 +46,7 @@ describe("Shell App", () => {
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    rs.useRealTimers();
     cleanup();
     __resetPrescriptionsStreamingResourceCache();
     __resetAnalyticsStreamingResourceCache();
@@ -161,7 +161,7 @@ describe("Shell App", () => {
 
   it("dispatches moduleChange when the route changes", async () => {
     const user = userEvent.setup();
-    const handler = vi.fn();
+    const handler = rs.fn();
     window.addEventListener("moduleChange", handler);
 
     render(<App />);
@@ -209,7 +209,7 @@ describe("Shell App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    const handler = vi.fn();
+    const handler = rs.fn();
     window.addEventListener("themeChange", handler);
 
     await user.click(screen.getByRole("button", { name: /switch theme to light/i }));
@@ -304,7 +304,7 @@ describe("Shell App", () => {
   });
 
   it("auto-removes notifications after 3 seconds", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
+    rs.useFakeTimers({ shouldAdvanceTime: true });
     render(<App />);
 
     act(() => {
@@ -320,7 +320,7 @@ describe("Shell App", () => {
     });
 
     act(() => {
-      vi.advanceTimersByTime(4500);
+      rs.advanceTimersByTime(4500);
     });
 
     await waitFor(() => {

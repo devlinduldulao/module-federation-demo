@@ -1,18 +1,18 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, rs, beforeEach, afterEach } from "@rstest/core";
 import { renderHook, act } from "@testing-library/react";
 import { useActiveTheme } from "./theme";
 
 function createStorageMock() {
     const store = new Map<string, string>();
     return {
-        getItem: vi.fn((key: string) => store.get(key) ?? null),
-        setItem: vi.fn((key: string, value: string) => {
+        getItem: rs.fn((key: string) => store.get(key) ?? null),
+        setItem: rs.fn((key: string, value: string) => {
             store.set(key, value);
         }),
-        removeItem: vi.fn((key: string) => {
+        removeItem: rs.fn((key: string) => {
             store.delete(key);
         }),
-        clear: vi.fn(() => {
+        clear: rs.fn(() => {
             store.clear();
         }),
     };
@@ -31,7 +31,7 @@ describe("useActiveTheme", () => {
     });
 
     afterEach(() => {
-        vi.restoreAllMocks();
+        rs.restoreAllMocks();
     });
 
     it("returns dark theme by default when nothing is stored", () => {
@@ -55,7 +55,7 @@ describe("useActiveTheme", () => {
 
     it("prefers window.__MF_THEME__ over localStorage", () => {
         storageMock.getItem.mockReturnValue("light");
-        window.__MF_THEME__ = { getTheme: () => "dark", setTheme: vi.fn() };
+        window.__MF_THEME__ = { getTheme: () => "dark", setTheme: rs.fn() };
         const { result } = renderHook(() => useActiveTheme());
         expect(result.current.theme).toBe("dark");
     });
@@ -63,7 +63,7 @@ describe("useActiveTheme", () => {
     it("falls back to localStorage when __MF_THEME__ returns invalid value", () => {
         storageMock.getItem.mockReturnValue("light");
         // @ts-expect-error testing invalid value
-        window.__MF_THEME__ = { getTheme: () => "invalid", setTheme: vi.fn() };
+        window.__MF_THEME__ = { getTheme: () => "invalid", setTheme: rs.fn() };
         const { result } = renderHook(() => useActiveTheme());
         expect(result.current.theme).toBe("light");
     });
@@ -108,7 +108,7 @@ describe("useActiveTheme", () => {
     });
 
     it("removes the themeChange event listener on unmount", () => {
-        const removeSpy = vi.spyOn(window, "removeEventListener");
+        const removeSpy = rs.spyOn(window, "removeEventListener");
         const { unmount } = renderHook(() => useActiveTheme());
         unmount();
         expect(removeSpy).toHaveBeenCalledWith("themeChange", expect.any(Function));

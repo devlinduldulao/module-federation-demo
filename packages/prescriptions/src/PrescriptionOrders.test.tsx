@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, rs, beforeEach } from "@rstest/core";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import PrescriptionOrders from "./PrescriptionOrders";
 
-vi.mock("./index.css", () => ({}));
-vi.mock("./lib/utils", () => ({
+rs.mock("./index.css", () => ({}));
+rs.mock("./lib/utils", () => ({
     cn: (...args: unknown[]) =>
         args
             .flat()
@@ -14,7 +14,7 @@ vi.mock("./lib/utils", () => ({
 
 describe("PrescriptionOrders", () => {
     beforeEach(() => {
-        vi.restoreAllMocks();
+        rs.restoreAllMocks();
     });
 
     it("renders the header", () => {
@@ -116,7 +116,7 @@ describe("PrescriptionOrders", () => {
 
     it("requests navigation back to records from the empty state", async () => {
         const user = userEvent.setup();
-        const handler = vi.fn();
+        const handler = rs.fn();
         window.addEventListener("navigateToModule", handler);
 
         render(<PrescriptionOrders />);
@@ -165,7 +165,7 @@ describe("PrescriptionOrders", () => {
 
     it("dispatches showNotification on submit", async () => {
         const user = userEvent.setup();
-        const handler = vi.fn();
+        const handler = rs.fn();
         window.addEventListener("showNotification", handler);
 
         render(<PrescriptionOrders />);

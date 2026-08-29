@@ -2,6 +2,7 @@
   "name": "module-federation-demo",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "install:all": "pnpm install --force --ignore-scripts && pnpm run install:packages",
     "dev": "concurrently \"pnpm:dev:*\"",
@@ -23,9 +24,9 @@
     "typecheck:prescriptions": "cd packages/prescriptions && pnpm run typecheck",
     "typecheck:analytics": "cd packages/analytics && pnpm run typecheck",
     "typecheck:home": "cd packages/home && pnpm run typecheck",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
+    "test": "rstest run",
+    "test:watch": "rstest watch",
+    "test:coverage": "rstest run --coverage",
     "postinstall": "pnpm run install:packages",
     "install:packages": "pnpm --dir packages/shell install --force && pnpm --dir packages/records install --force && pnpm --dir packages/prescriptions install --force && pnpm --dir packages/analytics install --force && pnpm --dir packages/home install --force",
     "kill:ports": "pnpm exec kill-port 3000 3001 3002 3003 3004",
@@ -36,13 +37,15 @@
     "pptx": "node presentation/generate-pptx.mjs"
   },
   "devDependencies": {
+    "@rsbuild/plugin-react": "^2.1.0",
+    "@rstest/core": "^0.11.10",
+    "@rstest/coverage-v8": "^0.11.10",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.6",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "@vitest/coverage-v8": "^4.1.11",
     "concurrently": "^10.0.5",
     "globals": "^17.11.0",
     "jsdom": "^30.0.1",
@@ -51,7 +54,6 @@
     "react-dom": "19.2.8",
     "react-router-dom": "^7.18.2",
     "sonner": "^2.0.8",
-    "typescript": "^7.0.2",
-    "vitest": "^4.1.11"
+    "typescript": "^7.0.2"
   }
 }

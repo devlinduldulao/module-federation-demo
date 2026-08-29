@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, rs, beforeEach } from "@rstest/core";
 import { render, screen } from "@testing-library/react";
 import ClinicalAnalytics from "./ClinicalAnalytics";
 
-vi.mock("./index.css", () => ({}));
-vi.mock("./lib/utils", () => ({
+rs.mock("./index.css", () => ({}));
+rs.mock("./lib/utils", () => ({
     cn: (...args: unknown[]) =>
         args
             .flat()
@@ -13,7 +13,7 @@ vi.mock("./lib/utils", () => ({
 
 describe("ClinicalAnalytics", () => {
     beforeEach(() => {
-        vi.restoreAllMocks();
+        rs.restoreAllMocks();
     });
 
     it("renders the header", () => {

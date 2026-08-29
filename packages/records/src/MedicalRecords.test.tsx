@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, rs, beforeEach } from "@rstest/core";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MedicalRecords from "./MedicalRecords";
 
-vi.mock("./index.css", () => ({}));
-vi.mock("./lib/utils", () => ({
+rs.mock("./index.css", () => ({}));
+rs.mock("./lib/utils", () => ({
     cn: (...args: unknown[]) =>
         args
             .flat()
@@ -14,7 +14,7 @@ vi.mock("./lib/utils", () => ({
 
 describe("MedicalRecords", () => {
     beforeEach(() => {
-        vi.restoreAllMocks();
+        rs.restoreAllMocks();
     });
 
     it("renders the header", () => {
@@ -100,8 +100,8 @@ describe("MedicalRecords", () => {
 
     it("dispatches addPrescription and showNotification events on Prescribe click", async () => {
         const user = userEvent.setup();
-        const addPrescriptionHandler = vi.fn();
-        const notificationHandler = vi.fn();
+        const addPrescriptionHandler = rs.fn();
+        const notificationHandler = rs.fn();
 
         window.addEventListener("addPrescription", addPrescriptionHandler);
         window.addEventListener("showNotification", notificationHandler);

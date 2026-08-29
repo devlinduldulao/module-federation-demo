@@ -34,7 +34,7 @@
       "@components/*": ["./src/components/*"],
       "@lib/*": ["./src/lib/*"]
     },
-    "types": ["node", "vitest/globals", "@testing-library/jest-dom"]
+    "types": ["node", "@rstest/core/globals", "@testing-library/jest-dom"]
   },
   "include": [
     "src/**/*"

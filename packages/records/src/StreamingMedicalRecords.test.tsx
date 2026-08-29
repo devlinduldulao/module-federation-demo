@@ -1,19 +1,19 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, rs, beforeEach, afterEach } from "@rstest/core";
 import { render, screen, act } from "@testing-library/react";
 import React, { Suspense } from "react";
 import StreamingMedicalRecords, {
     __resetRecordsStreamingResourceCache,
 } from "./StreamingMedicalRecords";
 
-vi.mock("./index.css", () => ({}));
-vi.mock("./lib/utils", () => ({
+rs.mock("./index.css", () => ({}));
+rs.mock("./lib/utils", () => ({
     cn: (...args: unknown[]) =>
         args
             .flat()
             .filter((a) => typeof a === "string" && a.length > 0)
             .join(" "),
 }));
-vi.mock("./lib/theme", () => ({
+rs.mock("./lib/theme", () => ({
     useActiveTheme: () => ({ theme: "dark", label: "Dark" }),
 }));
 
@@ -23,12 +23,12 @@ function Fallback() {
 
 describe("StreamingMedicalRecords", () => {
     beforeEach(() => {
-        vi.useFakeTimers();
+        rs.useFakeTimers();
         __resetRecordsStreamingResourceCache();
     });
 
     afterEach(() => {
-        vi.useRealTimers();
+        rs.useRealTimers();
     });
 
     it("shows the Suspense fallback while the resource is pending", () => {
@@ -59,7 +59,7 @@ describe("StreamingMedicalRecords", () => {
 
         // Advance past the 2500ms delay and flush all promises
         await act(async () => {
-            await vi.runAllTimersAsync();
+            await rs.runAllTimersAsync();
         });
 
         expect(screen.getByText("Records")).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe("StreamingMedicalRecords", () => {
         expect(screen.getByText("Records loading skeleton")).toBeInTheDocument();
 
         await act(async () => {
-            await vi.runAllTimersAsync();
+            await rs.runAllTimersAsync();
         });
 
         expect(screen.queryByText("Records loading skeleton")).not.toBeInTheDocument();

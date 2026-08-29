@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "@rstest/core";
 import { render, screen } from "@testing-library/react";
 import PrescriptionsSkeleton from "./PrescriptionsSkeleton";
 

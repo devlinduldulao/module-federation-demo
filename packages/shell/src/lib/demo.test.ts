@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "@rstest/core";
 import { renderHook, act } from "@testing-library/react";
 import { useKillSwitch, useVersionRegistry } from "./demo";
 

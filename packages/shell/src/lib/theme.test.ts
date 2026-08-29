@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, rs, beforeEach, afterEach } from "@rstest/core";
 import {
   applyTheme,
   getInitialTheme,
@@ -25,7 +25,7 @@ function createStorageMock(): Storage {
 }
 
 beforeEach(() => {
-  vi.stubGlobal("localStorage", createStorageMock());
+  rs.stubGlobal("localStorage", createStorageMock());
 });
 
 describe("isThemeName", () => {
@@ -82,7 +82,7 @@ describe("applyTheme", () => {
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    rs.restoreAllMocks();
   });
 
   it("sets data-theme attribute on documentElement", () => {
@@ -125,7 +125,7 @@ describe("applyTheme", () => {
   });
 
   it("dispatches themeChange event by default", () => {
-    const handler = vi.fn();
+    const handler = rs.fn();
     window.addEventListener("themeChange", handler);
 
     applyTheme("light");
@@ -141,7 +141,7 @@ describe("applyTheme", () => {
   });
 
   it("skips broadcast when broadcast=false", () => {
-    const handler = vi.fn();
+    const handler = rs.fn();
     window.addEventListener("themeChange", handler);
 
     applyTheme("light", { broadcast: false });
@@ -169,7 +169,7 @@ describe("initializeTheme", () => {
   });
 
   it("applies theme without persisting or broadcasting", () => {
-    const handler = vi.fn();
+    const handler = rs.fn();
     window.addEventListener("themeChange", handler);
 
     initializeTheme();

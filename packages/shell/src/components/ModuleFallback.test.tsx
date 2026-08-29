@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, rs, afterEach } from "@rstest/core";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ModuleFallback from "./ModuleFallback";
@@ -50,7 +50,7 @@ describe("ModuleFallback", () => {
 
     it("calls onRetry when the retry button is clicked", async () => {
         const user = userEvent.setup();
-        const onRetry = vi.fn();
+        const onRetry = rs.fn();
 
         render(
             <ModuleFallback

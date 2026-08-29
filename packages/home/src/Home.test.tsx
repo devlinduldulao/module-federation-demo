@@ -1,15 +1,15 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, rs, afterEach } from "@rstest/core";
 import { render, screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Home from "./Home";
 
-vi.mock("./index.css", () => ({}));
+rs.mock("./index.css", () => ({}));
 
-vi.mock("./lib/theme", () => ({
+rs.mock("./lib/theme", () => ({
     useActiveTheme: () => ({ theme: "dark", label: "Dark" }),
 }));
 
-vi.mock("./lib/utils", () => ({
+rs.mock("./lib/utils", () => ({
     cn: (...args: unknown[]) =>
         args
             .flat()
@@ -82,7 +82,7 @@ describe("Home", () => {
 
     it("dispatches navigateToModule when a destination card is clicked", async () => {
         const user = userEvent.setup();
-        const handler = vi.fn();
+        const handler = rs.fn();
         window.addEventListener("navigateToModule", handler);
 
         render(<Home />);
@@ -100,7 +100,7 @@ describe("Home", () => {
 
     it("dispatches showNotification when a destination card is clicked", async () => {
         const user = userEvent.setup();
-        const handler = vi.fn();
+        const handler = rs.fn();
         window.addEventListener("showNotification", handler);
 
         render(<Home />);
@@ -119,7 +119,7 @@ describe("Home", () => {
 
     it("dispatches the correct module id for each destination", async () => {
         const user = userEvent.setup();
-        const handler = vi.fn();
+        const handler = rs.fn();
         window.addEventListener("navigateToModule", handler);
 
         render(<Home />);

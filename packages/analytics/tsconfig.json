@@ -21,7 +21,7 @@
     "jsx": "react-jsx",
     "types": [
       "node",
-      "vitest/globals",
+      "@rstest/core/globals",
       "@testing-library/jest-dom"
     ],
     "paths": {
