@@ -102,7 +102,7 @@ two paths.
    `__resetAnalyticsStreamingResourceCache`. Follow the convention exactly — the shell's
    `types.d.ts` declares these by name.
 3. Add both to `exposes` in `rspack.config.ts`, `packages/shell/src/types.d.ts`, and the
-   root `vitest.config.ts` alias map.
+   root `rstest.config.ts` alias map.
 4. Add a matching skeleton in `packages/shell/src/components/`. A streamed module without
    a layout-matched skeleton feels broken, not fast.
 
@@ -123,7 +123,7 @@ That export exists **only** for tests. It is not application API — do not call
 component code.
 
 To assert the suspended state, render inside a `<Suspense>` with a recognizable fallback
-and assert the fallback is present before advancing timers. Use `vi.useFakeTimers()`
+and assert the fallback is present before advancing timers. Use `rs.useFakeTimers()`
 rather than waiting 2500 ms of real time.
 
 ## Choosing a delay

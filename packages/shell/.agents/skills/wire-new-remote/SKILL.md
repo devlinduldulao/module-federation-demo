@@ -119,11 +119,11 @@ at runtime on a missing id.
 
 ## 8. Wire the test alias
 
-Root `vitest.config.ts`, in `resolve.alias`:
+Root `rstest.config.ts`, in `resolve.alias`:
 
 ```ts
-"billing/StreamingBillingOverview": path.resolve(__dirname, "packages/billing/src/StreamingBillingOverview.tsx"),
-"billing/BillingOverview":          path.resolve(__dirname, "packages/billing/src/BillingOverview.tsx"),
+"billing/StreamingBillingOverview": path.resolve(import.meta.dirname, "packages/billing/src/StreamingBillingOverview.tsx"),
+"billing/BillingOverview":          path.resolve(import.meta.dirname, "packages/billing/src/BillingOverview.tsx"),
 ```
 
 Without this, any test that touches the shell's `App.tsx` fails to resolve the import.
@@ -155,5 +155,5 @@ the console is free of `Invalid hook call` and `Loading script failed`.
 - [ ] One `MODULES` entry
 - [ ] Matching skeleton component
 - [ ] `MOCK_VERSIONS` **and** `CANARY_VERSIONS`
-- [ ] Root `vitest.config.ts` aliases
+- [ ] Root `rstest.config.ts` aliases
 - [ ] `ci-billing.yml` + `deploy.yml` loops

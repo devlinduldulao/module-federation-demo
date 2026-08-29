@@ -38,6 +38,7 @@ Nothing here is loaded all at once; the closest file to your work wins.
 AGENTS.md                                  ← you are here (repo-wide rules)
 .agents/skills/                            ← repo-wide skills
   verify-federation/                         (authored here)
+  rstest-testing/                            (authored here)
   rspack-best-practices/                     (vendored, see skills-lock.json)
   rspack-debugging/                          (vendored)
   rspack-v2-upgrade/                         (vendored)
@@ -84,8 +85,9 @@ pnpm run install:all      # install root + all five packages (required on first 
 pnpm dev                  # start all five dev servers concurrently
 pnpm build                # production build of all five packages
 pnpm typecheck            # tsc --noEmit across all five packages
-pnpm test                 # vitest run (one root project, covers all packages)
-pnpm test:coverage        # vitest with v8 coverage
+pnpm test                 # rstest run (one root project, covers all packages)
+pnpm test:watch           # rstest watch
+pnpm test:coverage        # rstest with v8 coverage
 pnpm run kill:ports       # free ports 3000-3004 when a dev server is stranded
 ```
 
@@ -184,22 +186,54 @@ config before changing it.
 
 ---
 
-## Testing
+## Testing — Rstest
 
-One Vitest project at the root covers every package: `vitest.config.ts`,
+This repo uses **[Rstest](https://rstest.rs)**, the Rspack-native test runner, not Vitest.
+One root project covers every package: `rstest.config.ts`,
 `include: ["packages/*/src/**/*.test.{ts,tsx}"]`, jsdom environment.
 
+Test files are built by Rspack/SWC before they run, so they compile through the same Rust
+toolchain as the apps — one transform pipeline instead of two.
+
+### The API, in one table
+
+| Vitest | Rstest | Note |
+|---|---|---|
+| `from "vitest"` | `from "@rstest/core"` | Everything comes from the one package |
+| `vi.fn` / `vi.mock` / `vi.spyOn` | `rs.fn` / `rs.mock` / `rs.spyOn` | The namespace is `rs`, not `vi` |
+| `vi.useFakeTimers()`, `vi.advanceTimersByTimeAsync()` | `rs.useFakeTimers()`, `rs.advanceTimersByTimeAsync()` | Same names under `rs` |
+| `vi.stubGlobal`, `vi.restoreAllMocks` | `rs.stubGlobal`, `rs.restoreAllMocks` | |
+| `test.environment` | `testEnvironment` | Top level — Rstest has no `test` wrapper |
+| `alias` / `dedupe` | `resolve.alias` / `resolve.dedupe` | |
+| `pool: "forks"` | `pool: { type: "forks" }` | An object, not a string |
+| `@vitest/coverage-v8` | `@rstest/coverage-v8` | Same V8 engine |
+| `vitest run` / `vitest` | `rstest run` / `rstest watch` | Rstest is single-run by default |
+
+`describe`, `it`, `test`, `expect`, `beforeEach`, and `afterEach` are unchanged.
+
+### Rules
+
 - Tests live beside their subject: `MedicalRecords.tsx` → `MedicalRecords.test.tsx`.
-- `vitest.config.ts` aliases federated specifiers (`records/MedicalRecords`, …) to real
+- **Import from `@rstest/core` and use `rs.*`.** Never reintroduce `vitest` or `vi.*`.
+- `rstest.config.ts` aliases federated specifiers (`records/MedicalRecords`, …) to real
   source files, and pins `react` / `react-dom` to the **root** `node_modules` copy to
   avoid duplicate-React "Invalid hook call" failures. **If you add a new `exposes` entry,
   add a matching alias there**, or any test importing it will fail to resolve.
-- `vitest.setup.ts` provides a `localStorage` mock and stubs `./lib/utils`.
+- `rstest.setup.ts` registers the jest-dom matchers with `expect.extend()`, provides the
+  `localStorage` mock, and runs Testing Library `cleanup()` after each test. Rstest has no
+  self-registering `@testing-library/jest-dom/vitest` entry point — that `expect.extend()`
+  call is what makes `toBeInTheDocument()` exist.
 - Use `@testing-library/react`; query by role and accessible name, not by test id.
 - Streaming components cache their Suspense resource in a module-level `Map`. Call the
-  exported `__reset*StreamingResourceCache()` in `beforeEach` or the second test in a
+  exported `__reset*StreamingResourceCache()` in `beforeEach`, or the second test in a
   file will not suspend.
+- Each package tsconfig lists `"@rstest/core/globals"` in `compilerOptions.types`. A new
+  package needs the same entry.
+- Run one package with a path filter: `pnpm test packages/records/src`. Note there is
+  **no `--`** before the path — pnpm v11 does not forward args after `--` here, and the
+  filter is silently dropped, running the whole suite.
 
+Full detail is in `.agents/skills/rstest-testing/`.
 ---
 
 ## Deployment

@@ -74,7 +74,7 @@ Each remote runs standalone at its own port with its own `index.html`. The shell
 
 **What works standalone:** `dev` (with HMR), `build`, `typecheck`
 
-**What needs the monorepo root:** `lint` (shared ESLint config), `test` / `test:watch` (shared Vitest config)
+**What needs the monorepo root:** `test` / `test:watch` (shared Rstest config)
 
 #### The async bootstrap pattern (required for standalone mode)
 
@@ -188,7 +188,7 @@ module-federation-demo/
 | Rspack | ^2.1.2 | Bundler + Module Federation + Rust React Compiler |
 | Tailwind CSS | v4 | Utility-first CSS via `@theme` |
 | PostCSS | ^8.5.16 | CSS pipeline (`@tailwindcss/postcss`) |
-| Vitest | ^4.1.9 | Unit + component testing |
+| Rstest | ^0.11.10 | Unit + component testing (Rspack-native) |
 | concurrently | ^10.0.3 | Dev server orchestration |
 
 ## Design System — "Noir Editorial"
@@ -629,17 +629,19 @@ pnpm run kill:ports        # Stop all demo ports (3000–3004)
 
 ## Testing
 
-The project uses **Vitest** + **React Testing Library** with `jsdom` for component testing. Tests live alongside source files.
+The project uses **[Rstest](https://rstest.rs)** + **React Testing Library** with `jsdom` for component testing. Tests live alongside source files.
+
+Rstest is the Rspack-native test runner: test files are built with Rspack/SWC before they run, so tests go through the same Rust toolchain as the apps instead of a second, separately configured transform pipeline.
 
 ```bash
-pnpm test              # Run all tests once
-pnpm run test:watch    # Watch mode
-pnpm run test:coverage # Coverage report (v8)
-pnpm run lint          # Lint all packages with ESLint
-pnpm run typecheck     # TypeScript validation across all packages
+pnpm test                        # Run all tests once
+pnpm test packages/records/src   # Run one package (no `--` before the path)
+pnpm run test:watch              # Watch mode
+pnpm run test:coverage           # Coverage report (v8)
+pnpm run typecheck               # TypeScript validation across all packages
 ```
 
-Remote module imports are aliased in `vitest.config.ts` so federated components can be tested in isolation without running dev servers. Each package has its own test file:
+Remote module imports are aliased in `rstest.config.ts` so federated components can be tested in isolation without running dev servers. Each package has its own test file:
 
 - `packages/shell/src/App.test.tsx` — navigation, tab switching, notification system, skeleton fallbacks
 - `packages/records/src/MedicalRecords.test.tsx` — filtering, add-to-cart events, records grid
@@ -647,6 +649,68 @@ Remote module imports are aliased in `vitest.config.ts` so federated components 
 - `packages/analytics/src/ClinicalAnalytics.test.tsx` — stats display, activity stream, welcome banner
 
 The shell test suite also covers theme restoration from `localStorage`, theme persistence, and `themeChange` event broadcasting.
+
+### Migrated from Vitest
+
+This project previously used Vitest. The migration to Rstest was mostly mechanical, and
+the test suite reached parity immediately — the same 21 files and 211 tests pass, and the
+suite got roughly 3x faster (~34s to ~10s wall clock on the same machine).
+
+**Files**
+
+| Before | After |
+|---|---|
+| `vitest.config.ts` | `rstest.config.ts` |
+| `vitest.setup.ts` | `rstest.setup.ts` |
+| `vitest`, `@vitest/coverage-v8` | `@rstest/core`, `@rstest/coverage-v8`, `@rsbuild/plugin-react` |
+
+**Config**
+
+Vitest nests test options under a `test` key; Rstest puts them at the top level next to
+build options.
+
+| Vitest | Rstest |
+|---|---|
+| `test.environment: "jsdom"` | `testEnvironment: "jsdom"` |
+| `test.pool: "forks"` | `pool: { type: "forks" }` |
+| `resolve.alias` / `resolve.dedupe` | same, but resolved by Rspack |
+| `test.coverage.provider: "v8"` | `coverage.provider: "v8"` |
+| (Vite handles JSX) | `plugins: [pluginReact()]` from `@rsbuild/plugin-react` |
+
+**Test code**
+
+```diff
+-import { describe, it, expect, vi, beforeEach } from "vitest";
++import { describe, it, expect, rs, beforeEach } from "@rstest/core";
+
+-const fetchMock = vi.fn();
++const fetchMock = rs.fn();
+```
+
+Every `vi.*` API used here has an identically named `rs.*` equivalent — `fn`, `mock`,
+`spyOn`, `stubGlobal`, `useFakeTimers`, `advanceTimersByTimeAsync`, `runAllTimersAsync`,
+`restoreAllMocks`, `clearAllMocks`. `describe`, `it`, `expect`, `beforeEach`, and
+`afterEach` are unchanged.
+
+**Three things that needed a human decision**
+
+1. **jest-dom registration.** Vitest offered `@testing-library/jest-dom/vitest`, which
+   self-registers on import. Rstest has no equivalent entry point, so `rstest.setup.ts`
+   registers the matchers explicitly with `expect.extend(jestDomMatchers)`.
+2. **tsconfig types.** Each package listed `"vitest/globals"` in `compilerOptions.types`;
+   that becomes `"@rstest/core/globals"`, or `tsc` fails with TS2688.
+3. **`"type": "module"`.** Rstest warns `[MODULE_TYPELESS_PACKAGE_JSON]` and reparses the
+   config without it. The root `package.json` now declares it.
+
+Two dead mocks in the old setup file (`vi.mock("*.css")` and a `vi.mock("./lib/utils")`
+whose relative path resolved to a non-existent root module) were dropped rather than
+translated — a glob is not a module specifier, and neither had any effect.
+
+A latent bug also surfaced: the per-package scripts used
+`pnpm --dir ../.. run test -- packages/<name>/src`, and pnpm v11 does not forward the
+argument after `--`, so a "single package" run silently ran the entire suite. Dropping the
+`--` fixed it.
+
 
 ## GitHub Pages Deployment
 
@@ -679,7 +743,7 @@ typecheck ──┼──► build (uploads artifact)
 test ──┘
 ```
 
-All workflows also trigger when shared root configs change (`vitest.config.ts`, `eslint.config.mjs`, `package.json`).
+All workflows also trigger when shared root configs change (`rstest.config.ts`, `rstest.setup.ts`, `package.json`).
 
 The full-repo [ci.yml](.github/workflows/ci.yml) still exists as a safety net for cross-cutting changes, but in a real multi-repo setup the per-module workflows are all you need.
 

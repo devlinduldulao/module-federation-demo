@@ -8,8 +8,8 @@
     "build": "rspack build --mode production",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "cd ../.. && pnpm exec eslint packages/analytics/src",
-    "test": "pnpm --dir ../.. run test -- packages/analytics/src",
-    "test:watch": "pnpm --dir ../.. run test:watch -- packages/analytics/src"
+    "test": "pnpm --dir ../.. run test packages/analytics/src",
+    "test:watch": "pnpm --dir ../.. run test:watch packages/analytics/src"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

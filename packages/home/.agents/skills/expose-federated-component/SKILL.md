@@ -96,10 +96,10 @@ either package. Treat it as part of the contract and update both together.
 
 ## 4. Add the test alias
 
-Root `vitest.config.ts`, in `resolve.alias`:
+Root `rstest.config.ts`, in `resolve.alias`:
 
 ```ts
-"home/PatientBanner": path.resolve(__dirname, "packages/home/src/PatientBanner.tsx"),
+"home/PatientBanner": path.resolve(import.meta.dirname, "packages/home/src/PatientBanner.tsx"),
 ```
 
 Without it, every test that imports the specifier fails to resolve.
@@ -122,7 +122,7 @@ React context values, or anything relying on shared module identity that is not 
 Treat it as a breaking API change:
 
 1. Confirm nothing in the shell imports it (`grep -rn "home/PatientBanner" packages/shell/src`).
-2. Remove from `exposes`, `types.d.ts`, and `vitest.config.ts` together.
+2. Remove from `exposes`, `types.d.ts`, and `rstest.config.ts` together.
 3. In a real deployment, the host and remote ship independently — a removed key breaks
    any host build still importing it. Deprecate before deleting.
 
@@ -141,6 +141,6 @@ browser console for `Loading script failed`, which means the key does not match.
 - [ ] Component imports its own CSS and needs no bootstrap, no router, no host
 - [ ] `exposes` key starts with `./`
 - [ ] Ambient declaration in `packages/shell/src/types.d.ts`, props typed
-- [ ] Alias in root `vitest.config.ts`
+- [ ] Alias in root `rstest.config.ts`
 - [ ] Host consumes it via `loadRemote()`
 - [ ] `shared` untouched

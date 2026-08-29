@@ -19,7 +19,7 @@ exposes: {
 
 The shell imports **`prescriptions/StreamingPrescriptionOrders`** — the suspending
 variant. Both keys are public API; changing them requires matching edits in
-`packages/shell/src/types.d.ts` and the root `vitest.config.ts` alias map.
+`packages/shell/src/types.d.ts` and the root `rstest.config.ts` alias map.
 
 ---
 

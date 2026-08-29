@@ -19,7 +19,7 @@ exposes: {
 
 The shell imports **`analytics/StreamingClinicalAnalytics`** — the suspending variant,
 behind `<AnalyticsSkeleton />`. Both keys are public API; changing them requires matching
-edits in `packages/shell/src/types.d.ts` and the root `vitest.config.ts` alias map.
+edits in `packages/shell/src/types.d.ts` and the root `rstest.config.ts` alias map.
 
 ---
 

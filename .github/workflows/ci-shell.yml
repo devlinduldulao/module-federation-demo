@@ -13,16 +13,16 @@ on:
     branches: [main]
     paths:
       - "packages/shell/**"
-      - "vitest.config.ts"
-      - "vitest.setup.ts"
+      - "rstest.config.ts"
+      - "rstest.setup.ts"
       - "eslint.config.mjs"
       - "package.json"
   push:
     branches: [main]
     paths:
       - "packages/shell/**"
-      - "vitest.config.ts"
-      - "vitest.setup.ts"
+      - "rstest.config.ts"
+      - "rstest.setup.ts"
       - "eslint.config.mjs"
       - "package.json"
 
@@ -86,7 +86,7 @@ jobs:
             pnpm-lock.yaml
             packages/*/pnpm-lock.yaml
       - run: pnpm install --force
-      - run: pnpm exec vitest run packages/shell/src
+      - run: pnpm exec rstest run packages/shell/src
 
   build:
     name: Build

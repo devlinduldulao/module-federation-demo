@@ -1,5 +1,5 @@
 # Full-repo CI: runs lint, typecheck, test, and build across ALL packages.
-# This catches cross-cutting changes (shared configs, root deps, vitest setup).
+# This catches cross-cutting changes (shared configs, root deps, rstest setup).
 #
 # Each micro-frontend also has its own independent CI workflow (ci-<name>.yml)
 # that triggers only when that module's code changes. In a real multi-repo

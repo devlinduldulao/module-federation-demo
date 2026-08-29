@@ -8,8 +8,8 @@
     "build": "rspack build --mode production",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "cd ../.. && pnpm exec eslint packages/prescriptions/src",
-    "test": "pnpm --dir ../.. run test -- packages/prescriptions/src",
-    "test:watch": "pnpm --dir ../.. run test:watch -- packages/prescriptions/src"
+    "test": "pnpm --dir ../.. run test packages/prescriptions/src",
+    "test:watch": "pnpm --dir ../.. run test:watch packages/prescriptions/src"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

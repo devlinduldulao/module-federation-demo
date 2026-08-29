@@ -59,7 +59,7 @@ Check each by reading, not guessing. Every one of these is a runtime white scree
    `remoteUrl(name, port)` argument, and the `port` field in the shell's `MODULES` array.
 
 6. **Every `exposes` key has an ambient type** in `packages/shell/src/types.d.ts` **and**
-   an alias in the root `vitest.config.ts`.
+   an alias in the root `rstest.config.ts`.
 
 ## Step 3 — Runtime check
 

@@ -19,7 +19,7 @@ exposes: {
 
 Consumed by the shell as `records/MedicalRecords` and `records/StreamingMedicalRecords`.
 Both keys are public API. Changing `exposes` means editing three files: this config,
-`packages/shell/src/types.d.ts`, and the root `vitest.config.ts` alias map.
+`packages/shell/src/types.d.ts`, and the root `rstest.config.ts` alias map.
 
 ---
 

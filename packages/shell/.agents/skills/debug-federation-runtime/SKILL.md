@@ -90,7 +90,7 @@ one that rendered.
    grep -h '"react":' packages/*/package.json
    ```
 
-3. **In tests, not the browser?** That is a different cause — `vitest.config.ts` pins
+3. **In tests, not the browser?** That is a different cause — `rstest.config.ts` pins
    `react`/`react-dom` to the **root** `node_modules` copy and sets
    `dedupe: ["react", "react-dom"]`. If a new package was added, it needs the same
    treatment.

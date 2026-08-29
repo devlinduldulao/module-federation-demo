@@ -26,7 +26,7 @@ Changing `exposes` is a three-file change:
 
 1. `rspack.config.ts` here
 2. `packages/shell/src/types.d.ts` — the ambient declaration
-3. `vitest.config.ts` at the root — the test alias
+3. `rstest.config.ts` at the root — the test alias
 
 ---
 
