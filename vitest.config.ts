@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config";
 import path from "path";
 
 // Pin React to the root-level copy to avoid "Invalid hook call" from duplicate instances
-const rootNodeModules = path.resolve(__dirname, "node_modules");
+const rootNodeModules = path.resolve(import.meta.dirname, "node_modules");
 
 export default defineConfig({
   test: {
@@ -36,35 +36,35 @@ export default defineConfig({
 
       // Resolve MF remote imports to actual source files for transform
       "records/StreamingMedicalRecords": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "packages/records/src/StreamingMedicalRecords.tsx"
       ),
       "records/MedicalRecords": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "packages/records/src/MedicalRecords.tsx"
       ),
       "prescriptions/StreamingPrescriptionOrders": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "packages/prescriptions/src/StreamingPrescriptionOrders.tsx"
       ),
       "prescriptions/PrescriptionOrders": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "packages/prescriptions/src/PrescriptionOrders.tsx"
       ),
       "analytics/StreamingClinicalAnalytics": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "packages/analytics/src/StreamingClinicalAnalytics.tsx"
       ),
       "analytics/ClinicalAnalytics": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "packages/analytics/src/ClinicalAnalytics.tsx"
       ),
       "home/StreamingHome": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "packages/home/src/StreamingHome.tsx"
       ),
       "home/Home": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "packages/home/src/Home.tsx"
       ),
     },
