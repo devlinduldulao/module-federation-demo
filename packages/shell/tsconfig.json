@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "ES2025",
-    "lib": ["DOM", "ES2025"],
+    "lib": [
+      "DOM",
+      "ES2025"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -13,7 +16,6 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "rootDir": "./src",
     "noEmit": true,
     "jsx": "react-jsx",
     "declaration": false,
@@ -30,14 +32,25 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
-      "@lib/*": ["./src/lib/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@lib/*": [
+        "./src/lib/*"
+      ]
     },
-    "types": ["node", "@rstest/core/globals", "@testing-library/jest-dom"]
+    "types": [
+      "node",
+      "@rstest/core/globals",
+      "@testing-library/jest-dom"
+    ]
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "rspack.config.ts"
   ],
   "exclude": [
     "node_modules",

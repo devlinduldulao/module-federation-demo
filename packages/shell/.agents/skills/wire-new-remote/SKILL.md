@@ -88,6 +88,27 @@ Choose the specifier by strategy:
 | `eager` | the plain component | Frequently visited; worth prefetching on shell mount |
 | `streamed` | the `Streaming*` wrapper | Loaded on demand behind a skeleton |
 
+### Add the matching `PREFETCHERS` entry — same specifier
+
+```ts
+const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
+  // ...
+  billing: () => import("billing/StreamingBillingOverview").catch(() => undefined),
+};
+```
+
+**The specifier here must be character-for-character the one in `lazy()` above.** It is
+written twice per module and nothing enforces the pair:
+
+- A *missing* entry is caught — `Record<ModuleType, …>` is exhaustive, so it will not compile.
+- **Drift is not caught.** Point `lazy()` at `billing/StreamingBillingOverview` and leave
+  `PREFETCHERS` on `billing/BillingOverview` and both compile fine, while the prefetch warms
+  a chunk nobody asks for. Eager and hover-prefetch silently stop working, with no error.
+
+Keep the `.catch(() => undefined)`. Nobody awaits these promises, so without it an
+unreachable remote produces an unhandled promise rejection. Real error handling belongs in
+`loadRemote()` on the render path.
+
 ## 5. Add one entry to `MODULES`
 
 ```ts
@@ -152,6 +173,7 @@ the console is free of `Invalid hook call` and `Loading script failed`.
 - [ ] `remotes` entry added via `remoteUrl()`
 - [ ] `types.d.ts` ambient modules + `ModuleType` union extended
 - [ ] Lazy import wrapped in `loadRemote()`
+- [ ] `PREFETCHERS` entry using the **identical** specifier, with `.catch()`
 - [ ] One `MODULES` entry
 - [ ] Matching skeleton component
 - [ ] `MOCK_VERSIONS` **and** `CANARY_VERSIONS`

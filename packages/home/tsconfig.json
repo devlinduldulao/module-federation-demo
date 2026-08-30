@@ -16,7 +16,6 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "rootDir": "./src",
     "noEmit": true,
     "jsx": "react-jsx",
     "types": [
@@ -37,11 +36,11 @@
     }
   },
   "include": [
-    "src"
+    "src/**/*",
+    "rspack.config.ts"
   ],
   "exclude": [
     "node_modules",
     "dist"
   ]
 }
-

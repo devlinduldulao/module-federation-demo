@@ -60,6 +60,36 @@ unreachable, the host degrades to a fallback card and every other module keeps w
 **Never `lazy(() => import("remote/Thing"))` directly** — an uncaught rejection takes out
 the whole route.
 
+### `PREFETCHERS` must use the same specifier as `lazy()`
+
+Every module's remote specifier is written **twice**: once in the `lazy(loadRemote(...))`
+call, once in the `PREFETCHERS` map. They must match character-for-character.
+
+`Record<ModuleType, ...>` makes a *missing* entry a compile error, so adding a module is
+safe. **Drift is not caught by anything.** Repoint `lazy()` at
+`records/StreamingMedicalRecords` and leave `PREFETCHERS` on `records/MedicalRecords` and
+both still compile — while the prefetch warms a chunk nobody renders, and the `eager` and
+hover-prefetch strategies silently stop working. If eager "stops feeling instant", check
+this pair first.
+
+Keep `.catch(() => undefined)` on every prefetcher. Nothing awaits these promises, so
+without it an unreachable remote throws an unhandled rejection into the console. The real
+error handling is `loadRemote()`'s catch on the render path.
+
+`PREFETCHERS` is called from three places, and all three are load-bearing:
+
+1. **Module-eval time**, filtered to `loadStrategy === "eager"` — this is what makes eager
+   actually eager.
+2. **`onMouseEnter`** on a nav link, gated by
+   `shouldPrefetchOnHover = module.id !== "prescriptions"`. Prescriptions is excluded on
+   purpose so `BENCHMARK_TARGETS` has a true no-prefetch control. Do not "fix" that.
+3. **A `useEffect` on `activeModule` change.** This looks redundant with `lazy()` and
+   mostly is — except when the module is killed. `ModuleView` returns `<ModuleFallback />`
+   early when `isKilled`, so `<Component />` never mounts and `lazy()` never imports. This
+   effect is then the only thing warming that chunk, which is why restoring a killed remote
+   renders immediately instead of showing a skeleton. **Removing it would silently change
+   the kill-switch demo.**
+
 ---
 
 ## Federated imports need ambient types

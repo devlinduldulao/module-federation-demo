@@ -2,19 +2,12 @@ import Home from "./Home";
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// ---------------------------------------------------------------------------
-// Resource-based Suspense pattern (React 18+)
-// ---------------------------------------------------------------------------
-// When this module is loaded via Module Federation, `getResource` creates a
-// promise that simulates a network delay.  Calling `resource.read()` inside
-// the render path *throws* that promise, which React's <Suspense> boundary
-// catches - displaying the shell's skeleton fallback until the delay resolves.
-// ---------------------------------------------------------------------------
-
 interface Resource<T> {
   read(): T;
 }
 
+// Suspense protocol: read() throws the promise while pending, throws on error,
+// otherwise returns. Work starts at creation, not on read. Pre-`use()` idiom.
 function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
   let status: "pending" | "success" | "error" = "pending";
   let result: T;
@@ -38,12 +31,16 @@ function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
   };
 }
 
+// Module scope on purpose — a resource built during render would throw a new
+// promise every render and the fallback would never resolve.
 const resourceCache = new Map<string, Resource<void>>();
 
+// Test-only: lets the next test suspend again.
 export function __resetHomeStreamingResourceCache(): void {
   resourceCache.clear();
 }
 
+// One Resource per key — the delay is paid once per page load, not per render.
 function getResource(key: string, delayMs: number): Resource<void> {
   if (!resourceCache.has(key)) {
     resourceCache.set(key, createResource(() => delay(delayMs)));
@@ -51,15 +48,10 @@ function getResource(key: string, delayMs: number): Resource<void> {
   return resourceCache.get(key)!;
 }
 
-// ---------------------------------------------------------------------------
-// Streaming wrapper - the only job is to trigger Suspense, then render the
-// standalone component.  The host shell wraps this in <Suspense fallback={...}>
-// so the user sees a skeleton while the simulated fetch completes.
-// ---------------------------------------------------------------------------
-
 const StreamingHome = () => {
-  const resource = getResource("home-initial", 2000);
-  resource.read(); // throws a Promise while pending -> triggers Suspense
+  const resource = getResource("home-initial", 2000); // module-level cache
+  resource.read(); // throws while pending → <Suspense> shows <HomeSkeleton />
+
   return <Home />;
 };
 

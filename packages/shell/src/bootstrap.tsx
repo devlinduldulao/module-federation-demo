@@ -6,6 +6,7 @@ import "./index.css";
 
 initializeTheme();
 
+// actual React rendering
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
   <React.StrictMode>

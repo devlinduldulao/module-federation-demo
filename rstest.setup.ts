@@ -57,12 +57,3 @@ afterEach(() => {
   // choice from deciding the next test's initial render.
   window.localStorage.clear();
 });
-
-// NOTE: vitest.setup.ts also carried two module mocks:
-//   vi.mock("*.css", () => ({}));
-//   vi.mock("./lib/utils", () => ({ cn: ... }));
-// Neither is reproduced here. A glob is not a module specifier, and
-// "./lib/utils" resolved relative to THIS file (the repo root), where no such
-// module exists — so both were no-ops. Every test file that needs `cn` stubbed
-// already declares its own `rs.mock("./lib/utils", ...)`, which is the form that
-// actually resolves.

@@ -2,6 +2,15 @@
 
 The shell is the **host** in the Module Federation topology. It defines four remotes (`home`, `records`, `prescriptions`, `analytics`), renders navigation and shell chrome, owns the shared theme state, and wraps each lazily-loaded remote module in `<Suspense>` + `<ErrorBoundary>` for independent loading and fault isolation.
 
+> **Developer docs.** This file explains what this package is and how to work on it.
+> The rules an AI agent must follow when editing it live in [`AGENTS.md`](./AGENTS.md),
+> with task playbooks in [`.agents/skills/`](./.agents/skills/). Repo-wide context is in
+> the [root README](../../README.md) and [root AGENTS.md](../../AGENTS.md).
+
+```bash
+cd packages/shell && pnpm dev    # http://localhost:3000 — runs on its own
+```
+
 Runs on **localhost:3000**.
 
 The root route `/` renders the **Home** landing page. Unknown routes redirect to `/`.

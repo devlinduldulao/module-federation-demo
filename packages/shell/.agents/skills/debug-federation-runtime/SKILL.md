@@ -136,6 +136,45 @@ pnpm dev
 
 ---
 
+## Symptom: every edit reloads the whole page instead of hot-swapping
+
+**This is the current known behaviour, not a regression — do not "fix" it casually.**
+
+`[HMR] Cannot find update. Need to do a full reload!` in the console means the client
+asked for a `.hot-update.json` that no longer exists. `output.clean: true` deletes those
+files on each rebuild.
+
+But removing `clean` alone makes things **worse**: the page stops reloading and the
+console reports `[HMR] Nothing hot updated.` while the change silently never appears.
+Underneath, `ModuleFederationPlugin` is what actually breaks Fast Refresh — it adds a
+second entrypoint (the `<name>` container alongside `main`), so a module lives in two
+runtimes and the update lands in the one that is not rendering. Confirmed by disabling MF
+temporarily, at which point Fast Refresh worked and component state survived.
+
+So today: edits appear, via full reload, and component state is lost. Both halves —
+`clean` and the MF/Fast-Refresh interaction — must be solved together. Not caused by
+`reactCompiler: true` (tested with it off).
+
+To tell a real HMR failure from this known one, set a sentinel before editing:
+
+```js
+window.__s = Date.now();   // survives Fast Refresh, dies on a full reload
+```
+
+---
+
+## Symptom: `Cannot read properties of null (reading 'useMemoCache')`
+
+The React Compiler runtime is calling into a React instance whose dispatcher is null —
+the same root cause as `Invalid hook call`, but surfacing through compiled code.
+
+Almost always: a remote was built **without** `ModuleFederationPlugin`, so it never
+declared `shared` React and bundled its own copy. Check that the remote's config actually
+registers the plugin (no env guard or comment disabling it), then restart that dev server
+and clear `dist/`.
+
+---
+
 ## Symptom: the skeleton flashes on every navigation, or a test never suspends
 
 The streaming resource cache. Each `Streaming*.tsx` caches its resource in a module-level

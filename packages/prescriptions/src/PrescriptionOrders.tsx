@@ -134,7 +134,6 @@ const PrescriptionSummary = memo<{
         <button
             onClick={onSubmit}
             className="w-full bg-primary text-primary-foreground font-mono text-[11px] tracking-wider py-2.5 hover:bg-primary/80 transition-colors duration-300 rounded-md"
-            style={{ color: "var(--color-ink)" }}
             aria-label={`Submit ${itemCount} prescriptions with ${totalRefills} total refills`}
         >
             Submit Prescriptions &rarr;

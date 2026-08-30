@@ -2,6 +2,15 @@
 
 The analytics micro-frontend provides a clinical analytics overview with performance metrics and an activity stream. It exposes `ClinicalAnalytics` (instant render) and `StreamingClinicalAnalytics` (Suspense-wrapped with simulated delay).
 
+> **Developer docs.** This file explains what this package is and how to work on it.
+> The rules an AI agent must follow when editing it live in [`AGENTS.md`](./AGENTS.md),
+> with task playbooks in [`.agents/skills/`](./.agents/skills/). Repo-wide context is in
+> the [root README](../../README.md) and [root AGENTS.md](../../AGENTS.md).
+
+```bash
+cd packages/analytics && pnpm dev    # http://localhost:3003 — runs on its own
+```
+
 Runs on **localhost:3003**.
 
 ## Exposed Modules

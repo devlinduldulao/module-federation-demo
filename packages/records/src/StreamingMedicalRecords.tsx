@@ -6,6 +6,8 @@ interface Resource<T> {
     read(): T;
 }
 
+// Suspense protocol: read() throws the promise while pending, throws on error,
+// otherwise returns. Work starts at creation, not on read. Pre-`use()` idiom.
 function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
     let status: "pending" | "success" | "error" = "pending";
     let result: T;
@@ -29,12 +31,16 @@ function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
     };
 }
 
+// Module scope on purpose — a resource built during render would throw a new
+// promise every render and the fallback would never resolve.
 const resourceCache = new Map<string, Resource<void>>();
 
+// Test-only: lets the next test suspend again.
 export function __resetRecordsStreamingResourceCache(): void {
     resourceCache.clear();
 }
 
+// One Resource per key — the delay is paid once per page load, not per render.
 function getResource(key: string, delayMs: number): Resource<void> {
     if (!resourceCache.has(key)) {
         resourceCache.set(key, createResource(() => delay(delayMs)));
@@ -43,8 +49,9 @@ function getResource(key: string, delayMs: number): Resource<void> {
 }
 
 const StreamingMedicalRecords = () => {
-    const resource = getResource("records-initial", 2500);
-    resource.read();
+    const resource = getResource("records-initial", 2500); // module-level cache
+    resource.read(); // throws while pending → <Suspense> shows <RecordsSkeleton />
+
     return <MedicalRecords />;
 };
 

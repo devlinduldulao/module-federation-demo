@@ -1,8 +1,55 @@
 # Module Federation Demo
 
-A micro-frontend architecture demo built with **Rspack Module Federation**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. Five independently runnable applications compose into a single shell. The module boundaries support independent builds and deployment topologies; the included GitHub Pages workflow deliberately assembles one demo site.
+[![CI](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci.yml)
+[![Deploy](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/deploy.yml/badge.svg)](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](#license)
 
-Built for conference talks and technical demonstrations.
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white)](https://react.dev)
+[![Rspack](https://img.shields.io/badge/Rspack-2.2-F93920?logo=rspack&logoColor=white)](https://rspack.rs)
+[![Module Federation](https://img.shields.io/badge/Module_Federation-runtime-8A2BE2)](https://module-federation.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7.0-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-neutral-000000)](https://ui.shadcn.com)
+[![Rstest](https://img.shields.io/badge/Rstest-0.11-F93920)](https://rstest.rs)
+[![pnpm](https://img.shields.io/badge/pnpm-11-F69220?logo=pnpm&logoColor=white)](https://pnpm.io)
+
+A micro-frontend architecture demo built with **Rspack Module Federation**, **React 19**,
+**TypeScript**, and **Tailwind CSS v4**. Five independently runnable applications compose
+into a single shell at runtime. The module boundaries support independent builds and
+deployment topologies; the included GitHub Pages workflow deliberately assembles one demo
+site.
+
+Built as a reference implementation and teaching aid for runtime micro-frontend composition.
+
+---
+
+## Documentation map
+
+This repository keeps **two kinds of documentation**, aimed at two different readers. If
+you are looking for something and cannot find it here, it is probably in the other one.
+
+| | `README.md` (this file) | `AGENTS.md` |
+|---|---|---|
+| **Reader** | You — a developer | An AI coding agent |
+| **Answers** | "What is this, how do I run it, how does it work?" | "What must I not break while changing it?" |
+| **Voice** | Descriptive and explanatory | Imperative and prescriptive |
+| **Shape** | Read once, top to bottom | Reference; the file closest to your edit wins |
+| **Contains** | Architecture tour, quick start, feature walkthrough, rationale | Invariants, contracts, verification gates, failure modes |
+| **Scope** | One file for the whole repo | One at the root plus one per package |
+
+`AGENTS.md` is a vendor-neutral convention that most coding agents read automatically.
+Alongside it, `.agents/skills/` holds task-specific playbooks (adding a remote, debugging
+a failed remote, keeping a bundle inside budget). Humans are welcome to read both — the
+agent files are often the fastest way to learn the project's hard rules — but they are
+written as constraints, not as a tutorial.
+
+```
+README.md                    ← you are here: the human guide
+AGENTS.md                    ← repo-wide rules for agents
+.agents/skills/              ← repo-wide agent playbooks
+packages/<name>/AGENTS.md    ← per-package rules, override the root
+packages/<name>/.agents/skills/
+```
 
 ## Architecture
 
@@ -19,7 +66,7 @@ Each remote exposes both a **Streaming** component (wraps a Resource-based Suspe
 | Strategy | Module | Behavior |
 |----------|--------|----------|
 | **Instant** | Home | Lazy-loaded for code splitting, but imports the standalone component directly — no streaming delay. Renders the moment the chunk arrives. |
-| **Eager** | Records | Imports the standalone component directly and preloads the chunk on shell mount — already cached before the user clicks. No skeleton, no streaming delay. Still uses `lazy()` because Module Federation remotes are separate builds resolved at runtime via `import()` — you can't use a static `import`. The eager `import()` fires at shell init and warms the cache; `lazy()` resolves from it instantly. |
+| **Eager** | Records | Imports the standalone component directly and preloads the chunk on shell mount — already cached before the user clicks. No skeleton, no streaming delay. Still uses `lazy()` — see [Why `lazy()` for eager modules?](#why-lazy-for-eager-modules) below. The eager `import()` fires at shell init and warms the module registry; `lazy()` resolves from it instantly. |
 | **Streamed** | Prescriptions, Analytics | Loaded on demand with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. |
 
 All modules are wrapped in `<Suspense>` with per-module skeleton fallbacks and `<ErrorBoundary>` for fault isolation. The shell owns URL-based navigation, so `/`, `/records`, `/prescriptions`, and `/analytics` are directly shareable routes. The status strip shows the active module's loading strategy (INSTANT / EAGER / STREAMING) with a color-coded indicator.
@@ -45,7 +92,6 @@ If `pnpm run dev` fails, the most common cause is that one of the demo ports is 
 ### Quality Checks
 
 ```bash
-
 # Run TypeScript checks across the workspace
 pnpm run typecheck
 
@@ -58,7 +104,7 @@ pnpm run build
 
 ### Run a single package (standalone development)
 
-Each module is a fully self-contained React app. You can open any package folder in its own VS Code window and develop with full HMR — no other modules need to be running:
+Each module is a fully self-contained React app. You can open any package folder in its own VS Code window and develop it with no other modules running:
 
 ```bash
 cd packages/home && pnpm install && pnpm run dev          # :3004
@@ -70,9 +116,25 @@ cd packages/shell && pnpm install && pnpm run dev         # :3000
 
 Each remote runs standalone at its own port with its own `index.html`. The shell also runs standalone — remotes it can't reach will show `ModuleFallback` instead of crashing.
 
-**What works standalone:** `dev` (with HMR), `build`, `typecheck`
+**What works standalone:** `dev`, `build`, `typecheck`
 
 **What needs the monorepo root:** `test` / `test:watch` (shared Rstest config)
+
+#### A caveat on hot reloading
+
+Saving a file **does** rebuild and update the browser automatically — but as a **full page
+reload, not React Fast Refresh**, so component state is lost on every save.
+
+Two causes stack. `output.clean: true` deletes the `.hot-update.json` files the HMR client
+then tries to fetch (`[HMR] Cannot find update. Need to do a full reload!`). Underneath
+that, `ModuleFederationPlugin` breaks Fast Refresh: it adds a second entrypoint (the
+container, alongside `main`), so a module lives in two runtimes and the update lands in
+the one that is not rendering. Disabling MF temporarily makes Fast Refresh work and
+preserves state, which is how the cause was confirmed.
+
+Removing `clean` on its own is **not** a fix — the page then stops reloading and the change
+silently never appears (`[HMR] Nothing hot updated.`), which is worse. Not caused by the
+React Compiler (verified with it disabled).
 
 #### The async bootstrap pattern (required for standalone mode)
 
@@ -182,7 +244,7 @@ module-federation-demo/
 |------|---------|------|
 | React | ^19.2.7 | UI library |
 | TypeScript | ^6.0.3 | Type safety |
-| Rspack | ^2.1.2 | Bundler + Module Federation + Rust React Compiler |
+| Rspack | ^2.2.1 | Bundler + Module Federation + Rust React Compiler |
 | Tailwind CSS | v4 | Utility-first CSS via `@theme` |
 | shadcn/ui | neutral | Design system — semantic tokens + components |
 | Geist / Geist Mono | ^5.3.0 | The two font families shadcn/ui uses |
@@ -274,16 +336,41 @@ Everything else in the config is standard Rspack. Remove the `ModuleFederationPl
 
 One practical rule follows from that: if a file is listed under `exposes`, treat it as a real runtime entrypoint. It must bring along any required CSS or other side-effect imports on its own instead of depending on standalone-only bootstrap code.
 
+### Why `lazy()` for eager modules?
+
+A common question, and the usual answer ("you can't statically import a remote") is wrong.
+You can — verified in this repo by importing `records/MedicalRecords` straight into the
+shell's `bootstrap.tsx`: it builds and renders. It works because `src/index.tsx` is
+`import("./bootstrap")`, and that async boundary resolves the shared scope first;
+everything downstream of it can import remotes statically.
+
+The remote is fetched over the network either way — it is a separate build on a separate
+origin, so there is no way to inline it. `lazy()` earns its place for two other reasons:
+
+- **Timing.** A static import makes the remote a blocking dependency of the initial load.
+  `lazy()` defers the fetch to navigation, which is what makes the instant / eager /
+  streamed distinction possible at all.
+- **Fault isolation.** `loadRemote()` attaches a `.catch()` that degrades to
+  `<ModuleFallback />`. A static import has nowhere to hang that catch, so an unreachable
+  remote takes down the whole bundle instead of one route.
+
+`React.lazy()` also requires a function returning a promise, so once you want a per-module
+`<Suspense>` boundary, `import()` is forced regardless.
+
+The eager strategy then just warms it early: the `import()` in `PREFETCHERS` fires at shell
+init, and when `lazy()` later calls the same specifier it resolves from the bundler's
+module registry rather than the network.
+
 ## Rspack 2 Notes
 
-This repository runs on **Rspack 2.1**. A few setup details matter for anyone copying this setup:
+This repository runs on **Rspack 2.2**. A few setup details matter for anyone copying this setup:
 
 - Local development scripts use `rspack dev`, backed by an explicit `@rspack/dev-server` dependency in each package that runs a dev server.
 - `ModuleFederationPlugin` now requires an explicit `@module-federation/runtime-tools` dependency in each federated package.
 - The configs use `rspack.config.ts` + `defineConfig` and Rspack 2's cleaner defaults: `target: ["web", "es2020"]` and `detectSyntax: "auto"` on `builtin:swc-loader`.
 - CSS now uses Rspack's built-in CSS handling with `type: "css"` and keeps `postcss-loader` only for Tailwind/PostCSS transforms.
-- **Rspack 2.1: Rust React Compiler.** Every package enables `jsc.transform.reactCompiler: true` in `builtin:swc-loader` — build-time auto-memoization (no manual `useMemo`/`useCallback`/`React.memo`) at 7–13x the speed of the Babel plugin.
-- **Rspack 2.1: persistent cache with automatic cleanup.** Every config uses `cache: { type: "persistent" }`, which speeds up cold dev-server starts and cached production builds. 2.1 cleans up stale cache versions automatically (`maxAge` defaults to 7 days, `maxVersions` to 3).
+- **Rspack 2.2: Rust React Compiler.** Every package enables `jsc.transform.reactCompiler: true` in `builtin:swc-loader` — build-time auto-memoization (no manual `useMemo`/`useCallback`/`React.memo`) at 7–13x the speed of the Babel plugin.
+- **Rspack 2.2: persistent cache with automatic cleanup.** Every config uses `cache: { type: "persistent" }`, which speeds up cold dev-server starts and cached production builds. 2.1 cleans up stale cache versions automatically (`maxAge` defaults to 7 days, `maxVersions` to 3).
 
 ### Shell (Host)
 
@@ -454,7 +541,7 @@ Press **Ctrl+K** (or **Cmd+K** on Mac), or click the **Commands** button to open
 - **Fuzzy search** — type any keyword (module name, port, "kill", "canary", "dark") and the list filters in real time.
 - **Keyboard dismiss** — press Esc to close.
 
-**Why it matters for the demo:** During a live talk, the speaker can control the entire demo from the keyboard — navigate between modules, kill remotes, toggle themes, and switch deployment rings — without hunting for buttons. It also demonstrates that shell-level orchestration features (kill switch, version registry) are accessible from multiple surfaces: the Lab panel, the command palette, and the status strip.
+**Why it matters:** The entire demo can be driven from the keyboard — navigate between modules, kill remotes, toggle themes, and switch deployment rings — without hunting for buttons. It also demonstrates that shell-level orchestration features (kill switch, version registry) are accessible from multiple surfaces: the Lab panel, the command palette, and the status strip.
 
 **Implementation (`App.tsx` — `CommandPalette` + `commandActions`):**
 
@@ -535,7 +622,7 @@ Click the **Lab** button (orange border, right side of header) or use the comman
 **4. Hot Reload Guide**
 - Step-by-step instructions for demonstrating independent deployment live: stop a remote's dev server, show the ErrorBoundary fallback, edit source code, restart the server, click Retry — the module reloads with changes while others never went down.
 
-**Why it matters for the demo:** This is the centerpiece of the live talk. It lets the speaker prove fault isolation in real time (kill a remote → others keep running), show independent versioning (canary ring), and demonstrate that the architecture handles failure gracefully. It answers the skeptic's question: "What happens when one team's deploy breaks?"
+**Why it matters:** This is the centrepiece of the demo. It proves fault isolation in real time (kill a remote → others keep running), show independent versioning (canary ring), and demonstrate that the architecture handles failure gracefully. It answers the sceptical question: "What happens when one team's deploy breaks?"
 
 **Implementation (`lib/health.ts` + `lib/demo.ts` + `DemoPanel.tsx`):**
 
@@ -742,6 +829,15 @@ After that first bootstrap, normal deploys can continue with the default workflo
 
 ## Per-Module CI Pipelines (Independent Build & Deploy)
 
+[![CI: Shell](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-shell.yml/badge.svg)](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-shell.yml)
+[![CI: Home](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-home.yml/badge.svg)](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-home.yml)
+[![CI: Records](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-records.yml/badge.svg)](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-records.yml)
+[![CI: Prescriptions](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-prescriptions.yml/badge.svg)](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-prescriptions.yml)
+[![CI: Analytics](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-analytics.yml/badge.svg)](https://github.com/devlinduldulao/module-federation-demo/actions/workflows/ci-analytics.yml)
+
+Five independent badges for five independently deployable modules — that is the point of
+the architecture, visible at a glance.
+
 Each micro-frontend has its own GitHub Actions workflow that triggers **only when that module's code changes**:
 
 | Module | Workflow | Triggers on |
@@ -873,9 +969,9 @@ A common question: "Is this like microservices where one broken service doesn't 
 
 All modules share one browser tab. If a remote has an infinite loop or massive memory leak, it freezes the entire page. Microservices don't have this problem because each runs in its own process. The fix is `<iframe>` isolation, but that breaks shared React context and degrades DX. Most teams accept this tradeoff — and it's why code review and testing at the module level matter.
 
-## Conference Demo Value
+## What This Demonstrates
 
-This project demonstrates these micro-frontend concepts during a live talk:
+This project demonstrates the following micro-frontend concepts end to end:
 
 1. **Independent development and builds** — each remote starts on its own port with its own build
 2. **Fault isolation** — kill a remote server and only that module shows a fallback (or use the Federation Lab kill switch)
@@ -888,7 +984,7 @@ This project demonstrates these micro-frontend concepts during a live talk:
 8. **Design system consistency** — shared `@theme` tokens across all packages keep the UI cohesive without a shared CSS build step
 9. **Live demo controls** — the Federation Lab panel lets you kill/restore remotes, monitor health, and toggle A/B deployment during a presentation
 
-### What to show in a talk
+### A suggested walkthrough order
 
 - Start `pnpm run dev`, open `:3000` — Home loads **instantly** (no skeleton delay, status strip shows INSTANT)
 - Click Records — loads fast because it was **eagerly preloaded** on shell mount (status strip shows EAGER)

@@ -187,6 +187,10 @@ const KNOWN_PATHS = new Set<string>(MODULES.map((module) => module.path));
 const THEME_OPTIONS: readonly ThemeName[] = ["dark", "light"] as const;
 const KEYBOARD_SHORTCUT_LABEL = "Ctrl/Cmd + K";
 
+// Warms a remote's chunk ahead of render. Each specifier must match its lazy()
+// import above exactly — a missing key fails to compile, but drift does not, and
+// silently breaks eager + hover prefetch. .catch keeps a dead remote from throwing
+// an unhandled rejection; loadRemote() does the real error handling.
 const PREFETCHERS: Record<ModuleType, () => Promise<unknown>> = {
   home: () => import("home/Home").catch(() => undefined),
   records: () => import("records/MedicalRecords").catch(() => undefined),
@@ -684,6 +688,10 @@ function ShellFrame(): React.JSX.Element {
       })
     );
 
+    // Mostly redundant with lazy() — except when the module is killed. ModuleView
+    // returns early on isKilled, so <Component /> never mounts and lazy() never
+    // imports; this is then the only thing warming the chunk, which is why restore
+    // is instant. Do not remove.
     PREFETCHERS[activeModule.id]();
   }, [activeModule]);
 

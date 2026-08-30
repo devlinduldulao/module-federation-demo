@@ -2,6 +2,15 @@
 
 The prescriptions micro-frontend provides prescription orders management. It exposes `PrescriptionOrders` (instant render) and `StreamingPrescriptionOrders` (Suspense-wrapped with simulated delay). It listens for `addPrescription` events from the records module.
 
+> **Developer docs.** This file explains what this package is and how to work on it.
+> The rules an AI agent must follow when editing it live in [`AGENTS.md`](./AGENTS.md),
+> with task playbooks in [`.agents/skills/`](./.agents/skills/). Repo-wide context is in
+> the [root README](../../README.md) and [root AGENTS.md](../../AGENTS.md).
+
+```bash
+cd packages/prescriptions && pnpm dev    # http://localhost:3002 — runs on its own
+```
+
 Runs on **localhost:3002**.
 
 ## Exposed Modules

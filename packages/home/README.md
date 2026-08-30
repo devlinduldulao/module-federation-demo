@@ -2,6 +2,15 @@
 
 The home micro-frontend provides the **landing page** for the Module Federation demo. It renders an architecture overview, key technology stats, and navigation cards for each module. It exposes `Home` (instant render) and `StreamingHome` (Suspense-wrapped with simulated delay).
 
+> **Developer docs.** This file explains what this package is and how to work on it.
+> The rules an AI agent must follow when editing it live in [`AGENTS.md`](./AGENTS.md),
+> with task playbooks in [`.agents/skills/`](./.agents/skills/). Repo-wide context is in
+> the [root README](../../README.md) and [root AGENTS.md](../../AGENTS.md).
+
+```bash
+cd packages/home && pnpm dev    # http://localhost:3004 — runs on its own
+```
+
 Runs on **localhost:3004**. Mounted at the root route `/` in the shell.
 
 ## Exposed Modules
