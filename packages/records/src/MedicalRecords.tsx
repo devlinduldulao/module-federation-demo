@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, memo } from "react";
 import { cn } from "./lib/utils";
 import { MedicalRecord, PrescriptionItem, RecordCategory } from "./types";
 import { useActiveTheme } from "./lib/theme";
+import SharedStateBar from "./components/SharedStateBar";
 import "./index.css";
 
 const MOCK_RECORDS: readonly MedicalRecord[] = [
@@ -224,6 +225,11 @@ function MedicalRecords() {
           </div>
         </div>
       </header>
+
+      {/* Client state (zustand) + server state (TanStack Query), both local to this remote. */}
+      <div className="mb-6 border border-border rounded-lg px-4 py-3">
+        <SharedStateBar />
+      </div>
 
       {/* Filters */}
       <nav

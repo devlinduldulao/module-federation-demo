@@ -27,6 +27,16 @@ export interface ModuleDestination {
   readonly icon: string;
 }
 
+/**
+ * Client-state sync contract. Each module owns its own zustand store and agrees
+ * only on this payload. `source` is the originating module id, so a listener can
+ * ignore its own echo. Versioned contract: additive changes only.
+ */
+export type CounterChangeEvent = CustomEvent<{
+  count: number;
+  source: string;
+}>;
+
 declare global {
   interface Window {
     __MF_THEME__?: {
@@ -36,6 +46,7 @@ declare global {
   }
 
   interface WindowEventMap {
+    counterChange: CounterChangeEvent;
     navigateToModule: NavigateToModuleEvent;
     showNotification: NotificationEvent;
     themeChange: ThemeChangeEvent;

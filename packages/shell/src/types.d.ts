@@ -52,6 +52,15 @@ interface Window {
 }
 
 interface WindowEventMap {
+  /**
+   * Client-state sync contract. Every module owns its own zustand store and agrees
+   * only on this payload - no shared store, no shared npm package. `source` is the
+   * originating module id so a listener can ignore its own echo.
+   */
+  counterChange: CustomEvent<{
+    count: number;
+    source: string;
+  }>;
   moduleChange: CustomEvent<{
     newModule: "home" | "records" | "prescriptions" | "analytics";
   }>;

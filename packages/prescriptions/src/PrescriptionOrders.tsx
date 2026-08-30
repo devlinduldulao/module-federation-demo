@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import type { PrescriptionItem, AddPrescriptionEvent } from "./types";
 import { useActiveTheme } from "./lib/theme";
+import SharedStateBar from "./components/SharedStateBar";
 import "./index.css";
 
 // Prescription row
@@ -243,6 +244,11 @@ function PrescriptionOrders() {
                     </div>
                 </div>
             </header>
+
+            {/* Client state (zustand) + server state (TanStack Query), both local to this remote. */}
+            <div className="mb-6 border border-border rounded-lg px-4 py-3">
+              <SharedStateBar />
+            </div>
 
             {prescriptions.length === 0 ? (
                 <EmptyPrescriptions onBrowseRecords={handleBrowseRecords} />

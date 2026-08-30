@@ -49,6 +49,25 @@ Object.defineProperty(window, "localStorage", {
   configurable: true,
 });
 
+// Every module's SharedStateBar fetches /todos through TanStack Query. Without a
+// stub the suite would hit the real network — slow, flaky, and offline-hostile.
+// Individual tests can still override this with rs.stubGlobal("fetch", ...).
+const TODO_FIXTURE = Array.from({ length: 200 }, (_, index) => ({ id: index + 1 }));
+
+Object.defineProperty(globalThis, "fetch", {
+  writable: true,
+  configurable: true,
+  value: rs.fn(async (input: RequestInfo | URL) => {
+    if (String(input).includes("/todos")) {
+      return new Response(JSON.stringify(TODO_FIXTURE), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response("{}", { status: 200 });
+  }),
+});
+
 afterEach(() => {
   // Unmount anything Testing Library rendered, so the next test starts on a
   // clean DOM.

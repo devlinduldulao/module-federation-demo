@@ -1,6 +1,7 @@
 import { useCallback, memo } from "react";
 import { useActiveTheme } from "./lib/theme";
 import { ModuleDestination } from "./types";
+import SharedStateBar from "./components/SharedStateBar";
 import "./index.css";
 
 const MODULE_DESTINATIONS: readonly ModuleDestination[] = [
@@ -137,6 +138,11 @@ function Home() {
           </div>
         </div>
       </header>
+
+      {/* Client state (zustand) + server state (TanStack Query), both local to this remote. */}
+      <div className="mb-6 border border-border rounded-lg px-4 py-3">
+        <SharedStateBar />
+      </div>
 
       {/* Architecture Stats */}
       <section

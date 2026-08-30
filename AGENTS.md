@@ -276,6 +276,15 @@ config before changing it.
 - **shadcn-style components** built on `@base-ui/react`, in `src/components/ui/`. These
   are vendored source, not a dependency — edit them in place when needed.
 - **`cn()`** from `src/lib/utils.ts` is the only class-merging helper. Use it.
+- **State: zustand for client, TanStack Query for server — both scoped to one package.**
+  Every package has its own `src/lib/counter-store.ts` and its own `QueryClient`, and
+  **neither library is in any `shared` block.** That is deliberate: a shared store is a
+  shared dependency, and it would version-lock every team to one zustand release. Modules
+  stay in sync over the `counterChange` event contract instead, which survives independent
+  deploys and does not require the remotes to be React. **Do not "optimise" this by adding
+  zustand or `@tanstack/react-query` to `shared`** — it would trade the repo's whole
+  decoupling argument for one deduplicated fetch. The cost of the current design is real
+  and intentional: each mounted module fetches `/todos` itself.
 - **`lucide-react`** for icons. **`sonner`** for toasts (the host owns the `<Toaster />`;
   remotes request a toast by dispatching a `showNotification` event).
 - Each remote duplicates its own `components/ui/` and `lib/`. **This duplication is

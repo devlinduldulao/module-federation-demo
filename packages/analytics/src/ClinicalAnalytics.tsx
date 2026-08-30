@@ -1,6 +1,7 @@
 import { memo, useMemo } from "react";
 import type { AnalyticsStat, ClinicalActivity } from "./types";
 import { useActiveTheme } from "./lib/theme";
+import SharedStateBar from "./components/SharedStateBar";
 import "./index.css";
 
 // Mock stats
@@ -149,6 +150,11 @@ function ClinicalAnalytics() {
                     </div>
                 </div>
             </header>
+
+            {/* Client state (zustand) + server state (TanStack Query), both local to this remote. */}
+            <div className="mb-6 border border-border rounded-lg px-4 py-3">
+              <SharedStateBar />
+            </div>
 
             {/* Welcome banner */}
             <WelcomeBanner />

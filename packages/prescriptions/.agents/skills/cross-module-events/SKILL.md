@@ -30,6 +30,21 @@ All payloads are declared in **one place**: `packages/shell/src/types.d.ts`, in 
 | `navigateToModule` | home, prescriptions | shell (router) | `{ module: "home" \| "records" \| "prescriptions" \| "analytics" }` |
 | `moduleChange` | shell | any module | `{ newModule: ... }` |
 | `themeChange` | shell | all remotes | `{ theme, colorScheme }` |
+| `counterChange` | any module | every other module | `{ count, source }` |
+
+`counterChange` is the client-state channel. **Every package owns its own zustand store**
+(`src/lib/counter-store.ts`) and they agree only on this payload — there is no shared
+store and no shared npm package, so no team version-locks another and a non-React remote
+could join using the same contract. Two rules specific to it:
+
+- **Ignore your own echo.** `window` events fire on the dispatcher too, so the listener
+  bails when `source === COUNTER_SOURCE`. Without that guard you re-broadcast and loop.
+- **The listener is registered at module scope, not in a `useEffect`.** A remote that only
+  listened while mounted would show a stale count after remounting.
+
+Late-loading remotes are seeded from `localStorage` (`mf-demo-counter`), because a remote
+that was not loaded yet never heard the earlier events. Note that this is per-origin, so a
+remote running standalone on its own port starts from its own count — correct, not a bug.
 
 Note the direction of the last two: the shell broadcasts, remotes listen. Remotes never
 set the theme and never route directly — they **ask**.

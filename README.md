@@ -468,6 +468,49 @@ declare global {
 
 The shell also exposes `window.__MF_THEME__` so remotes can read or update the active theme without importing host-only shell code.
 
+## State Management — zustand + TanStack Query
+
+Both libraries work under Module Federation, and the interesting part is *how they are
+scoped*. Every package owns its own store and its own query cache. **Neither library
+appears in any `shared` block.**
+
+| | Library | Scope | Cross-module channel |
+|---|---|---|---|
+| Client state | zustand | one store per package (`src/lib/counter-store.ts`) | `counterChange` event |
+| Server state | TanStack Query | one `QueryClient` per package | none — each fetches its own |
+
+### Why not one shared store?
+
+A shared store is a shared dependency. Put zustand in `shared` as a singleton and every
+team upgrades together, forever. Events do not have that problem: they survive independent
+deploys, and they survive framework diversity — a Vue remote can join the federation using
+the same `window` contract with no npm package in common.
+
+So the counter in the header and the counter on every page stay in sync **without a shared
+store**. Each module keeps its own zustand instance and they agree on a payload:
+
+```ts
+counterChange: CustomEvent<{ count: number; source: string }>;
+```
+
+Declared independently in each package's own types file by augmenting `WindowEventMap` —
+no shared types package either. Two details make it work:
+
+- **Ignore your own echo.** `window` events fire on the dispatcher too, so the listener
+  returns early when `source` is its own module id. Without that, you re-broadcast and loop.
+- **Register at module scope, not in a `useEffect`.** A store that only listened while its
+  component was mounted would show a stale count after a remount.
+
+Late-loading remotes seed from `localStorage`, since a module that was not loaded yet never
+heard the earlier events.
+
+### The cost, made visible
+
+Each mounted module fetches `https://jsonplaceholder.typicode.com/todos` itself, so the
+network tab shows one request per module rather than one in total. That duplication is the
+price of zero coupling. Sharing a single `QueryClient` would remove it — and add the version
+lock straight back. The trade is the point; the demo shows the bill.
+
 ## Shell Controls
 
 The shell header exposes three control surfaces — **Settings**, **Commands**, and **Lab** — that serve distinct purposes during both development and live presentations. Each opens as a slide-over panel or overlay.

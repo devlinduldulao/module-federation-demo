@@ -30,6 +30,7 @@ import {
 import ErrorBoundary from "./components/ErrorBoundary";
 import ModuleFallback from "./components/ModuleFallback";
 import DemoPanel from "./components/DemoPanel";
+import SharedStateBar from "./components/SharedStateBar";
 import HomeSkeleton from "./components/HomeSkeleton";
 import RecordsSkeleton from "./components/RecordsSkeleton";
 import PrescriptionsSkeleton from "./components/PrescriptionsSkeleton";
@@ -909,6 +910,9 @@ function ShellFrame(): React.JSX.Element {
                   <span className="hidden font-mono text-[10px] text-muted-foreground/70 uppercase sm:inline">
                     {KEYBOARD_SHORTCUT_LABEL}
                   </span>
+                  {/* The host's own zustand store + QueryClient. It shares neither
+                      with the remotes — they agree on the counterChange contract. */}
+                  <SharedStateBar />
                 </div>
               </div>
             </div>
