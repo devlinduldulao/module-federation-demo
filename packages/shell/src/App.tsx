@@ -31,6 +31,12 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import ModuleFallback from "./components/ModuleFallback";
 import DemoPanel from "./components/DemoPanel";
 import SharedStateBar from "./components/SharedStateBar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./components/ui/tooltip";
 import HomeSkeleton from "./components/HomeSkeleton";
 import RecordsSkeleton from "./components/RecordsSkeleton";
 import PrescriptionsSkeleton from "./components/PrescriptionsSkeleton";
@@ -142,6 +148,12 @@ type ModuleConfig = {
   port: string;
   component: React.LazyExoticComponent<React.ComponentType>;
   loadStrategy: LoadStrategy;
+  /**
+   * Warm this remote's chunk when the cursor enters its nav link.
+   * `prescriptions` opts out deliberately, so the demo keeps one module with no
+   * prefetch at all to compare against. Do not "fix" it to true.
+   */
+  prefetchOnHover: boolean;
 };
 
 const MODULES = [
@@ -152,6 +164,7 @@ const MODULES = [
     port: "3004",
     component: Home,
     loadStrategy: "instant",
+    prefetchOnHover: true,
   },
   {
     id: "records",
@@ -160,6 +173,7 @@ const MODULES = [
     port: "3001",
     component: MedicalRecords,
     loadStrategy: "eager",
+    prefetchOnHover: true,
   },
   {
     id: "prescriptions",
@@ -168,6 +182,8 @@ const MODULES = [
     port: "3002",
     component: StreamingPrescriptionOrders,
     loadStrategy: "streamed",
+    // Deliberate: the one module with no prefetch, as a control.
+    prefetchOnHover: false,
   },
   {
     id: "analytics",
@@ -176,6 +192,7 @@ const MODULES = [
     port: "3003",
     component: StreamingClinicalAnalytics,
     loadStrategy: "streamed",
+    prefetchOnHover: true,
   },
 ] as const satisfies readonly ModuleConfig[];
 
@@ -255,6 +272,42 @@ function showToast(type: NotificationType, message: string): void {
   toast(message);
 }
 
+// Four distinct fetch timings from two independent switches: `loadStrategy`
+// decides whether the chunk is preloaded at init, and `prefetchOnHover` decides
+// whether hovering warms it. Prescriptions opts out of hover on purpose so the
+// demo has a true no-prefetch control to compare against.
+function describeLoading(module: ModuleConfig): {
+  readonly title: string;
+  readonly detail: string;
+} {
+  if (module.loadStrategy === "instant") {
+    return {
+      title: "Instant",
+      detail: "Landing route — its chunk arrives with the initial page load.",
+    };
+  }
+
+  if (module.loadStrategy === "eager") {
+    return {
+      title: "Preloaded",
+      detail:
+        "Fetched at shell init, before you touch anything. Already cached by the time you click.",
+    };
+  }
+
+  return module.prefetchOnHover
+    ? {
+        title: "Prefetched on hover",
+        detail:
+          "Fetching right now, while your cursor travels to the link — so the click feels instant.",
+      }
+    : {
+        title: "Lazy",
+        detail:
+          "Nothing is fetched until you click. Hovering does nothing — watch the network tab.",
+      };
+}
+
 const NavigationItem = memo(function NavigationItem({
   module,
   onNavigateStart,
@@ -262,37 +315,54 @@ const NavigationItem = memo(function NavigationItem({
   module: ModuleConfig;
   onNavigateStart: (module: ModuleConfig) => void;
 }) {
-  const shouldPrefetchOnHover = module.id !== "prescriptions";
+  const loading = describeLoading(module);
 
   return (
-    <NavLink
-      to={module.path}
-      onMouseEnter={() => {
-        if (shouldPrefetchOnHover) {
-          PREFETCHERS[module.id]();
-        }
-      }}
-      onClick={() => onNavigateStart(module)}
-      className={({ isActive }) =>
-        cn(
-          "relative px-5 py-2.5 font-mono text-sm tracking-wide transition-all duration-500 focus:outline-hidden",
-          isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-        )
-      }
-      aria-label={`Navigate to ${module.label}`}
-    >
-      {({ isActive }) => (
-        <>
-          <span className="relative z-10">{module.label.toUpperCase()}</span>
-          <span
-            className={cn(
-              "absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-500",
-              isActive ? "w-full" : "w-0"
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <NavLink
+            to={module.path}
+            onMouseEnter={() => {
+              if (module.prefetchOnHover) {
+                PREFETCHERS[module.id]();
+              }
+            }}
+            onClick={() => onNavigateStart(module)}
+            className={({ isActive }) =>
+              cn(
+                "relative px-5 py-2.5 font-mono text-sm tracking-wide transition-all duration-500 focus:outline-hidden",
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              )
+            }
+            aria-label={`Navigate to ${module.label}`}
+          >
+            {({ isActive }) => (
+              <>
+                <span className="relative z-10">{module.label.toUpperCase()}</span>
+                <span
+                  className={cn(
+                    "absolute bottom-0 left-0 h-0.5 bg-primary transition-all duration-500",
+                    isActive ? "w-full" : "w-0"
+                  )}
+                />
+              </>
             )}
-          />
-        </>
-      )}
-    </NavLink>
+          </NavLink>
+        }
+      />
+      <TooltipContent side="bottom" sideOffset={6} className="max-w-64 rounded-md">
+        <span className="flex flex-col gap-1 py-0.5 text-left">
+          <span className="font-mono text-[10px] tracking-[0.2em] uppercase opacity-70">
+            {loading.title}
+          </span>
+          <span className="text-xs leading-snug">{loading.detail}</span>
+          <span className="font-mono text-[10px] opacity-70">
+            {module.id} · :{module.port}
+          </span>
+        </span>
+      </TooltipContent>
+    </Tooltip>
   );
 });
 
@@ -871,15 +941,19 @@ function ShellFrame(): React.JSX.Element {
               </div>
 
               <div className="flex flex-col gap-3 lg:items-end">
-                <nav className="flex flex-wrap items-center gap-1" aria-label="Module navigation">
-                  {MODULES.map((module) => (
-                    <NavigationItem
-                      key={module.id}
-                      module={module}
-                      onNavigateStart={handleNavigateStart}
-                    />
-                  ))}
-                </nav>
+                {/* delay={150} keeps the tooltip quick enough to feel responsive
+                    while demoing, without flashing as the cursor crosses the nav. */}
+                <TooltipProvider delay={150}>
+                  <nav className="flex flex-wrap items-center gap-1" aria-label="Module navigation">
+                    {MODULES.map((module) => (
+                      <NavigationItem
+                        key={module.id}
+                        module={module}
+                        onNavigateStart={handleNavigateStart}
+                      />
+                    ))}
+                  </nav>
+                </TooltipProvider>
 
                 <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto">
                   <ThemeSelector theme={theme} onSelect={handleThemeChange} />
@@ -924,16 +998,6 @@ function ShellFrame(): React.JSX.Element {
             <div className="flex h-12 items-center justify-between">
               <div className="flex items-center gap-6 font-mono text-[11px] text-muted-foreground/70">
                 <div className="flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "h-1.5 w-1.5 rounded-full",
-                      activeModule.loadStrategy === "instant"
-                        ? "bg-chart-2"
-                        : activeModule.loadStrategy === "eager"
-                          ? "bg-primary"
-                          : "bg-chart-4"
-                    )}
-                  />
                   <span>
                     {activeModule.loadStrategy === "instant"
                       ? "INSTANT"

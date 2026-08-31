@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useMemo, memo } from "react";
-import type { PrescriptionItem, AddPrescriptionEvent } from "./types";
+import { useCallback, useMemo, memo } from "react";
+import type { PrescriptionItem } from "./types";
 import { useActiveTheme } from "./lib/theme";
+import { usePrescriptionsStore } from "./lib/prescriptions-store";
 import SharedStateBar from "./components/SharedStateBar";
 import "./index.css";
 
@@ -152,45 +153,14 @@ PrescriptionSummary.displayName = "PrescriptionSummary";
 
 // Main component
 function PrescriptionOrders() {
-    const [prescriptions, setPrescriptions] = useState<PrescriptionItem[]>([
-        { id: 1, patientName: "Sarah Chen", provider: "Dr. Williams", quantity: 1 },
-        { id: 7, patientName: "Lisa Nguyen", provider: "Dr. Patel", quantity: 2 },
-    ]);
+    // State and the `addPrescription` listener both live in the store at module
+    // scope, NOT here. Records can dispatch while this module is unmounted — or
+    // before its chunk has even downloaded — and the event still lands.
+    // See src/lib/prescriptions-store.ts for why.
+    const prescriptions = usePrescriptionsStore((state) => state.items);
+    const updateQuantity = usePrescriptionsStore((state) => state.updateQuantity);
+    const removeItem = usePrescriptionsStore((state) => state.remove);
     const { label: themeLabel } = useActiveTheme();
-
-    // Listen for addPrescription events
-    useEffect(() => {
-        const handleAddPrescription = (event: AddPrescriptionEvent) => {
-            const item: PrescriptionItem = event.detail;
-            setPrescriptions((prev) => {
-                const existing = prev.find((p) => p.id === item.id);
-                if (existing) {
-                    return prev.map((p) =>
-                        p.id === item.id
-                            ? { ...p, quantity: p.quantity + item.quantity }
-                            : p
-                    );
-                }
-                return [...prev, item];
-            });
-        };
-        window.addEventListener("addPrescription", handleAddPrescription);
-        return () => window.removeEventListener("addPrescription", handleAddPrescription);
-    }, []);
-
-    const updateQuantity = useCallback((id: number, delta: number) => {
-        setPrescriptions((prev) =>
-            prev.map((item) =>
-                item.id === id
-                    ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-                    : item
-            )
-        );
-    }, []);
-
-    const removeItem = useCallback((id: number) => {
-        setPrescriptions((prev) => prev.filter((item) => item.id !== id));
-    }, []);
 
     const handleSubmit = useCallback(() => {
         window.dispatchEvent(

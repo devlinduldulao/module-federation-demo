@@ -49,6 +49,44 @@ remote running standalone on its own port starts from its own count — correct,
 Note the direction of the last two: the shell broadcasts, remotes listen. Remotes never
 set the theme and never route directly — they **ask**.
 
+## Delivery window — the thing that actually bites
+
+An event reaches a listener only if that listener exists **at the moment it is dispatched**.
+There is no queue, no retry, no replay. In a lazily-loaded federation that produces three
+distinct cases, and they are not equally solvable:
+
+| When the event fires | Delivered? | Why |
+|---|---|---|
+| Module loaded **and** mounted | yes | Obvious case |
+| Module loaded, **unmounted** | yes — **if** the listener is at module scope | A `useEffect` listener is gone the moment the component unmounts |
+| Module **never loaded** | **no** | Its code does not exist yet; nothing can listen |
+
+The second row is the one worth engineering for, and it is why the listener in
+`src/lib/prescriptions-store.ts` sits at module scope rather than in a `useEffect`:
+
+```ts
+// module scope — alive from the moment this chunk loads until the page unloads
+if (typeof window !== "undefined") {
+  window.addEventListener("addPrescription", (event) => {
+    usePrescriptionsStore.getState().add(event.detail);
+  });
+}
+```
+
+Pair it with persistence, or a remount still throws the state away — `useState` re-runs its
+initialiser, and everything the listener collected is gone. The store seeds from
+`localStorage` for exactly that reason.
+
+**The third row is not a bug to fix.** A module that has never been downloaded cannot
+receive anything, and no amount of event design changes that. If data must survive a cold
+start, it does not belong in an event — POST it to an API and let the consuming module
+fetch it. Events are *live notification between loaded modules*; the server is the durable
+channel. This is the same reason server state needs no cross-module syncing here.
+
+Because the store outlives unmount, tests must reset it explicitly — see
+`__resetPrescriptionsStore()`, called in `beforeEach`. Otherwise each test inherits the
+previous one's prescriptions.
+
 ## Listening (the consumer side)
 
 ```tsx
@@ -65,10 +103,20 @@ useEffect(() => {
 
 ### Four rules, in order of how often they are broken
 
-1. **Always remove the listener in the cleanup.** A remote unmounts and remounts every
-   time the user navigates away and back. A leaked listener means the next event is
-   handled twice, then three times. This is the number one bug in this pattern, and it
-   looks like "the row got added twice" rather than like a leak.
+1. **Match the listener's lifetime to the state's lifetime.** Two valid placements, and
+   picking the wrong one is the number one bug in this pattern:
+
+   - **Module scope** — for state that must survive unmount, like `addPrescription`.
+     Registered once when the chunk loads, never removed. It must sit at the top level of
+     the module so it cannot run twice; putting it anywhere that re-executes gives you
+     duplicate handling, which looks like "the row got added twice".
+   - **Inside `useEffect`** — for genuinely view-local reactions (an animation, a toast
+     the page owns). Then you **must** return the cleanup, or a remount leaves the old
+     listener behind and the next event is handled twice, then three times.
+
+   The failure looks identical from the outside; the fix is opposite. Ask whether the
+   state should outlive the component. If yes, module scope plus persistence. If no,
+   `useEffect` plus cleanup.
 
 2. **Type the handler parameter as `WindowEventMap["<name>"]`.** Do not use
    `CustomEvent<any>` or cast. The `WindowEventMap` augmentation in the shell's

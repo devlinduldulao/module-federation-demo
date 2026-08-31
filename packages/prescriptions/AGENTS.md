@@ -41,19 +41,34 @@ in the shell should change with it, or the transition will visibly jump.
 Prescriptions is the only module that **listens** for domain events. Records dispatches
 `addPrescription`; this module receives it:
 
+The listener and the list both live in `src/lib/prescriptions-store.ts`, at **module
+scope** — not in the component:
+
 ```ts
-useEffect(() => {
-  const handleAddPrescription = (event: WindowEventMap["addPrescription"]) => { ... };
-  window.addEventListener("addPrescription", handleAddPrescription);
-  return () => window.removeEventListener("addPrescription", handleAddPrescription);
-}, []);
+// src/lib/prescriptions-store.ts
+if (typeof window !== "undefined") {
+  window.addEventListener("addPrescription", (event) => {
+    usePrescriptionsStore.getState().add(event.detail);
+  });
+}
 ```
 
 Rules that matter here more than anywhere else in the repo:
 
-1. **Always remove the listener in the cleanup function.** A remote is unmounted and
-   remounted every time the user navigates away and back. A leaked listener means one
-   `addPrescription` event appends the row two, three, four times.
+1. **Keep this listener at module scope, and keep the list in the store.** This module is
+   `streamed`, so it is unmounted most of the time — Records usually dispatches while the
+   user is on `/records`, not here. A `useEffect` listener would not exist at that moment
+   and the event would be lost; `useState` would then throw away whatever it did collect
+   on the next remount. Module scope plus the `localStorage` seed is what makes delivery
+   survive both.
+
+   The trade is that the listener is never removed and the state outlives unmount, so
+   **tests must call `__resetPrescriptionsStore()` in `beforeEach`** or each test inherits
+   the previous one's rows.
+
+   **Known limit:** if this module's chunk has never loaded in the page session, nothing
+   is listening and the event is genuinely lost. That is not fixable with event design —
+   durable data belongs on a server. See the `cross-module-events` skill.
 2. **Treat `event.detail` as untrusted.** It crossed a module boundary from a separately
    deployed bundle that may be running an older contract. Validate before use; do not
    assume a field exists because the type says it does.
@@ -118,10 +133,15 @@ the event flow inside the shell.
 cd ../.. && pnpm typecheck && pnpm test && pnpm build
 ```
 
-If you touched the listener or the payload, run the full app (`pnpm dev` from the root),
-go to Records, add a prescription, then navigate to Prescriptions and confirm exactly one
-row was added. Navigate away and back, repeat, and confirm it is still exactly one — that
-is the listener-cleanup check.
+If you touched the listener or the payload, run the full app (`pnpm dev` from the root)
+and use the **in-app nav links**, not typed URLs — a full page load unloads every remote
+and invalidates the test:
+
+1. Visit `/prescriptions` first, so this chunk is loaded and listening.
+2. Navigate to `/records` and add a prescription for a patient **not** in the seed data
+   (`Sarah Chen` and `Lisa Nguyen` are seeded — using them gives a false pass).
+3. Navigate back. The row is there, exactly once.
+4. Repeat. Still exactly once — that is the duplicate-registration check.
 
 ---
 

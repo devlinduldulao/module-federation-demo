@@ -2,6 +2,7 @@ import { describe, it, expect, rs, beforeEach } from "@rstest/core";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import PrescriptionOrders from "./PrescriptionOrders";
+import { __resetPrescriptionsStore } from "./lib/prescriptions-store";
 
 rs.mock("./index.css", () => ({}));
 rs.mock("./lib/utils", () => ({
@@ -15,6 +16,10 @@ rs.mock("./lib/utils", () => ({
 describe("PrescriptionOrders", () => {
     beforeEach(() => {
         rs.restoreAllMocks();
+        // The store lives at module scope and persists to localStorage, so state
+        // survives unmount by design. That also means it survives between tests —
+        // reset it or each test inherits the previous one's prescriptions.
+        __resetPrescriptionsStore();
     });
 
     it("renders the header", () => {

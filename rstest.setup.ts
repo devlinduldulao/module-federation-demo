@@ -49,21 +49,28 @@ Object.defineProperty(window, "localStorage", {
   configurable: true,
 });
 
-// Every module's SharedStateBar fetches /todos through TanStack Query. Without a
-// stub the suite would hit the real network — slow, flaky, and offline-hostile.
-// Individual tests can still override this with rs.stubGlobal("fetch", ...).
+// Each SharedStateBar fetches through TanStack Query. Without a stub the suite
+// would hit the real network — slow, flaky, and offline-hostile. Individual tests
+// can still override this with rs.stubGlobal("fetch", ...).
+//
+// Two endpoints, matching the boundary the app respects: remotes fetch /todos
+// (their domain data), the shell fetches /users/1 (its own chrome data).
 const TODO_FIXTURE = Array.from({ length: 200 }, (_, index) => ({ id: index + 1 }));
+const USER_FIXTURE = { id: 1, name: "Leanne Graham" };
 
 Object.defineProperty(globalThis, "fetch", {
   writable: true,
   configurable: true,
   value: rs.fn(async (input: RequestInfo | URL) => {
-    if (String(input).includes("/todos")) {
-      return new Response(JSON.stringify(TODO_FIXTURE), {
+    const url = String(input);
+    const json = (body: unknown) =>
+      new Response(JSON.stringify(body), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
-    }
+
+    if (url.includes("/users/")) return json(USER_FIXTURE);
+    if (url.includes("/todos")) return json(TODO_FIXTURE);
     return new Response("{}", { status: 200 });
   }),
 });

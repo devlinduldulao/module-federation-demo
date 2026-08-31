@@ -1,37 +1,42 @@
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { useCounterStore, COUNTER_SOURCE } from "../lib/counter-store";
 
-// Server state, also owned locally. Each package builds its own QueryClient, so
-// each fetches /todos itself — visible as separate requests in the network tab.
-// That duplication is the price of zero coupling; sharing one client would remove
-// it and add a version lock in exchange.
+// The host's own QueryClient, for the host's own server state.
+//
+// Note WHAT it fetches: the signed-in user, which is chrome the shell actually
+// owns. It deliberately does NOT fetch /todos — that is a remote's domain data,
+// and a host reaching for it would be the boundary violation this architecture
+// exists to avoid. Each remote fetches its own.
+//
+// A real shell's server state looks like this: session, permissions, unread
+// counts. Anything a remote owns, the remote fetches.
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: { staleTime: 60_000, retry: 1, refetchOnWindowFocus: false },
   },
 });
 
-interface Todo {
-  readonly id: number;
+interface SignedInUser {
+  readonly name: string;
 }
 
-async function fetchTodos(): Promise<readonly Todo[]> {
-  const response = await fetch("https://jsonplaceholder.typicode.com/todos");
-  if (!response.ok) throw new Error(`todos request failed: ${response.status}`);
-  return response.json() as Promise<readonly Todo[]>;
+async function fetchSignedInUser(): Promise<SignedInUser> {
+  const response = await fetch("https://jsonplaceholder.typicode.com/users/1");
+  if (!response.ok) throw new Error(`user request failed: ${response.status}`);
+  return response.json() as Promise<SignedInUser>;
 }
 
-function TodoCount() {
+function SignedInUserBadge() {
   const { data, isPending, isError } = useQuery({
-    queryKey: ["todos"],
-    queryFn: fetchTodos,
+    queryKey: ["signed-in-user"],
+    queryFn: fetchSignedInUser,
   });
 
-  const label = isError ? "error" : isPending ? "…" : String(data?.length ?? 0);
+  const label = isError ? "error" : isPending ? "…" : (data?.name ?? "unknown");
 
   return (
     <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">
-      Todos <span className="text-foreground">{label}</span>
+      User <span className="text-foreground">{label}</span>
     </span>
   );
 }
@@ -84,7 +89,7 @@ export default function SharedStateBar() {
     <QueryClientProvider client={queryClient}>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <CounterControls />
-        <TodoCount />
+        <SignedInUserBadge />
       </div>
     </QueryClientProvider>
   );

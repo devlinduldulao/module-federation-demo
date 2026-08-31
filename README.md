@@ -477,7 +477,7 @@ appears in any `shared` block.**
 | | Library | Scope | Cross-module channel |
 |---|---|---|---|
 | Client state | zustand | one store per package (`src/lib/counter-store.ts`) | `counterChange` event |
-| Server state | TanStack Query | one `QueryClient` per package | none — each fetches its own |
+| Server state | TanStack Query | one `QueryClient` per package | none — each fetches what it owns |
 
 ### Why not one shared store?
 
@@ -504,12 +504,60 @@ no shared types package either. Two details make it work:
 Late-loading remotes seed from `localStorage`, since a module that was not loaded yet never
 heard the earlier events.
 
+### Delivery is not free — a broadcast is only as durable as its listener
+
+Events have no queue, no retry and no replay, which in a lazily-loaded federation produces
+three cases:
+
+| When the event fires | Delivered? |
+|---|---|
+| Target module loaded **and** mounted | yes |
+| Target module loaded, **unmounted** | yes — **only** if its listener is at module scope |
+| Target module **never loaded** | no |
+
+The middle row is the one that matters in practice, because `prescriptions` is a `streamed`
+module: it is unmounted most of the time, and Records dispatches `addPrescription` while
+the user is still on `/records`. A listener inside `useEffect` would not exist at that
+moment. So the listener and the list both live in the store, at module scope:
+
+```ts
+// packages/prescriptions/src/lib/prescriptions-store.ts
+if (typeof window !== "undefined") {
+  window.addEventListener("addPrescription", (event) => {
+    usePrescriptionsStore.getState().add(event.detail);
+  });
+}
+```
+
+Registered when the chunk loads, never removed, and seeded from `localStorage` so a remount
+does not discard what it collected. That is the difference between *the event fired* and
+*the event was delivered*.
+
+The third row is **not** a bug to engineer around: a module whose code has never been
+downloaded cannot listen to anything. If data must survive a cold start it does not belong
+in an event — POST it to an API and let the consumer fetch it. Events are live notification
+between loaded modules; the server is the durable channel. Which is the same reason server
+state needs no syncing here at all.
+
+### Who fetches what
+
+The endpoint each package calls follows the ownership boundary, not convenience:
+
+| Package | Fetches | Why |
+|---|---|---|
+| shell | `/users/1` — the signed-in user | Chrome the host owns: session, permissions, unread counts |
+| the four remotes | `/todos` — their domain data | Each remote owns its own data and fetches it itself |
+
+The shell deliberately does **not** fetch `/todos`. That is a remote's domain data, and a
+host reaching for it would be exactly the boundary violation the rest of this architecture
+avoids — convenient, and the first crack in module ownership.
+
 ### The cost, made visible
 
-Each mounted module fetches `https://jsonplaceholder.typicode.com/todos` itself, so the
-network tab shows one request per module rather than one in total. That duplication is the
-price of zero coupling. Sharing a single `QueryClient` would remove it — and add the version
-lock straight back. The trade is the point; the demo shows the bill.
+Each mounted remote fetches `/todos` itself, so the network tab shows one request per
+remote rather than one in total. That duplication is the price of zero coupling. Sharing a
+single `QueryClient` would remove it — and add the version lock straight back. The trade is
+the point; the demo shows the bill.
 
 ## Shell Controls
 

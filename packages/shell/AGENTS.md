@@ -19,10 +19,31 @@ The shell is a **composition layer**. It owns:
 - Per-module `<Suspense>` and `<ErrorBoundary>` boundaries
 - The single `<Toaster />` for the whole app
 - Remote health polling and the demo control surfaces
+- Its own client store and `QueryClient` (`src/lib/counter-store.ts`,
+  `src/components/SharedStateBar.tsx`)
 
 It must **not** own business UI. Patient records, prescription tables, and charts belong
 to their remotes. If you are about to write domain UI in the shell, you are working in
 the wrong package.
+
+### The shell's state is the shell's — not a hub
+
+The shell has a store and a `QueryClient` like every other package. Two rules keep that
+from quietly turning into central ownership:
+
+1. **The shell is a peer on the event bus, not a broker.** Its counter store broadcasts and
+   listens exactly like a remote's. It does not relay, aggregate, or arbitrate other
+   modules' state. If you find yourself writing "the shell keeps track of X for the
+   remotes", stop — that is a hub, and the remotes stop being independently deployable.
+
+2. **The shell fetches only what it owns.** `SharedStateBar` queries `/users/1` — the
+   signed-in user, which is chrome. It must **not** fetch `/todos`: that is a remote's
+   domain data, and a host reaching for it is the boundary violation everything else here
+   avoids. Legitimate host server state is session, permissions, unread counts, feature
+   flags. Anything a remote owns, the remote fetches.
+
+Neither zustand nor `@tanstack/react-query` is in this package's `shared` block, and
+neither should be. See the root `AGENTS.md`.
 
 ---
 

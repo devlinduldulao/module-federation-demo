@@ -82,13 +82,29 @@ is where async-boundary and `lazyCompilation` regressions show up first.
 
 ## Step 4 — Cross-module event flow
 
-If you touched events or payloads:
+**Order matters here, and the obvious sequence tests the wrong thing.** An event only
+reaches a module whose chunk has been *loaded*. `prescriptions` is a `streamed` module, so
+on a cold page load its code does not exist yet and it cannot listen to anything. Visit
+`/prescriptions` first, or you are testing a case the architecture cannot satisfy.
 
-1. Go to `/records`, add a prescription.
-2. A toast appears (dispatched by Records, rendered by the shell's single `<Toaster />`).
-3. Navigate to `/prescriptions` — the row is there, **exactly once**.
-4. Navigate away and back and repeat. Still exactly once. Duplicates mean a listener was
-   not removed in a `useEffect` cleanup.
+Navigate with the in-app nav links, not by typing URLs — a full page load unloads every
+remote and resets the experiment.
+
+1. Open `/`, then click through to **`/prescriptions`**. This loads the chunk and registers
+   its module-scope listener.
+2. Click to **`/records`**. Prescriptions is now loaded but unmounted.
+3. Add a prescription for a patient who is **not** in the seed data (`Sarah Chen` and
+   `Lisa Nguyen` are seeded — using them gives a false pass).
+4. A toast appears, dispatched by Records and rendered by the shell's single `<Toaster />`.
+5. Click back to **`/prescriptions`** — the row is there, **exactly once**.
+6. Repeat steps 2-5. Still exactly once. Duplicates mean the listener got registered twice,
+   not that a cleanup is missing — it lives at module scope and is intentionally never
+   removed.
+
+**Known limit, by design:** if `prescriptions` has never been loaded in this page session,
+step 3 is lost. Nothing is listening, and there is no replay. Events are live notification
+between loaded modules, not durable transport — durable data belongs on a server. See
+`packages/prescriptions/.agents/skills/cross-module-events/`.
 
 ## Step 5 — Production path
 
