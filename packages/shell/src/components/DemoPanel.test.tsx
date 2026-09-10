@@ -3,7 +3,7 @@ import { render, screen, cleanup, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DemoPanel from "./DemoPanel";
 import type { RemoteHealth } from "../lib/health";
-import type { RemoteVersionInfo, KilledRemotes } from "../lib/demo";
+import type { KilledRemotes } from "../lib/demo";
 
 const HEALTH: RemoteHealth[] = [
     { id: "home", port: "3004", status: "online", latencyMs: 12, lastChecked: Date.now() },
@@ -18,13 +18,6 @@ const KILLED: KilledRemotes = {
     prescriptions: false,
     analytics: false,
 };
-
-const VERSIONS: RemoteVersionInfo[] = [
-    { id: "home", version: "1.0.0", variant: "stable", buildHash: "a3f2c1d" },
-    { id: "records", version: "2.1.0", variant: "stable", buildHash: "b7e4f9a" },
-    { id: "prescriptions", version: "1.3.2", variant: "stable", buildHash: "c1d8e3b" },
-    { id: "analytics", version: "1.5.0", variant: "stable", buildHash: "d9f2a7c" },
-];
 
 const RENDER_BENCHMARKS = [
     {
@@ -64,9 +57,6 @@ const defaults = {
     onToggleKill: rs.fn(),
     onKillAll: rs.fn(),
     onRestoreAll: rs.fn(),
-    versions: VERSIONS,
-    variant: "stable" as const,
-    onToggleVariant: rs.fn(),
     renderBenchmarks: RENDER_BENCHMARKS,
 };
 
@@ -221,34 +211,6 @@ describe("DemoPanel", () => {
         expect(
             screen.getByRole("button", { name: /restore all remote modules/i })
         ).toBeDisabled();
-    });
-
-    // Version registry section
-    it("renders version info for all remotes", () => {
-        render(<DemoPanel {...defaults} />);
-        expect(screen.getByText("v1.0.0")).toBeInTheDocument();
-        expect(screen.getByText("v2.1.0")).toBeInTheDocument();
-        expect(screen.getByText("#a3f2c1d")).toBeInTheDocument();
-    });
-
-    it("shows Stable Ring label when stable variant", () => {
-        render(<DemoPanel {...defaults} />);
-        expect(screen.getByText("Stable Ring")).toBeInTheDocument();
-    });
-
-    it("calls onToggleVariant when the A/B button is clicked", async () => {
-        const user = userEvent.setup();
-        render(<DemoPanel {...defaults} />);
-
-        await user.click(
-            screen.getByRole("button", { name: /switch to canary deployment/i })
-        );
-        expect(defaults.onToggleVariant).toHaveBeenCalledTimes(1);
-    });
-
-    it("shows Canary Ring when variant is canary", () => {
-        render(<DemoPanel {...defaults} variant="canary" />);
-        expect(screen.getByText("Canary Ring")).toBeInTheDocument();
     });
 
     // Hot Reload Demo section

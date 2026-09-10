@@ -28,7 +28,7 @@ The root route `/` renders the **Home** landing page. Unknown routes redirect to
 - Prefetch remote entry points on tab hover via the `PREFETCHERS` map
 - Persist the selected theme in `localStorage`
 - Broadcast `themeChange` events and expose `window.__MF_THEME__` to remotes
-- Provide the **Federation Lab** demo panel with remote health monitoring, kill switches, and A/B deployment controls
+- Provide the **Federation Lab** demo panel with remote health monitoring, kill switches, and fault-isolation controls
 
 ## File Structure
 
@@ -48,7 +48,7 @@ shell/
     ├── components/
     │   ├── ErrorBoundary.tsx      # Class component, catches JS errors per module
     │   ├── ModuleFallback.tsx     # Module unavailable card with retry
-    │   ├── DemoPanel.tsx          # Federation Lab — health, kill switches, A/B deployment
+    │   ├── DemoPanel.tsx          # Federation Lab — health, kill switches, fault isolation
     │   ├── LoadingSpinner.tsx     # Three primary dots with staggered pulse
     │   ├── HomeSkeleton.tsx       # Home landing page skeleton
     │   ├── RecordsSkeleton.tsx   # Records grid skeleton with shimmer
@@ -57,7 +57,7 @@ shell/
     └── lib/
         ├── theme.ts               # Theme definitions, persistence, event bridge
         ├── health.ts              # useRemoteHealth — polls remoteEntry.js endpoints
-        ├── demo.ts                # useKillSwitch + useVersionRegistry hooks
+        ├── demo.ts                # useKillSwitch hook
         └── utils.ts               # cn() — clsx + tailwind-merge
 ```
 
@@ -224,10 +224,9 @@ The shell includes a slide-out **Federation Lab** panel (`DemoPanel.tsx`) for li
 
 - **Remote Health Monitor** (`lib/health.ts`) — `useRemoteHealth` polls each remote's `remoteEntry.js` via HEAD requests every 5 seconds. Shows status dots (online/offline/checking) and latency per module.
 - **Fault Isolation Kill Switches** (`lib/demo.ts`) — `useKillSwitch` toggles modules as "killed". When a module is killed, `ModuleView` renders `ModuleFallback` instead of loading the remote. Other modules keep running independently.
-- **A/B Deployment Ring** (`lib/demo.ts`) — `useVersionRegistry` provides mock stable/canary version info per module. Toggle between rings to simulate independent version deployment.
 - **Hot Reload Guide** — Step-by-step instructions embedded in the panel.
 
-Open with the **Lab** button in the header or via the command palette (`Ctrl+K` → "Open Federation Lab"). Kill/restore commands and variant toggles are also available as command palette actions.
+Open with the **Lab** button in the header or via the command palette (`Ctrl+K` → "Open Federation Lab"). Kill/restore commands are also available as command palette actions.
 
 ## Development
 

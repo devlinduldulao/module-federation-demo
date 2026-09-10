@@ -132,13 +132,7 @@ Create `packages/shell/src/components/BillingSkeleton.tsx` mirroring the real la
 pass it as the `<Suspense fallback>`. Do not use `LoadingSpinner` for a full route view —
 a generic spinner is what makes a streamed module feel slow.
 
-## 7. Register in the demo instrumentation
-
-`src/lib/demo.ts` — add a `billing` entry to **both** `MOCK_VERSIONS` and
-`CANARY_VERSIONS`. `useVersionRegistry` indexes with a non-null assertion and will throw
-at runtime on a missing id.
-
-## 8. Wire the test alias
+## 7. Wire the test alias
 
 Root `rstest.config.ts`, in `resolve.alias`:
 
@@ -176,6 +170,5 @@ the console is free of `Invalid hook call` and `Loading script failed`.
 - [ ] `PREFETCHERS` entry using the **identical** specifier, with `.catch()`
 - [ ] One `MODULES` entry
 - [ ] Matching skeleton component
-- [ ] `MOCK_VERSIONS` **and** `CANARY_VERSIONS`
 - [ ] Root `rstest.config.ts` aliases
 - [ ] `ci-billing.yml` + `deploy.yml` loops

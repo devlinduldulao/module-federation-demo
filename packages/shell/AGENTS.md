@@ -152,10 +152,8 @@ Two host-only libraries back the demo control surfaces. Both are mock data by de
   5s with a `HEAD` + `mode: "no-cors"` fetch. Opaque responses (`type === "opaque"`,
   status 0) count as **online**; that is expected, not a bug. It targets
   `http://localhost:<port>` and so only reports meaningfully in local dev.
-- **`src/lib/demo.ts`** — `useKillSwitch()` simulates a remote going down;
-  `useVersionRegistry()` serves a hardcoded stable/canary version table. If you add a
-  module, add it to `MOCK_VERSIONS` **and** `CANARY_VERSIONS` — `useVersionRegistry`
-  indexes with a non-null assertion and will throw on a missing id.
+- **`src/lib/demo.ts`** — `useKillSwitch()` simulates a remote going down. The remaining
+  demo controls are kept in the shell components and health hook.
 
 ---
 

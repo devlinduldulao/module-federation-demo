@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@rstest/core";
 import { renderHook, act } from "@testing-library/react";
-import { useKillSwitch, useVersionRegistry } from "./demo";
+import { useKillSwitch } from "./demo";
 
 const MODULE_IDS = ["home", "records", "prescriptions", "analytics"] as const;
 
@@ -54,71 +54,3 @@ describe("useKillSwitch", () => {
   });
 });
 
-describe("useVersionRegistry", () => {
-  it("defaults to stable variant", () => {
-    const { result } = renderHook(() => useVersionRegistry(MODULE_IDS));
-    expect(result.current.variant).toBe("stable");
-  });
-
-  it("returns stable versions by default", () => {
-    const { result } = renderHook(() => useVersionRegistry(MODULE_IDS));
-    const versions = result.current.versions;
-
-    expect(versions).toHaveLength(4);
-    expect(versions[0]).toMatchObject({
-      id: "home",
-      version: "1.0.0",
-      variant: "stable",
-    });
-    expect(versions[1]).toMatchObject({
-      id: "records",
-      version: "2.1.0",
-      variant: "stable",
-    });
-  });
-
-  it("toggles to canary variant", () => {
-    const { result } = renderHook(() => useVersionRegistry(MODULE_IDS));
-
-    act(() => result.current.toggleVariant());
-    expect(result.current.variant).toBe("canary");
-
-    const versions = result.current.versions;
-    expect(versions[0]).toMatchObject({
-      id: "home",
-      variant: "canary",
-    });
-    expect(versions[1]).toMatchObject({
-      id: "records",
-      version: "2.2.0-canary.1",
-      variant: "canary",
-    });
-  });
-
-  it("toggles back to stable", () => {
-    const { result } = renderHook(() => useVersionRegistry(MODULE_IDS));
-
-    act(() => result.current.toggleVariant());
-    act(() => result.current.toggleVariant());
-    expect(result.current.variant).toBe("stable");
-    expect(result.current.versions[0]!.variant).toBe("stable");
-  });
-
-  it("each version has a build hash", () => {
-    const { result } = renderHook(() => useVersionRegistry(MODULE_IDS));
-    for (const v of result.current.versions) {
-      expect(v.buildHash).toBeTruthy();
-      expect(v.buildHash.length).toBe(7);
-    }
-  });
-
-  it("canary versions have different hashes from stable", () => {
-    const { result } = renderHook(() => useVersionRegistry(MODULE_IDS));
-    const stableHashes = result.current.versions.map((v) => v.buildHash);
-
-    act(() => result.current.toggleVariant());
-    const canaryHashes = result.current.versions.map((v) => v.buildHash);
-
-    expect(stableHashes).not.toEqual(canaryHashes);
-  });
-});

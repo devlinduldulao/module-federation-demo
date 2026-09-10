@@ -1,11 +1,7 @@
 import { memo } from "react";
 import { cn } from "../lib/utils";
 import type { RemoteHealth, RemoteStatus } from "../lib/health";
-import type {
-    KilledRemotes,
-    RemoteVersionInfo,
-    DeploymentVariant,
-} from "../lib/demo";
+import type { KilledRemotes } from "../lib/demo";
 
 interface DemoPanelProps {
     readonly isOpen: boolean;
@@ -15,9 +11,6 @@ interface DemoPanelProps {
     readonly onToggleKill: (id: string) => void;
     readonly onKillAll: () => void;
     readonly onRestoreAll: () => void;
-    readonly versions: readonly RemoteVersionInfo[];
-    readonly variant: DeploymentVariant;
-    readonly onToggleVariant: () => void;
     readonly renderBenchmarks: readonly RenderBenchmark[];
 }
 
@@ -49,9 +42,6 @@ const DemoPanel = memo<DemoPanelProps>(
         onToggleKill,
         onKillAll,
         onRestoreAll,
-        versions,
-        variant,
-        onToggleVariant,
         renderBenchmarks,
     }) => {
         if (!isOpen) return null;
@@ -291,78 +281,7 @@ const DemoPanel = memo<DemoPanelProps>(
                             </div>
                         </section>
 
-                        {/* Section 4: Version Registry & A/B Deployment */}
-                        <section className="mb-8" aria-label="Version registry and A/B deployment">
-                            <div className="mb-4">
-                                <span className="font-mono text-[11px] tracking-[0.3em] text-muted-foreground/70 uppercase block mb-1">
-                                    A/B Deployment
-                                </span>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    Toggle between stable and canary deployment rings. In production,
-                                    each remote could be deployed independently at different versions.
-                                </p>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={onToggleVariant}
-                                className={cn(
-                                    "w-full border px-4 py-4 mb-4 text-left transition-all duration-300 focus:outline-hidden",
-                                    variant === "canary"
-                                        ? "border-chart-4/40 bg-chart-4/10"
-                                        : "border-primary/30 bg-primary/5"
-                                )}
-                                aria-label={`Switch to ${variant === "stable" ? "canary" : "stable"} deployment`}
-                                aria-pressed={variant === "canary"}
-                            >
-                                <div className="flex items-center justify-between mb-2">
-                                    <span
-                                        className={cn(
-                                            "font-mono text-[11px] tracking-[0.3em] uppercase",
-                                            variant === "canary" ? "text-chart-4" : "text-primary"
-                                        )}
-                                    >
-                                        {variant === "stable" ? "Stable Ring" : "Canary Ring"}
-                                    </span>
-                                    <span className="font-mono text-[10px] text-muted-foreground/70 uppercase">
-                                        Click to swap
-                                    </span>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                    {variant === "stable"
-                                        ? "Production-grade releases verified across the full test suite."
-                                        : "Pre-release builds for early validation and feature flagging."}
-                                </p>
-                            </button>
-
-                            <div className="border border-border divide-y divide-border">
-                                {versions.map((v) => (
-                                    <div key={v.id} className="flex items-center justify-between px-4 py-3">
-                                        <div className="flex items-center gap-3">
-                                            <span
-                                                className={cn(
-                                                    "h-1.5 w-1.5 rounded-full",
-                                                    v.variant === "canary" ? "bg-chart-4" : "bg-primary"
-                                                )}
-                                            />
-                                            <span className="font-mono text-[11px] tracking-wider text-foreground uppercase">
-                                                {v.id}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="font-mono text-[10px] text-muted-foreground">
-                                                v{v.version}
-                                            </span>
-                                            <span className="font-mono text-[10px] text-muted-foreground/70">
-                                                #{v.buildHash}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-
-                        {/* Section 5: Independent Deployment Guide */}
+                        {/* Section 4: Independent Deployment Guide */}
                         <section aria-label="Independent deployment demo">
                             <div className="mb-4">
                                 <span className="font-mono text-[11px] tracking-[0.3em] text-muted-foreground/70 uppercase block mb-1">

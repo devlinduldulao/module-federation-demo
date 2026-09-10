@@ -42,7 +42,7 @@ import RecordsSkeleton from "./components/RecordsSkeleton";
 import PrescriptionsSkeleton from "./components/PrescriptionsSkeleton";
 import AnalyticsSkeleton from "./components/AnalyticsSkeleton";
 import { useRemoteHealth } from "./lib/health";
-import { useKillSwitch, useVersionRegistry } from "./lib/demo";
+import { useKillSwitch } from "./lib/demo";
 
 // ---------------------------------------------------------------------------
 // Loading strategies — not every module should load the same way:
@@ -655,7 +655,6 @@ function ShellFrame(): React.JSX.Element {
   const remoteSpecs = useMemo(() => MODULES.map((m) => ({ id: m.id, port: m.port })), []);
   const health = useRemoteHealth(remoteSpecs, isDemoPanelOpen);
   const { killed, toggle: toggleKill, killAll, restoreAll } = useKillSwitch(moduleIds);
-  const { variant, versions, toggleVariant } = useVersionRegistry(moduleIds);
 
   const activeModule = useMemo(() => getModuleForPath(location.pathname), [location.pathname]);
 
@@ -823,8 +822,8 @@ function ShellFrame(): React.JSX.Element {
       {
         id: "demo-panel",
         title: "Open Federation Lab",
-        subtitle: "Health monitor, kill switches, A/B deployment controls",
-        keywords: "demo lab federation health kill fault isolation version canary",
+        subtitle: "Health monitor, kill switches, and fault isolation",
+        keywords: "demo lab federation health kill fault isolation",
         run: () => {
           setIsDemoPanelOpen(true);
           setIsCommandPaletteOpen(false);
@@ -840,20 +839,10 @@ function ShellFrame(): React.JSX.Element {
           setIsCommandPaletteOpen(false);
         },
       })),
-      {
-        id: "toggle-variant",
-        title: `Switch to ${variant === "stable" ? "Canary" : "Stable"} Ring`,
-        subtitle: `Toggle A/B deployment from ${variant} to ${variant === "stable" ? "canary" : "stable"} builds`,
-        keywords: "variant canary stable deployment ab version",
-        run: () => {
-          toggleVariant();
-          setIsCommandPaletteOpen(false);
-        },
-      },
     ];
 
     return [...navigationCommands, ...themeCommands, ...demoCommands];
-  }, [navigate, killed, variant]);
+  }, [navigate, killed]);
 
   const filteredCommands = useMemo(() => {
     const normalizedQuery = commandQuery.trim().toLowerCase();
@@ -925,9 +914,6 @@ function ShellFrame(): React.JSX.Element {
         onToggleKill={toggleKill}
         onKillAll={killAll}
         onRestoreAll={restoreAll}
-        versions={versions}
-        variant={variant}
-        onToggleVariant={toggleVariant}
         renderBenchmarks={renderBenchmarks}
       />
 
@@ -1025,12 +1011,6 @@ function ShellFrame(): React.JSX.Element {
                     <span className="text-destructive">
                       {Object.values(killed).filter(Boolean).length} KILLED
                     </span>
-                  </>
-                )}
-                {variant === "canary" && (
-                  <>
-                    <span className="text-border">|</span>
-                    <span className="text-chart-4">CANARY</span>
                   </>
                 )}
               </div>
