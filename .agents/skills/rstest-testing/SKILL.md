@@ -120,8 +120,8 @@ wins. If you add a package that must be a singleton in tests, add it in both pla
 
 ## Testing a streaming component
 
-Streaming wrappers cache their Suspense resource in a module-level `Map`, so the delay
-runs once per module load. In tests that means **the second test in a file will not
+Streaming wrappers cache the promise they hand to `use()` in a module-level `Map`, so the
+delay runs once per module load. In tests that means **the second test in a file will not
 suspend** unless you clear it:
 
 ```tsx
@@ -132,8 +132,20 @@ beforeEach(() => {
 });
 ```
 
-Use `rs.useFakeTimers()` and `rs.advanceTimersByTimeAsync()` rather than waiting out the
-real 2500 ms delay.
+**Await the render.** `use()` yields to the microtask queue once before React commits a
+fallback. A synchronous `act()` — which is what RTL's bare `render()`, `fireEvent`, and
+`userEvent` use — drops that continuation, the fallback never commits, and React logs
+*"A component suspended inside an `act` scope, but the `act` call was not awaited."*
+Wrap any render or navigation that reaches a `use()` call:
+
+```tsx
+await act(async () => {
+  render(<Suspense fallback={<Fallback />}><StreamingMedicalRecords /></Suspense>);
+});
+```
+
+Use `rs.useFakeTimers()` and `rs.runAllTimersAsync()` inside a second awaited `act`
+rather than waiting out the real 2500 ms delay.
 
 ## Conventions
 

@@ -33,6 +33,17 @@ function createStorageMock() {
   };
 }
 
+// Prescriptions and Analytics suspend via React 19's use(), which yields to the
+// microtask queue once before React commits the skeleton. A synchronous act() —
+// what RTL's fireEvent and userEvent wrap events in — drops that continuation
+// and the navigation never commits. Anything that routes to a streamed module
+// has to run inside an awaited act.
+async function navigateTo(name: RegExp): Promise<void> {
+  await act(async () => {
+    fireEvent.click(screen.getByRole("link", { name }));
+  });
+}
+
 describe("Shell App", () => {
   let localStorageMock: ReturnType<typeof createStorageMock>;
 
@@ -163,12 +174,11 @@ describe("Shell App", () => {
   });
 
   it("dispatches moduleChange when the route changes", async () => {
-    const user = userEvent.setup();
     const handler = rs.fn();
     window.addEventListener("moduleChange", handler);
 
     render(<App />);
-    await user.click(screen.getByRole("link", { name: /navigate to prescriptions/i }));
+    await navigateTo(/navigate to prescriptions/i);
 
     expect(handler).toHaveBeenCalledTimes(2);
     expect((handler.mock.calls.at(-1)?.[0] as CustomEvent).detail).toEqual({
@@ -181,7 +191,7 @@ describe("Shell App", () => {
   it("navigates when a remote requests a module change", async () => {
     render(<App />);
 
-    act(() => {
+    await act(async () => {
       window.dispatchEvent(
         new CustomEvent("navigateToModule", {
           detail: { module: "analytics" },
@@ -268,10 +278,9 @@ describe("Shell App", () => {
   });
 
   it("shows prescriptions skeleton while loading the prescriptions module", async () => {
-    const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("link", { name: /navigate to prescriptions/i }));
+    await navigateTo(/navigate to prescriptions/i);
 
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByText(/streaming prescriptions/i)).toBeInTheDocument();
@@ -287,7 +296,7 @@ describe("Shell App", () => {
       ).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole("link", { name: /navigate to prescriptions/i }));
+    await navigateTo(/navigate to prescriptions/i);
 
     expect(window.location.pathname).toBe("/prescriptions");
     expect(screen.getByText(/streaming prescriptions/i)).toBeInTheDocument();
@@ -297,10 +306,9 @@ describe("Shell App", () => {
   });
 
   it("shows analytics skeleton while loading the analytics module", async () => {
-    const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("link", { name: /navigate to analytics/i }));
+    await navigateTo(/navigate to analytics/i);
 
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByText(/streaming analytics/i)).toBeInTheDocument();

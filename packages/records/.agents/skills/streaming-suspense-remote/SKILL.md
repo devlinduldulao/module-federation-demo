@@ -1,6 +1,6 @@
 ---
 name: streaming-suspense-remote
-description: Build or modify a Streaming* wrapper that suspends behind a React Suspense boundary in a federated remote. Use when adding a streamed module, changing a Suspense delay, fixing a skeleton that flashes on every render, or fixing a test that will not suspend.
+description: Build or modify a Streaming* wrapper that suspends behind a React Suspense boundary in a federated remote using React 19's use(). Use when adding a streamed module, changing a Suspense delay, fixing a skeleton that flashes on every render, or fixing a test that will not suspend or never resolves.
 ---
 
 # Streaming Suspense in a Remote
@@ -15,45 +15,28 @@ skeleton first, content second.
 ## The pattern
 
 ```tsx
+import { use } from "react";
 import MedicalRecords from "./MedicalRecords";
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-interface Resource<T> { read(): T; }
-
-function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
-  let status: "pending" | "success" | "error" = "pending";
-  let result: T;
-  const suspender = asyncFn().then(
-    (data)  => { status = "success"; result = data; },
-    (error) => { status = "error";   result = error; }
-  );
-
-  return {
-    read() {
-      if (status === "pending") throw suspender;   // ← Suspense catches the promise
-      if (status === "error")   throw result;      // ← ErrorBoundary catches the error
-      return result;
-    },
-  };
-}
-
-const resourceCache = new Map<string, Resource<void>>();
+const pendingDelays = new Map<string, Promise<void>>();
 
 export function __resetRecordsStreamingResourceCache(): void {
-  resourceCache.clear();
+  pendingDelays.clear();
 }
 
-function getResource(key: string, delayMs: number): Resource<void> {
-  if (!resourceCache.has(key)) {
-    resourceCache.set(key, createResource(() => delay(delayMs)));
+function getDelay(key: string, delayMs: number): Promise<void> {
+  let promise = pendingDelays.get(key);
+  if (!promise) {
+    promise = delay(delayMs);
+    pendingDelays.set(key, promise);
   }
-  return resourceCache.get(key)!;
+  return promise;
 }
 
 const StreamingMedicalRecords = () => {
-  const resource = getResource("records-initial", 2500);
-  resource.read();
+  use(getDelay("records-initial", 2500));   // ← suspends while pending
   return <MedicalRecords />;
 };
 
@@ -62,23 +45,29 @@ export default StreamingMedicalRecords;
 
 ## The three things that make it work
 
-### 1. `read()` throws — that is the mechanism, not a bug
+### 1. `use()` is the mechanism
 
-Throwing a **promise** is how a component tells React "I am not ready." React catches it,
-renders the nearest `<Suspense fallback>`, and retries when the promise settles.
-Throwing an **error** falls through to the nearest `<ErrorBoundary>`. Both boundaries are
-supplied by the shell, per module.
+`use(promise)` is React 19's first-class way for a component to say "I am not ready."
+While the promise is pending React renders the nearest `<Suspense fallback>` and retries
+when it settles. If the promise **rejects**, `use()` rethrows the reason and the nearest
+`<ErrorBoundary>` catches it. Both boundaries are supplied by the shell, per module.
+
+React tracks settlement by attaching `status` / `value` / `reason` to the promise object
+itself. That is why there is no hand-rolled `createResource` with a `read()` that throws:
+the promise *is* the resource. Before `use()` existed this file threw the promise
+manually — that pre-19 idiom still works but is deprecated and should not come back.
 
 ### 2. The cache lives outside React
 
-`resourceCache` is a module-level `Map`. This is the single most important line in the
+`pendingDelays` is a module-level `Map`. This is the single most important line in the
 file.
 
-- Inside a component or a `useState`, the resource would be recreated on every render,
-  `read()` would throw a fresh promise every time, and the skeleton would flicker
-  forever — a render loop.
-- Outside React, the delay runs **once per page load**. Re-renders read the cached
-  `success` state and return immediately.
+- `use()` must receive the **same promise object** on every render. A promise created
+  inside the component — or in `useState`, or in `useMemo` — is new each render, so every
+  render re-suspends and the skeleton flickers forever. React logs *"A component was
+  suspended by an uncached promise"* when this happens.
+- Outside React, the delay runs **once per page load**. Re-renders hand `use()` an
+  already-fulfilled promise and it returns synchronously.
 
 **Never move the cache into the component.** Never key it on something that changes per
 render.
@@ -108,8 +97,11 @@ two paths.
 
 ## Testing a streaming component
 
-The module-level cache is global to the test file. **The second test will not suspend**
-unless you clear it:
+Two traps, both of which make a test look like "it never suspends" or "it never resolves".
+
+### Trap 1 — the cache is global to the test file
+
+**The second test will not suspend** unless you clear it:
 
 ```tsx
 import { __resetRecordsStreamingResourceCache } from "./StreamingMedicalRecords";
@@ -122,9 +114,51 @@ beforeEach(() => {
 That export exists **only** for tests. It is not application API — do not call it from
 component code.
 
-To assert the suspended state, render inside a `<Suspense>` with a recognizable fallback
-and assert the fallback is present before advancing timers. Use `rs.useFakeTimers()`
-rather than waiting 2500 ms of real time.
+### Trap 2 — `use()` needs an awaited `act()`
+
+`use()` yields to the microtask queue once before React commits a fallback, so the
+promise has a chance to resolve synchronously. A **synchronous** `act()` — which is what
+Testing Library's bare `render()`, `fireEvent`, and `userEvent` wrap things in — drops
+that continuation. The fallback never commits, the root is stuck until some unrelated
+update arrives, and React logs:
+
+```
+A component suspended inside an `act` scope, but the `act` call was not awaited.
+```
+
+The fix is to await the render, and to await the timer advance in a second `act`:
+
+```tsx
+async function renderStreaming(fallback: ReactNode = <Fallback />) {
+  let view!: ReturnType<typeof render>;
+  await act(async () => {
+    view = render(
+      <Suspense fallback={fallback}>
+        <StreamingMedicalRecords />
+      </Suspense>
+    );
+  });
+  return view;
+}
+
+it("renders after the delay resolves", async () => {
+  await renderStreaming();
+  expect(screen.getByRole("status")).toBeInTheDocument();   // skeleton
+
+  await act(async () => {
+    await rs.runAllTimersAsync();
+  });
+
+  expect(screen.getByText("Patient Files")).toBeInTheDocument();
+});
+```
+
+The same applies in the shell: `App.test.tsx` wraps any navigation to a streamed module
+in `await act(async () => { fireEvent.click(...) })` for exactly this reason. This is
+test-environment behaviour only — in the browser there is no `act` queue and `use()`
+resumes normally.
+
+Use `rs.useFakeTimers()` rather than waiting 2500 ms of real time.
 
 ## Choosing a delay
 
@@ -140,6 +174,7 @@ app which module is loading.
 - On an `instant` module (`home/Home`). It exists to render immediately.
 - On the plain component imported by the `eager` strategy (`records/MedicalRecords`).
   Prefetching is pointless if the component then suspends anyway.
-- For real data fetching. This is a timer wrapping `Promise`. A production data layer
-  should expose a cached promise read with React 19's `use()`, not a hand-rolled
-  `createResource`.
+- For real data fetching with a timer. The delay here is a stand-in; a production data
+  layer should hand `use()` a promise for real data, cached by the data layer (TanStack
+  Query's `useSuspenseQuery`, a router loader, or a `cache()`d fetch) — the `use()` call
+  and the module-level-cache rule are the same.

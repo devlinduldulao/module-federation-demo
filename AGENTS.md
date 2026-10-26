@@ -77,7 +77,7 @@ packages/home/.agents/skills/
 
 packages/records/AGENTS.md
 packages/records/.agents/skills/
-  streaming-suspense-remote/                 the Resource + Suspense pattern
+  streaming-suspense-remote/                 the use() + Suspense pattern
 
 packages/prescriptions/AGENTS.md
 packages/prescriptions/.agents/skills/

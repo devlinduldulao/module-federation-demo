@@ -65,8 +65,8 @@ If you do add an event, declare its payload in `packages/shell/src/types.d.ts` u
 
 ## Streaming wrapper
 
-`StreamingClinicalAnalytics.tsx` follows the same Resource + Suspense pattern as the
-other remotes: a module-level `Map` caches the resource so re-renders do not restart the
+`StreamingClinicalAnalytics.tsx` follows the same `use()` + Suspense pattern as the
+other remotes: a module-level `Map` caches the promise so re-renders do not restart the
 delay, and `__resetAnalyticsStreamingResourceCache()` exists **only** so tests can clear
 it in `beforeEach`. Without that reset, the second test in a file will not suspend.
 

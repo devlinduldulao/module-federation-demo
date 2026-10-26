@@ -1,6 +1,6 @@
 import { describe, it, expect, rs, beforeEach, afterEach } from "@rstest/core";
 import { render, screen, act } from "@testing-library/react";
-import React, { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import StreamingMedicalRecords, {
     __resetRecordsStreamingResourceCache,
 } from "./StreamingMedicalRecords";
@@ -21,6 +21,21 @@ function Fallback() {
     return <div role="status">Records loading skeleton</div>;
 }
 
+// use() yields to the microtask queue once before React commits a fallback. A
+// synchronous act() — which is what RTL's bare render() uses — drops that
+// continuation, so a render that reaches a use() call must be awaited.
+async function renderStreaming(fallback: ReactNode = <Fallback />) {
+    let view!: ReturnType<typeof render>;
+    await act(async () => {
+        view = render(
+            <Suspense fallback={fallback}>
+                <StreamingMedicalRecords />
+            </Suspense>
+        );
+    });
+    return view;
+}
+
 describe("StreamingMedicalRecords", () => {
     beforeEach(() => {
         rs.useFakeTimers();
@@ -31,33 +46,20 @@ describe("StreamingMedicalRecords", () => {
         rs.useRealTimers();
     });
 
-    it("shows the Suspense fallback while the resource is pending", () => {
-        render(
-            <Suspense fallback={<Fallback />}>
-                <StreamingMedicalRecords />
-            </Suspense>
-        );
+    it("shows the Suspense fallback while the promise is pending", async () => {
+        await renderStreaming();
         expect(screen.getByRole("status")).toBeInTheDocument();
         expect(screen.getByText("Records loading skeleton")).toBeInTheDocument();
     });
 
-    it("does not render MedicalRecords content while pending", () => {
-        render(
-            <Suspense fallback={<Fallback />}>
-                <StreamingMedicalRecords />
-            </Suspense>
-        );
+    it("does not render MedicalRecords content while pending", async () => {
+        await renderStreaming();
         expect(screen.queryByText("Patient Files")).not.toBeInTheDocument();
     });
 
     it("renders MedicalRecords after the delay resolves", async () => {
-        render(
-            <Suspense fallback={<Fallback />}>
-                <StreamingMedicalRecords />
-            </Suspense>
-        );
+        await renderStreaming();
 
-        // Advance past the 2500ms delay and flush all promises
         await act(async () => {
             await rs.runAllTimersAsync();
         });
@@ -67,11 +69,7 @@ describe("StreamingMedicalRecords", () => {
     });
 
     it("replaces the skeleton with MedicalRecords content after resolution", async () => {
-        render(
-            <Suspense fallback={<Fallback />}>
-                <StreamingMedicalRecords />
-            </Suspense>
-        );
+        await renderStreaming();
 
         expect(screen.getByText("Records loading skeleton")).toBeInTheDocument();
 
@@ -83,21 +81,11 @@ describe("StreamingMedicalRecords", () => {
         expect(screen.getByText("Records")).toBeInTheDocument();
     });
 
-    it("reuses cached resource — a second render suspends immediately without resetting", () => {
-        // First render populates the cache
-        const { unmount } = render(
-            <Suspense fallback={<Fallback />}>
-                <StreamingMedicalRecords />
-            </Suspense>
-        );
+    it("reuses the cached promise — a second render suspends on the existing pending delay", async () => {
+        const { unmount } = await renderStreaming();
         unmount();
 
-        // Second render uses the existing (still-pending) resource from cache
-        render(
-            <Suspense fallback={<div>Second skeleton</div>}>
-                <StreamingMedicalRecords />
-            </Suspense>
-        );
+        await renderStreaming(<div>Second skeleton</div>);
         expect(screen.getByText("Second skeleton")).toBeInTheDocument();
     });
 });

@@ -61,7 +61,7 @@ Shell (host)           localhost:3000
 └── Analytics (remote) localhost:3003   → STREAMED (StreamingClinicalAnalytics — on demand)
 ```
 
-Each remote exposes both a **Streaming** component (wraps a Resource-based Suspense pattern to simulate network delay) and a **Standalone** component (renders immediately). The shell chooses which to import based on **three loading strategies** and content priority:
+Each remote exposes both a **Streaming** component (suspends on a cached promise with React 19's `use()` to simulate network delay) and a **Standalone** component (renders immediately). The shell chooses which to import based on **three loading strategies** and content priority:
 
 | Strategy | Module | Behavior |
 |----------|--------|----------|
@@ -963,25 +963,30 @@ In a production multi-repo setup, each of these workflows would live in its own 
 
 ## Client-Side Suspense Fallback Pattern
 
-Each remote uses a Resource-based Suspense pattern to simulate a delayed client-side resource. This is not streaming SSR.
+Each remote's `Streaming*` wrapper suspends on a cached promise using React 19's `use()` to simulate a delayed client-side resource. This is not streaming SSR.
 
-```typescript
-function createResource<T>(asyncFn: () => Promise<T>): Resource<T> {
-  let status = "pending";
-  let result: T;
-  let suspender = asyncFn().then(
-    (data) => { status = "success"; result = data; },
-    (error) => { status = "error"; result = error; }
-  );
-  return {
-    read() {
-      if (status === "pending") throw suspender;     // Suspense catches this
-      if (status === "error") throw result;           // ErrorBoundary catches this
-      return result;
-    },
-  };
+```tsx
+import { use } from "react";
+
+// Module-level: use() must receive the same promise object on every render.
+const pendingDelays = new Map<string, Promise<void>>();
+
+function getDelay(key: string, ms: number): Promise<void> {
+  let promise = pendingDelays.get(key);
+  if (!promise) {
+    promise = new Promise((resolve) => setTimeout(resolve, ms));
+    pendingDelays.set(key, promise);
+  }
+  return promise;
 }
+
+const StreamingMedicalRecords = () => {
+  use(getDelay("records-initial", 2500)); // suspends while pending → Suspense shows the skeleton
+  return <MedicalRecords />;
+};
 ```
+
+`use()` replaces the pre-React-19 idiom of a hand-rolled `createResource` whose `read()` threw the promise. React tracks settlement on the promise object itself, so caching the promise outside render is the whole protocol: a promise created during render would be new every time and the skeleton would never resolve. A rejected promise is rethrown by `use()` and lands in the nearest `<ErrorBoundary>`.
 
 The shell wraps each lazy-loaded remote in `<Suspense fallback={<Skeleton />}>` and `<ErrorBoundary>`, giving each module independent loading and error states. The shell uses three distinct loading strategies:
 
@@ -999,14 +1004,14 @@ React 19 changed how Suspense commits fallbacks: when a component suspends, Reac
 |---------|--------------------------|--------|
 | Route view | One remote is the primary route view at a time | One deliberate fallback per route |
 | Boundary ownership | The route view has its own `<Suspense>` + `<ErrorBoundary>` | A slow module affects only its view |
-| Cached resource | The demo resource is cached outside component render | Re-renders do not restart the delay |
+| Cached promise | The promise handed to `use()` is cached outside component render | Re-renders do not restart the delay |
 | Pre-fetching | Eager preload + hover prefetch can warm remote code | Less work at navigation time |
 
 **What React 19 contributes here:**
 
 1. **Immediate fallback commits plus lazy-request pre-warming** — a purpose-built skeleton can appear promptly while React still prepares suspended work.
 
-2. **`use()` for supported cached promises** — a production Suspense-compatible data layer can expose a cached promise that a component reads with `use()`.
+2. **`use()` for cached promises** — the `Streaming*` wrappers hand `use()` a module-cached promise. The same call works for a production data layer that exposes cached promises (a router loader, TanStack's `useSuspenseQuery`, a `cache()`d fetch).
 
 3. **Optional React Compiler integration** — it is enabled in the Rspack configuration, but its impact should be measured in the deployed app rather than assumed.
 
@@ -1067,7 +1072,7 @@ This project demonstrates the following micro-frontend concepts end to end:
 1. **Independent development and builds** — each remote starts on its own port with its own build
 2. **Fault isolation** — kill a remote server and only that module shows a fallback (or use the Federation Lab kill switch)
 3. **Shared dependencies** — React is loaded once via singleton sharing
-4. **Suspense fallbacks** — skeleton screens appear while on-demand modules resolve their simulated resource
+4. **Suspense fallbacks** — skeleton screens appear while on-demand modules `use()` their simulated delay
 5. **Loading strategy taxonomy** — instant (Home), eager (Records), streamed (Prescriptions/Analytics) — not every module should load the same way
 5. **Loose coupling** — modules communicate through events, not imports
 6. **Host-owned routing** — remotes can request navigation through `navigateToModule` without importing `react-router-dom`

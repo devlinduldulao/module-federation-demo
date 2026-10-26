@@ -31,30 +31,35 @@ in cache and the module renders immediately.
 
 That is the whole point of the strategy, so:
 
-- **`MedicalRecords.tsx` must not suspend.** No `use()`, no resource `read()`, no
-  blocking fetch. Anything that needs to suspend goes in `StreamingMedicalRecords.tsx`.
+- **`MedicalRecords.tsx` must not suspend.** No `use()`, no thrown promise, no blocking
+  fetch. Anything that needs to suspend goes in `StreamingMedicalRecords.tsx`.
 - Keep the module small enough for prefetching to be cheap — `performance.maxAssetSize`
   is 256000 here.
 
-`StreamingMedicalRecords.tsx` is the reference implementation of the Resource + Suspense
+`StreamingMedicalRecords.tsx` is the reference implementation of the `use()` + Suspense
 pattern used across this repo. See `.agents/skills/streaming-suspense-remote/`.
 
 ---
 
-## The streaming resource cache — and the test trap
+## The streaming promise cache — and the test trap
 
 ```ts
-const resourceCache = new Map<string, Resource<void>>();
-export function __resetRecordsStreamingResourceCache(): void { resourceCache.clear(); }
+const pendingDelays = new Map<string, Promise<void>>();
+export function __resetRecordsStreamingResourceCache(): void { pendingDelays.clear(); }
 ```
 
-The cache is **module-level, outside React**, so a re-render does not restart the 2500 ms
-delay. That is deliberate: without it, every re-render would re-suspend and the skeleton
+The cache is **module-level, outside React**, so a re-render hands `use()` the same
+promise and does not restart the 2500 ms delay. That is deliberate: a promise created
+during render would be new every time, every render would re-suspend, and the skeleton
 would flicker forever.
 
 It also means the delay only happens **once per page load**. In tests, the second test in
 a file will not suspend unless you call `__resetRecordsStreamingResourceCache()` in
 `beforeEach`. The reset export exists solely for that; it is not application API.
+
+Tests must also **await the render** — `await act(async () => render(...))`. `use()`
+yields once before React commits the fallback, and a synchronous `act()` drops that
+continuation. See `.agents/skills/streaming-suspense-remote/` for the full explanation.
 
 ---
 
@@ -136,4 +141,4 @@ If you touched the streaming wrapper or the event payload, also run the app
 
 ## Skills in this package
 
-- `.agents/skills/streaming-suspense-remote/` — the Resource + Suspense pattern
+- `.agents/skills/streaming-suspense-remote/` — the `use()` + Suspense pattern
